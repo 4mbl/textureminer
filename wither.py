@@ -94,6 +94,7 @@ def resize_image(image_path):
         | image_path.endswith(".jpg")
         | image_path.endswith(".jpeg")
     ):
+
         image = Image.open(image_path)
         image = image.resize((1600, 1600), resample=Image.NEAREST)
         image.save(image_path)
@@ -111,8 +112,10 @@ def get_item_icons(input_dir):
 
     output_dir = f"{os.path.expanduser('~')}/Downloads/mc-textures"
 
-    copytree(f"{input_dir}/item", f"{output_dir}/item")
+    # TODO merge to both to same dir and override blocks with items if conflicts
+    # items are copied last as some assets are in both and they look better as items
     copytree(f"{input_dir}/block", f"{output_dir}/block")
+    copytree(f"{input_dir}/item", f"{output_dir}/item")
     rmtree(input_dir)
 
     for subdir, dirs, files in os.walk(output_dir):
