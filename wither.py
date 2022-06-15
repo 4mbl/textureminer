@@ -85,7 +85,15 @@ def resize_image(image_path):
     Returns:
     """
 
-    if image_path.endswith(".png") | image_path.endswith(".jpg") | image_path.endswith(".jpeg"):
+    if ".mcmeta" in image_path:
+        os.remove(image_path)
+        return
+
+    if (
+        image_path.endswith(".png")
+        | image_path.endswith(".jpg")
+        | image_path.endswith(".jpeg")
+    ):
         image = Image.open(image_path)
         image = image.resize((1600, 1600), resample=Image.NEAREST)
         image.save(image_path)
@@ -128,5 +136,5 @@ You can find them on: {output_dir}.
 
 if __name__ == "__main__":
     get_item_icons(extract_textures(get_latest_version()))
-    
+
     # extract_textures(get_latest_version())
