@@ -75,6 +75,25 @@ def extract_textures(version):
     return output_path
 
 
+def remove_non_images(file_path):
+    """
+    Delete file if it is not an image file
+
+    Parameters:
+        file_path (string): path of the file that will be checked
+
+    Returns:
+    """
+
+    if (
+        not file_path.endswith(".png")
+        | file_path.endswith(".jpg")
+        | file_path.endswith(".jpeg")
+    ):
+        os.remove(file_path)
+    return
+
+
 def resize_image(image_path):
     """
     Resize an image
@@ -85,19 +104,24 @@ def resize_image(image_path):
     Returns:
     """
 
-    if ".mcmeta" in image_path:
-        os.remove(image_path)
-        return
+    remove_non_images(image_path)
 
     if (
         image_path.endswith(".png")
         | image_path.endswith(".jpg")
         | image_path.endswith(".jpeg")
     ):
+        with Image.open(image_path) as image:
+            # image = Image.open(image_path)
+            resize_multiplier = 100
+            image_width, image_height = image.size
 
-        image = Image.open(image_path)
-        image = image.resize((1600, 1600), resample=Image.NEAREST)
-        image.save(image_path)
+            image = image.resize(
+                (image_width * resize_multiplier, image_height * resize_multiplier),
+                resample=Image.NEAREST,
+            )
+
+            image.save(image_path)
 
 
 def get_item_icons(input_dir):
@@ -132,7 +156,7 @@ def get_item_icons(input_dir):
     print(
         f"""
 Icons have been extracted and resized.
-You can find them on: {output_dir}.
+You can find them on: {os.path.abspath(output_dir)}.
     """
     )
 
