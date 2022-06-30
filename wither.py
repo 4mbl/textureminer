@@ -92,7 +92,6 @@ def remove_non_images(file_path):
         | file_path.endswith(".jpeg")
     ):
         os.remove(file_path)
-    return
 
 
 def resize_image(image_path):
