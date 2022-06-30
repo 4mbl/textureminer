@@ -12,6 +12,7 @@ def get_latest_version():
     """Get latest installed Minecraft version
 
     Parameters:
+        void
 
     Returns:
         string: latest stable version, for example: "1.18.1"
@@ -102,6 +103,7 @@ def resize_image(image_path):
         image_path (string): full path of the image that will be resized
 
     Returns:
+        void
     """
 
     remove_non_images(image_path)
@@ -132,6 +134,7 @@ def get_item_icons(input_dir):
         input_dir (string): directory where the files are
 
     Returns:
+        void
     """
 
     output_dir = f"{os.path.expanduser('~')}/Downloads/mc-textures"
@@ -161,7 +164,18 @@ You can find them on: {os.path.abspath(output_dir)}.
     )
 
 
-if __name__ == "__main__":
+def main():
+    """
+    Main function
+
+    Parameters:
+        void
+
+    Returns:
+        void
+    """
     get_item_icons(extract_textures(get_latest_version()))
 
-    # extract_textures(get_latest_version())
+
+if __name__ == "__main__":
+    main()
