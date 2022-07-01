@@ -2,7 +2,6 @@ from shutil import copytree, rmtree
 from zipfile import ZipFile
 import os
 import re
-from PIL import Image  # python3 -m pip install Pillow
 from forfiles import image
 
 
