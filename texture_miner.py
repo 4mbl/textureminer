@@ -51,6 +51,7 @@ def extract_textures(version):
         string: path of the directory the files were extracted
     """
 
+    os.mkdir(temp_path)
     output_path = f"{temp_path}/extracted-textures"
 
     # %APPDATA%\.minecraft
@@ -70,9 +71,9 @@ def extract_textures(version):
     # extract the .jar file to a different directory
     with ZipFile(f"{temp_path}/version-files/{version}.jar", "r") as zip_object:
         zip_object.extractall(f"{temp_path}/extracted-files/")
+    rmtree(f"{temp_path}/version-files/")
 
     copytree(f"{temp_path}/extracted-files/assets/minecraft/textures", output_path)
-    rmtree(f"{temp_path}/version-files/")
     rmtree(f"{temp_path}/extracted-files/")
 
     return output_path
@@ -96,21 +97,6 @@ def remove_non_images(file_path):
         os.remove(file_path)
 
 
-def resize_image(image_path):
-    """
-    Resize an image
-
-    Parameters:
-        image_path (string): full path of the image that will be resized
-
-    Returns:
-        void
-    """
-
-    remove_non_images(image_path)
-    image.scale(image_path, 100, 100)
-
-
 def get_item_icons(input_dir):
     """
     Iterate through item icons and delete other files
@@ -128,7 +114,7 @@ def get_item_icons(input_dir):
     # items are copied last as some assets are in both and they look better as items
     copytree(f"{input_dir}/block", f"{output_dir}/block")
     copytree(f"{input_dir}/item", f"{output_dir}/item")
-    rmtree(input_dir)
+    rmtree(temp_path)
 
     for subdir, dirs, files in os.walk(output_dir):
 
@@ -139,11 +125,13 @@ def get_item_icons(input_dir):
         )
 
         for file in files:
-            resize_image(f"{os.path.abspath(subdir)}/{file}")
+            # resize_image(f"{os.path.abspath(subdir)}/{file}")
+            remove_non_images(f"{os.path.abspath(subdir)}/{file}")
+            image.scale(f"{os.path.abspath(subdir)}/{file}", 100, 100)
 
     print(
         f"""
-Icons have been extracted and resized.
+Textures have been extracted and resized.
 You can find them on: {os.path.abspath(output_dir)}.
     """
     )
