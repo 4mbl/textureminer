@@ -2,7 +2,9 @@ from shutil import copytree, rmtree
 from zipfile import ZipFile
 import os
 import re
-from PIL import Image  # py -m pip install Pillow
+from PIL import Image  # python3 -m pip install Pillow
+from forfiles import image
+
 
 temp_path = f"{os.path.expanduser('~')}/Downloads/temp-files"
 temp_path = temp_path.replace("\\", "/")
@@ -24,7 +26,7 @@ def get_latest_version():
 
     stable_versions = []
     for version in versions:
-        result = re.findall("[0-9]\.[0-9]+\.?[0-9]*", version)
+        result = re.findall("[0-9]\.[0-9]+\.?[0-9]+?$", version)
         if result:
             stable_versions.append(result)
 
@@ -106,23 +108,7 @@ def resize_image(image_path):
     """
 
     remove_non_images(image_path)
-
-    if (
-        image_path.endswith(".png")
-        | image_path.endswith(".jpg")
-        | image_path.endswith(".jpeg")
-    ):
-        with Image.open(image_path) as image:
-            # image = Image.open(image_path)
-            resize_multiplier = 100
-            image_width, image_height = image.size
-
-            image = image.resize(
-                (image_width * resize_multiplier, image_height * resize_multiplier),
-                resample=Image.NEAREST,
-            )
-
-            image.save(image_path)
+    image.scale(image_path, 100, 100)
 
 
 def get_item_icons(input_dir):
