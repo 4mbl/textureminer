@@ -2,7 +2,7 @@ from shutil import copytree, rmtree
 from zipfile import ZipFile
 import os
 import re
-from forfiles import image
+from forfiles import image, file as f
 
 
 temp_path = f"{os.path.expanduser('~')}/Downloads/temp-files"
@@ -78,24 +78,6 @@ def extract_textures(version):
     return output_path
 
 
-def remove_non_images(file_path):
-    """
-    Delete file if it is not an image file
-
-    Parameters:
-        file_path (string): path of the file that will be checked
-
-    Returns:
-    """
-
-    if (
-        not file_path.endswith(".png")
-        | file_path.endswith(".jpg")
-        | file_path.endswith(".jpeg")
-    ):
-        os.remove(file_path)
-
-
 def get_item_icons(input_dir):
     """
     Iterate through item icons and delete other files
@@ -124,8 +106,7 @@ def get_item_icons(input_dir):
         )
 
         for file in files:
-            # resize_image(f"{os.path.abspath(subdir)}/{file}")
-            remove_non_images(f"{os.path.abspath(subdir)}/{file}")
+            f.filter(f"{os.path.abspath(subdir)}", [".png"])
             image.scale(f"{os.path.abspath(subdir)}/{file}", 100, 100)
 
     print(
