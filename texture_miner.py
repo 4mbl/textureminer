@@ -3,6 +3,7 @@ from zipfile import ZipFile
 import os
 import re
 from forfiles import image, file as f
+from colorama import Fore, Back, Style
 
 
 temp_path = f"{os.path.expanduser('~')}/Downloads/temp-files"
@@ -31,12 +32,7 @@ def get_latest_version():
 
     latest_version = max(stable_versions)[0]
 
-    print(
-        f"""
-
-Latest stable installed version of Minecraft is {latest_version}, it will be used.
-    """
-    )
+    print(f"* Latest installed stable version of Minecraft: {latest_version}")
 
     return latest_version
 
@@ -61,11 +57,7 @@ def extract_textures(version):
 
     jar_path = f"{temp_path}/version-files/{version}.jar"
 
-    print(
-        f"""
-{len(ZipFile(jar_path).namelist())} files are being extracted...
-          """
-    )
+    print(f"* {len(ZipFile(jar_path).namelist())} files are being extracted...")
 
     # extract the .jar file to a different directory
     with ZipFile(f"{temp_path}/version-files/{version}.jar", "r") as zip_object:
@@ -99,21 +91,18 @@ def get_item_icons(input_dir):
 
     for subdir, dirs, files in os.walk(output_dir):
 
-        print(
-            f"""
-{len(files)} images are being resized...
-        """
-        )
+        if len(files) != 0:
+            print(
+                f"* {len(files)} {os.path.basename(subdir)} textures are being resized..."
+            )
 
         for file in files:
             f.filter(f"{os.path.abspath(subdir)}", [".png"])
             image.scale(f"{os.path.abspath(subdir)}/{file}", 100, 100)
 
     print(
-        f"""
-Textures have been extracted and resized.
-You can find them on: {os.path.abspath(output_dir)}.
-    """
+        f"""{Fore.GREEN}Completed. You can find the textures on:
+{os.path.abspath(output_dir)}{Fore.WHITE}."""
     )
 
 
