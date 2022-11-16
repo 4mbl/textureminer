@@ -22,7 +22,7 @@ def make_temp_dir():
 def get_latest_stable():
     """Get latest installed Minecraft version
 
-    Parameters:
+    Args:
         void
 
     Returns:
@@ -73,12 +73,12 @@ def get_latest_snapshot():
 
 
 def extract_textures(version, path=""):
-    """Extract textures from .jar file located in /.minecraft/ directory
+    """Extracts textures from .jar file located in /.minecraft/ directory
 
-    Parameters:
+    Args:
         version -- the version that the textures will be extracted from, for example: "1.18.2"
     Returns:
-        string: path of the directory the files were extracted to
+        string: path of the directory the files are extracted to
     """
 
     if path == "":
@@ -102,19 +102,18 @@ def extract_textures(version, path=""):
         zip_object.extractall(f"{TEMP_PATH}/extracted-files/")
     rmtree(f"{TEMP_PATH}/version-files/")
 
-    copytree(f"{TEMP_PATH}/extracted-files/assets/minecraft/textures",
-             path)
+    copytree(f"{TEMP_PATH}/extracted-files/assets/minecraft/textures", path)
     rmtree(f"{TEMP_PATH}/extracted-files/")
 
     return path
 
 
-def get_item_icons(input_path, output_path=""):
-    """
-    Iterate through item icons and delete other files
+def filter_non_icons(input_path, output_path=""):
+    """Iterates through item and block icons and deletes other files
 
-    Parameters:
-        input_dir (string): directory where the files are
+    Args:
+        input_path (string): directory where the input files are
+        output_path (string): directory where accepted files will end up
 
     Returns:
         void
@@ -133,7 +132,21 @@ def get_item_icons(input_path, output_path=""):
     copytree(f"{input_path}/item", f"{output_path}/item")
     rmtree(TEMP_PATH)
 
-    for subdir, dirs, files in os.walk(output_path):
+    return output_path
+
+
+def scale_icons(path, scale_factor=100):
+    """Scales images within a directory by a factor
+
+    Args:
+        path (string): path of the icons that will be scaled
+        scale_factor (int): factor that the icons will be scaled by
+
+    Returns:
+        string: path of the scaled icons
+    """
+
+    for subdir, dirs, files in os.walk(path):
 
         if len(files) != 0:
             print(
@@ -142,24 +155,45 @@ def get_item_icons(input_path, output_path=""):
 
         for file in files:
             f.filter(f"{os.path.abspath(subdir)}", [".png"])
-            image.scale(f"{os.path.abspath(subdir)}/{file}", 100, 100)
+            image.scale(f"{os.path.abspath(subdir)}/{file}", scale_factor,
+                        scale_factor)
 
     print(f"""{Fore.GREEN}Completed. You can find the textures on:
-{os.path.abspath(output_path)}{Fore.WHITE}.""")
+{os.path.abspath(path)}{Fore.WHITE}.""")
+
+    return path
+
+
+def get_icons(version, output_dir="", scale_factor=1):
+    """Easily extract, filter, and scale item and block icons.
+
+    Args:
+        version (string): a Minecraft version number, for example "1.11" or "22w11a"
+        output_dir (str, optional): directory that the final icons will go. Defaults to "".
+        scale_factor (int, optional): factor that will be used to scale the icons. Defaults to 1.
+    """
+
+    if output_dir == "":
+        output_dir = f"{os.path.expanduser('~')}/Downloads"
+
+    extracted = extract_textures(version)
+    filtered = filter_non_icons(extracted, f"{output_dir}/{version}_textures")
+    scale_icons(filtered, scale_factor)
 
 
 def main():
     """
     Main function
 
-    Parameters:
+    Args:
         void
 
     Returns:
         void
     """
-    get_item_icons(extract_textures(get_latest_stable()))
-    # get_item_icons(extract_textures(get_latest_snapshot()))
+
+    get_icons(get_latest_stable())
+    # get_icons(get_latest_snapshot())
 
 
 if __name__ == "__main__":
