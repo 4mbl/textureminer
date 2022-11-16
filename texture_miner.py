@@ -2,12 +2,13 @@ from shutil import copytree, rmtree
 from zipfile import ZipFile
 import os
 import re
+import tempfile
 from forfiles import image, file as f
 from colorama import Fore, Back, Style
 
 
-temp_path = f"{os.path.expanduser('~')}/Downloads/temp-files"
-temp_path = temp_path.replace("\\", "/")
+TEMP_PATH = f"{tempfile.gettempdir()}/texture_miner"
+TEMP_PATH = TEMP_PATH.replace("\\", "/")
 
 
 def get_latest_version():
@@ -46,26 +47,26 @@ def extract_textures(version):
         string: path of the directory the files were extracted
     """
 
-    os.mkdir(temp_path)
-    output_path = f"{temp_path}/extracted-textures"
+    os.mkdir(TEMP_PATH)
+    output_path = f"{TEMP_PATH}/extracted-textures"
 
     # %APPDATA%\.minecraft
     copytree(
         f"{os.path.expanduser('~')}/AppData/Roaming/.minecraft/versions/{version}/",
-        f"{temp_path}/version-files",
+        f"{TEMP_PATH}/version-files",
     )
 
-    jar_path = f"{temp_path}/version-files/{version}.jar"
+    jar_path = f"{TEMP_PATH}/version-files/{version}.jar"
 
     print(f"* {len(ZipFile(jar_path).namelist())} files are being extracted...")
 
     # extract the .jar file to a different directory
-    with ZipFile(f"{temp_path}/version-files/{version}.jar", "r") as zip_object:
-        zip_object.extractall(f"{temp_path}/extracted-files/")
-    rmtree(f"{temp_path}/version-files/")
+    with ZipFile(f"{TEMP_PATH}/version-files/{version}.jar", "r") as zip_object:
+        zip_object.extractall(f"{TEMP_PATH}/extracted-files/")
+    rmtree(f"{TEMP_PATH}/version-files/")
 
-    copytree(f"{temp_path}/extracted-files/assets/minecraft/textures", output_path)
-    rmtree(f"{temp_path}/extracted-files/")
+    copytree(f"{TEMP_PATH}/extracted-files/assets/minecraft/textures", output_path)
+    rmtree(f"{TEMP_PATH}/extracted-files/")
 
     return output_path
 
@@ -87,7 +88,7 @@ def get_item_icons(input_dir):
     # items are copied last as some assets are in both and they look better as items
     copytree(f"{input_dir}/block", f"{output_dir}/block")
     copytree(f"{input_dir}/item", f"{output_dir}/item")
-    rmtree(temp_path)
+    rmtree(TEMP_PATH)
 
     for subdir, dirs, files in os.walk(output_dir):
 
