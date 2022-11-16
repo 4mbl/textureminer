@@ -135,7 +135,7 @@ def filter_non_icons(input_path, output_path=""):
     return output_path
 
 
-def scale_icons(path, scale_factor=100):
+def scale_icons(path, scale_factor=1000):
     """Scales images within a directory by a factor
 
     Args:
