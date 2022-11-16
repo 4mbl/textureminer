@@ -72,18 +72,20 @@ def get_latest_snapshot():
     return latest_snapshot
 
 
-def extract_textures(version):
+def extract_textures(version, path=""):
     """Extract textures from .jar file located in /.minecraft/ directory
 
     Parameters:
         version -- the version that the textures will be extracted from, for example: "1.18.2"
     Returns:
-        string: path of the directory the files were extracted
+        string: path of the directory the files were extracted to
     """
 
-    make_temp_dir()
-    output_path = f"{TEMP_PATH}/extracted-textures"
-    rmtree(output_path)
+    if path == "":
+        path = f"{TEMP_PATH}/extracted-textures"
+        make_temp_dir()
+    if os.path.isdir(path):
+        rmtree(path)
 
     # %APPDATA%\.minecraft
     copytree(
@@ -101,13 +103,13 @@ def extract_textures(version):
     rmtree(f"{TEMP_PATH}/version-files/")
 
     copytree(f"{TEMP_PATH}/extracted-files/assets/minecraft/textures",
-             output_path)
+             path)
     rmtree(f"{TEMP_PATH}/extracted-files/")
 
-    return output_path
+    return path
 
 
-def get_item_icons(input_dir):
+def get_item_icons(input_path, output_path=""):
     """
     Iterate through item icons and delete other files
 
@@ -118,15 +120,20 @@ def get_item_icons(input_dir):
         void
     """
 
-    output_dir = f"{os.path.expanduser('~')}/Downloads/mc-textures"
+    if output_path == "":
+        output_path = f"{os.path.expanduser('~')}/Downloads/mc-textures"
+        if os.path.isdir(output_path):
+            rmtree(output_path)
+    elif not os.path.isdir(output_path):
+        os.mkdir(output_path)
 
     # TODO merge to both to same dir and override blocks with items if conflicts
     # items are copied last as some assets are in both and they look better as items
-    copytree(f"{input_dir}/block", f"{output_dir}/block")
-    copytree(f"{input_dir}/item", f"{output_dir}/item")
+    copytree(f"{input_path}/block", f"{output_path}/block")
+    copytree(f"{input_path}/item", f"{output_path}/item")
     rmtree(TEMP_PATH)
 
-    for subdir, dirs, files in os.walk(output_dir):
+    for subdir, dirs, files in os.walk(output_path):
 
         if len(files) != 0:
             print(
@@ -138,7 +145,7 @@ def get_item_icons(input_dir):
             image.scale(f"{os.path.abspath(subdir)}/{file}", 100, 100)
 
     print(f"""{Fore.GREEN}Completed. You can find the textures on:
-{os.path.abspath(output_dir)}{Fore.WHITE}.""")
+{os.path.abspath(output_path)}{Fore.WHITE}.""")
 
 
 def main():
