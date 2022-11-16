@@ -135,7 +135,7 @@ def filter_non_icons(input_path, output_path=""):
     return output_path
 
 
-def scale_icons(path, scale_factor=1000):
+def scale_icons(path, scale_factor=100):
     """Scales images within a directory by a factor
 
     Args:
@@ -164,6 +164,20 @@ def scale_icons(path, scale_factor=1000):
     return path
 
 
+def merge_dirs(input_dir, output_dir):
+    """Merges block and item textures to a single directory.
+    Item textures are given priority when there are conflicts.
+
+    Args:
+        input_dir (string): directory in which there are subdirectories 'block' and 'item'
+        output_dir (string): directory in which the files will be merged into
+    """
+    copytree(f"{input_dir}/block", output_dir, dirs_exist_ok=True)
+    rmtree(f"{input_dir}/block")
+    copytree(f"{input_dir}/item", output_dir, dirs_exist_ok=True)
+    rmtree(f"{input_dir}/item")
+
+
 def get_icons(version, output_dir="", scale_factor=1):
     """Easily extract, filter, and scale item and block icons.
 
@@ -178,7 +192,8 @@ def get_icons(version, output_dir="", scale_factor=1):
 
     extracted = extract_textures(version)
     filtered = filter_non_icons(extracted, f"{output_dir}/{version}_textures")
-    scale_icons(filtered, scale_factor)
+    scaled = scale_icons(filtered, scale_factor)
+    merge_dirs(scaled, scaled)
 
 
 def main():
@@ -192,7 +207,7 @@ def main():
         void
     """
 
-    get_icons(get_latest_stable())
+    get_icons(get_latest_stable(), scale_factor=100)
     # get_icons(get_latest_snapshot())
 
 
