@@ -130,8 +130,6 @@ def filter_non_icons(input_path: str, output_path: str = ""):
     elif not os.path.isdir(output_path):
         os.mkdir(output_path)
 
-    # TODO merge to both to same dir and override blocks with items if conflicts
-    # items are copied last as some assets are in both and they look better as items
     copytree(f"{input_path}/block", f"{output_path}/block")
     copytree(f"{input_path}/item", f"{output_path}/item")
     rmtree(TEMP_PATH)
@@ -212,7 +210,7 @@ def main():
     """
 
     get_icons(get_latest_stable(), scale_factor=100)
-    # get_icons(get_latest_snapshot())
+    get_icons(get_latest_snapshot())
 
 
 if __name__ == "__main__":
