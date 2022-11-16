@@ -12,6 +12,13 @@ TEMP_PATH = TEMP_PATH.replace("\\", "/")
 VERSIONS_PATH = f"{os.path.expanduser('~')}/AppData/Roaming/.minecraft/versions"
 
 
+def make_temp_dir():
+    """Makes a temporary directory for this project if one does not already exist.
+    """
+    if not os.path.isdir(TEMP_PATH):
+        os.mkdir(TEMP_PATH)
+
+
 def get_latest_stable():
     """Get latest installed Minecraft version
 
@@ -64,6 +71,7 @@ def get_latest_snapshot():
 
     return latest_snapshot
 
+
 def extract_textures(version):
     """Extract textures from .jar file located in /.minecraft/ directory
 
@@ -73,8 +81,9 @@ def extract_textures(version):
         string: path of the directory the files were extracted
     """
 
-    os.mkdir(TEMP_PATH)
+    make_temp_dir()
     output_path = f"{TEMP_PATH}/extracted-textures"
+    rmtree(output_path)
 
     # %APPDATA%\.minecraft
     copytree(
@@ -142,8 +151,8 @@ def main():
     Returns:
         void
     """
-    # get_item_icons(extract_textures(get_latest_version()))
-    get_item_icons(extract_textures(get_latest_snapshot()))
+    get_item_icons(extract_textures(get_latest_stable()))
+    # get_item_icons(extract_textures(get_latest_snapshot()))
 
 
 if __name__ == "__main__":
