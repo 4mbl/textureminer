@@ -12,8 +12,7 @@ TEMP_PATH = TEMP_PATH.replace("\\", "/")
 VERSIONS_PATH = f"{os.path.expanduser('~')}/AppData/Roaming/.minecraft/versions"
 
 
-
-def get_latest_version():
+def get_latest_stable():
     """Get latest installed Minecraft version
 
     Parameters:
