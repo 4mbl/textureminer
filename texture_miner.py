@@ -84,8 +84,12 @@ def extract_textures(version: str, path: str = ""):
     if path == "":
         path = f"{TEMP_PATH}/extracted-textures"
         make_temp_dir()
+
     if os.path.isdir(path):
         rmtree(path)
+
+    if os.path.isdir(f"{TEMP_PATH}/version-files"):
+        rmtree(f"{TEMP_PATH}/version-files")
 
     # %APPDATA%\.minecraft
     copytree(
@@ -208,7 +212,7 @@ def main():
     """
 
     get_icons(get_latest_stable(), scale_factor=100)
-    get_icons(get_latest_snapshot())
+    # get_icons(get_latest_snapshot())
 
 
 if __name__ == "__main__":
