@@ -6,9 +6,11 @@ import tempfile
 from forfiles import image, file as f
 from colorama import Fore, Back, Style
 
-
 TEMP_PATH = f"{tempfile.gettempdir()}/texture_miner"
 TEMP_PATH = TEMP_PATH.replace("\\", "/")
+
+VERSIONS_PATH = f"{os.path.expanduser('~')}/AppData/Roaming/.minecraft/versions"
+
 
 
 def get_latest_version():
@@ -21,9 +23,10 @@ def get_latest_version():
         string: latest stable version, for example: "1.18.1"
     """
 
-    path = f"{os.path.expanduser('~')}/AppData/Roaming/.minecraft/versions"
-
-    versions = [f for f in os.listdir(path) if os.path.isdir(os.path.join(path, f))]
+    versions = [
+        f for f in os.listdir(VERSIONS_PATH)
+        if os.path.isdir(os.path.join(VERSIONS_PATH, f))
+    ]
 
     stable_versions = []
     for version in versions:
@@ -37,6 +40,30 @@ def get_latest_version():
 
     return latest_version
 
+
+def get_latest_snapshot():
+    """Get latest installed Minecraft snapshot version number
+
+    Returns:
+        string: latest snapshot version, for example "22w11a"
+    """
+
+    versions = [
+        f for f in os.listdir(VERSIONS_PATH)
+        if os.path.isdir(os.path.join(VERSIONS_PATH, f))
+    ]
+
+    snapshots = []
+    for version in versions:
+        result = re.findall("[0-9]{2}w[0-9]{2}[a-z]", version)
+        if result:
+            snapshots.append(result[0])
+
+    latest_snapshot = sorted(snapshots)[-1]
+
+    print(f"* Latest installed stable version of Minecraft: {latest_snapshot}")
+
+    return latest_snapshot
 
 def extract_textures(version):
     """Extract textures from .jar file located in /.minecraft/ directory
@@ -65,7 +92,8 @@ def extract_textures(version):
         zip_object.extractall(f"{TEMP_PATH}/extracted-files/")
     rmtree(f"{TEMP_PATH}/version-files/")
 
-    copytree(f"{TEMP_PATH}/extracted-files/assets/minecraft/textures", output_path)
+    copytree(f"{TEMP_PATH}/extracted-files/assets/minecraft/textures",
+             output_path)
     rmtree(f"{TEMP_PATH}/extracted-files/")
 
     return output_path
@@ -101,10 +129,8 @@ def get_item_icons(input_dir):
             f.filter(f"{os.path.abspath(subdir)}", [".png"])
             image.scale(f"{os.path.abspath(subdir)}/{file}", 100, 100)
 
-    print(
-        f"""{Fore.GREEN}Completed. You can find the textures on:
-{os.path.abspath(output_dir)}{Fore.WHITE}."""
-    )
+    print(f"""{Fore.GREEN}Completed. You can find the textures on:
+{os.path.abspath(output_dir)}{Fore.WHITE}.""")
 
 
 def main():
@@ -117,7 +143,8 @@ def main():
     Returns:
         void
     """
-    get_item_icons(extract_textures(get_latest_version()))
+    # get_item_icons(extract_textures(get_latest_version()))
+    get_item_icons(extract_textures(get_latest_snapshot()))
 
 
 if __name__ == "__main__":
