@@ -72,7 +72,7 @@ def get_latest_snapshot():
     return latest_snapshot
 
 
-def extract_textures(version, path=""):
+def extract_textures(version: str, path: str = ""):
     """Extracts textures from .jar file located in /.minecraft/ directory
 
     Args:
@@ -108,7 +108,7 @@ def extract_textures(version, path=""):
     return path
 
 
-def filter_non_icons(input_path, output_path=""):
+def filter_non_icons(input_path: str, output_path: str = ""):
     """Iterates through item and block icons and deletes other files
 
     Args:
@@ -135,7 +135,7 @@ def filter_non_icons(input_path, output_path=""):
     return output_path
 
 
-def scale_icons(path, scale_factor=100):
+def scale_icons(path: str, scale_factor: int = 100):
     """Scales images within a directory by a factor
 
     Args:
@@ -164,7 +164,7 @@ def scale_icons(path, scale_factor=100):
     return path
 
 
-def merge_dirs(input_dir, output_dir):
+def merge_dirs(input_dir: str, output_dir: str):
     """Merges block and item textures to a single directory.
     Item textures are given priority when there are conflicts.
 
@@ -208,7 +208,7 @@ def main():
     """
 
     get_icons(get_latest_stable(), scale_factor=100)
-    # get_icons(get_latest_snapshot())
+    get_icons(get_latest_snapshot())
 
 
 if __name__ == "__main__":
