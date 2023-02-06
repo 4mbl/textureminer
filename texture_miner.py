@@ -67,7 +67,7 @@ def get_latest_snapshot():
 
     latest_snapshot = sorted(snapshots)[-1]
 
-    print(f"* Latest installed stable version of Minecraft: {latest_snapshot}")
+    print(f"* Latest installed snapshot version of Minecraft: {latest_snapshot}")
 
     return latest_snapshot
 
