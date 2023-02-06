@@ -148,8 +148,7 @@ def scale_icons(path: str, scale_factor: int = 100):
         string: path of the scaled icons
     """
 
-    for subdir, dirs, files in os.walk(path):
-
+    for subdir, _, files in os.walk(path):
         if len(files) != 0:
             print(
                 f"* {len(files)} {os.path.basename(subdir)} textures are being resized..."
