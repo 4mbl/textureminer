@@ -67,7 +67,8 @@ def get_latest_snapshot():
 
     latest_snapshot = sorted(snapshots)[-1]
 
-    print(f"* Latest installed snapshot version of Minecraft: {latest_snapshot}")
+    print(
+        f"* Latest installed snapshot version of Minecraft: {latest_snapshot}")
 
     return latest_snapshot
 
@@ -209,7 +210,7 @@ def main():
     """
 
     get_icons(get_latest_stable(), scale_factor=100)
-    get_icons(get_latest_snapshot())
+    get_icons(get_latest_snapshot(), scale_factor=100)
 
 
 if __name__ == "__main__":
