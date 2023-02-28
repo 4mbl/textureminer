@@ -6,9 +6,7 @@ import tempfile
 from forfiles import image, file as f
 from colorama import Fore, Back, Style
 
-TEMP_PATH = f"{tempfile.gettempdir()}/texture_miner"
-TEMP_PATH = TEMP_PATH.replace("\\", "/")
-
+TEMP_PATH = f"{tempfile.gettempdir()}/texture_miner".replace("\\", "/")
 VERSIONS_PATH = f"{os.path.expanduser('~')}/AppData/Roaming/.minecraft/versions"
 
 
@@ -36,7 +34,7 @@ def get_latest_stable():
 
     stable_versions = []
     for version in versions:
-        result = re.findall("[0-9]\.[0-9]+\.?[0-9]+?$", version)
+        result = re.findall(r"[0-9]\.[0-9]+\.?[0-9]+?$", version)
         if result:
             stable_versions.append(result)
 
@@ -73,7 +71,8 @@ def get_latest_snapshot():
     return latest_snapshot
 
 
-def extract_textures(version: str, path: str = ""):
+def extract_textures(version: str,
+                     path: str = f"{TEMP_PATH}/extracted-textures"):
     """Extracts textures from .jar file located in /.minecraft/ directory
 
     Args:
@@ -82,9 +81,7 @@ def extract_textures(version: str, path: str = ""):
         string: path of the directory the files are extracted to
     """
 
-    if path == "":
-        path = f"{TEMP_PATH}/extracted-textures"
-        make_temp_dir()
+    make_temp_dir()
 
     if os.path.isdir(path):
         rmtree(path)
@@ -113,7 +110,9 @@ def extract_textures(version: str, path: str = ""):
     return path
 
 
-def filter_non_icons(input_path: str, output_path: str = ""):
+def filter_non_icons(
+        input_path: str,
+        output_path: str = f"{os.path.expanduser('~')}/Downloads/mc-textures"):
     """Iterates through item and block icons and deletes other files
 
     Args:
@@ -124,11 +123,9 @@ def filter_non_icons(input_path: str, output_path: str = ""):
         void
     """
 
-    if output_path == "":
-        output_path = f"{os.path.expanduser('~')}/Downloads/mc-textures"
-        if os.path.isdir(output_path):
-            rmtree(output_path)
-    elif not os.path.isdir(output_path):
+    if os.path.isdir(output_path):
+        rmtree(output_path)
+    else:
         os.mkdir(output_path)
 
     copytree(f"{input_path}/block", f"{output_path}/block")
@@ -180,7 +177,9 @@ def merge_dirs(input_dir: str, output_dir: str):
     rmtree(f"{input_dir}/item")
 
 
-def get_icons(version, output_dir="", scale_factor=1):
+def get_icons(version,
+              output_dir=f"{os.path.expanduser('~')}/Downloads",
+              scale_factor=1):
     """Easily extract, filter, and scale item and block icons.
 
     Args:
@@ -188,9 +187,6 @@ def get_icons(version, output_dir="", scale_factor=1):
         output_dir (str, optional): directory that the final icons will go. Defaults to "".
         scale_factor (int, optional): factor that will be used to scale the icons. Defaults to 1.
     """
-
-    if output_dir == "":
-        output_dir = f"{os.path.expanduser('~')}/Downloads"
 
     extracted = extract_textures(version)
     filtered = filter_non_icons(extracted, f"{output_dir}/{version}_textures")
