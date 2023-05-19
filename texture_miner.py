@@ -159,8 +159,8 @@ def extract_textures(
     return output_path
 
 
-def filter_non_icons(input_path: str, output_dir: str = DEFAULT_OUTPUT_DIR):
-    """Iterates through item and block icons and deletes other files
+def filter_non_unwanted(input_path: str, output_dir: str = DEFAULT_OUTPUT_DIR):
+    """Removes non-essential item and block textures from the extracted textures.
 
     Args:
         input_path (string): directory where the input files are
@@ -179,18 +179,18 @@ def filter_non_icons(input_path: str, output_dir: str = DEFAULT_OUTPUT_DIR):
     return output_dir
 
 
-def scale_icons(path: str,
-                scale_factor: int = 100,
-                do_merge: bool = True) -> str:
-    """Scales images within a directory by a factor
+def scale_textures(path: str,
+                   scale_factor: int = 100,
+                   do_merge: bool = True) -> str:
+    """Scales textures within a directory by a factor
 
     Args:
-        path (string): path of the icons that will be scaled
-        scale_factor (int): factor that the icons will be scaled by
+        path (string): path of the textures that will be scaled
+        scale_factor (int): factor that the textures will be scaled by
         do_merge (bool): whether to merge block and item texture files into a single directory
 
     Returns:
-        string: path of the scaled icons
+        string: path of the scaled textures
     """
 
     if do_merge:
@@ -200,7 +200,8 @@ def scale_icons(path: str,
         if len(files) > 0:
             print_stylized(
                 f"{len(files)} textures are being resized..." if do_merge else
-                f"{len(files)} {os.path.basename(subdir)} are being resized...")
+                f"{len(files)} {os.path.basename(subdir)} textures are being resized..."
+            )
 
         for fil in files:
             f.filter(f'{os.path.abspath(subdir)}', ['.png'])
@@ -225,16 +226,16 @@ def merge_dirs(input_dir: str, output_dir: str):
     rmtree(f'{input_dir}/item')
 
 
-def get_icons(version_type: VersionType = VersionType.RELEASE,
-              output_dir=DEFAULT_OUTPUT_DIR,
-              scale_factor=1,
-              do_merge=True):
-    """Easily extract, filter, and scale item and block icons.
+def get_textures(version_type: VersionType = VersionType.RELEASE,
+                 output_dir=DEFAULT_OUTPUT_DIR,
+                 scale_factor=1,
+                 do_merge=True):
+    """Easily extract, filter, and scale item and block textures.
 
     Args:
         version (string): a Minecraft version number, for example "1.11" or "22w11a"
-        output_dir (str, optional): directory that the final icons will go. Defaults to "".
-        scale_factor (int, optional): factor that will be used to scale the icons. Defaults to 1.
+        output_dir (str, optional): directory that the final textures will go. Defaults to "".
+        scale_factor (int, optional): factor that will be used to scale the textures. Defaults to 1.
 
     Returns:
         string: path of the final textures
@@ -244,8 +245,8 @@ def get_icons(version_type: VersionType = VersionType.RELEASE,
     latest_version = get_latest_version(version_type)
     assets = download_client_jar(latest_version)
     extracted = extract_textures(assets)
-    filtered = filter_non_icons(extracted, f'{output_dir}/{latest_version}')
-    scale_icons(filtered, scale_factor, do_merge)
+    filtered = filter_non_unwanted(extracted, f'{output_dir}/{latest_version}')
+    scale_textures(filtered, scale_factor, do_merge)
 
     output_dir = os.path.abspath(filtered).replace('\\', '/')
     print(
@@ -255,8 +256,8 @@ def get_icons(version_type: VersionType = VersionType.RELEASE,
 
 
 def main():
-    get_icons(VersionType.RELEASE, scale_factor=100)
-    get_icons(VersionType.EXPERIMENTAL, scale_factor=100)
+    get_textures(VersionType.RELEASE, scale_factor=100)
+    get_textures(VersionType.EXPERIMENTAL, scale_factor=100)
 
 
 if __name__ == '__main__':
