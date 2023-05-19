@@ -196,10 +196,16 @@ def scale_textures(path: str,
     if do_merge:
         merge_dirs(path, path)
 
-    if scale_factor == 1:
-        return path
-
     for subdir, _, files in os.walk(path):
+        print_stylized(
+            "Textures are being filtered..." if do_merge else
+            f"{os.path.basename(subdir).capitalize()} textures are being filtered..."
+        )
+        f.filter(f'{os.path.abspath(subdir)}', ['.png'])
+
+        if scale_factor == 1:
+            continue
+
         if len(files) > 0:
             print_stylized(
                 f"{len(files)} textures are being resized..." if do_merge else
@@ -207,7 +213,6 @@ def scale_textures(path: str,
             )
 
         for fil in files:
-            f.filter(f'{os.path.abspath(subdir)}', ['.png'])
             image.scale(f"{os.path.abspath(subdir)}/{fil}", scale_factor,
                         scale_factor)
 
