@@ -12,12 +12,19 @@ from colorama import Fore, Back, Style
 HOME_DIR = os.path.expanduser('~').replace('\\', '/')
 TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
 DEFAULT_OUTPUT_DIR = f'{HOME_DIR}/Downloads/mc-textures'
-version_manifest = None
+VERSION_MANIFEST = None
 
 
 class VersionType(Enum):
-    SNAPSHOT = 'snapshot'
+    """Enum class representing different types of versions for Minecraft
+    """
+
+    EXPERIMENTAL = 'snapshot'
+    """snapshot, pre-release, or release candidate
+    """
     RELEASE = 'release'
+    """stable release
+    """
 
 
 def make_dir(path: str, do_delete_prev: bool = False):
@@ -34,29 +41,57 @@ def make_dir(path: str, do_delete_prev: bool = False):
 
 
 def print_stylized(text):
-    print(f"{Fore.CYAN}  * {Fore.RESET}{text}")
+    """Prints a message to the console with cyan text and a bullet point.
+    """
+    print(f"{Fore.CYAN}{' '*4}* {Fore.RESET}{text}")
 
 
 def validate_version(version_type: VersionType, version: str):
+    """Validates a version string based on the version type using regex.
+
+    Args:
+        version_type (VersionType):
+        version (str):
+
+    Returns:
+        bool: whether the version is valid
+    """
     REGEX_SNAPSHOT = r'^[0-9]{2}w[0-9]{2}[a-z]$'
     REGEX_PRE = r'^[0-9]\.[0-9]+\.?[0-9]+-pre[0-9]?$'
     REGEX_RC = r'^[0-9]\.[0-9]+\.?[0-9]+-rc[0-9]?$'
     REGEX_RELEASE = r'^[0-9]\.[0-9]+\.?[0-9]+?$'
 
-    if version_type == VersionType.SNAPSHOT:
+    if version_type == VersionType.EXPERIMENTAL:
         return re.match(REGEX_SNAPSHOT, version) or re.match(
             REGEX_PRE, version) or re.match(REGEX_RC, version)
     if version_type == VersionType.RELEASE:
         return re.match(REGEX_RELEASE, version)
 
 
-def get_version_manifest():
+def get_version_manifest() -> dict:
+    """Fetches the version manifest from Mojang's servers.
+    If the manifest has already been fetched, it will return the cached version.
+
+    Returns:
+        dict: version manifest
+    """
     return requests.get(
         'https://launchermeta.mojang.com/mc/game/version_manifest.json',
-        timeout=10).json() if version_manifest is None else version_manifest
+        timeout=10).json() if VERSION_MANIFEST is None else VERSION_MANIFEST
 
 
 def get_latest_version(version_type: VersionType) -> str:
+    """Gets the latest version of a certain type.
+
+    Args:
+        version_type (VersionType): type of version to get
+
+    Raises:
+        Exception: if the version number is invalid
+
+    Returns:
+        str: latest version as a string
+    """
     print_stylized(f"Finding latest {version_type.value}...")
     latest_version = get_version_manifest()['latest'][version_type.value]
     if not validate_version(version_type, latest_version):
@@ -67,8 +102,17 @@ def get_latest_version(version_type: VersionType) -> str:
 
 def download_client_jar(
     version: str,
-    download_path: str = f'{TEMP_PATH}/version-jars',
-):
+    download_dir: str = f'{TEMP_PATH}/version-jars',
+) -> str:
+    """Downloads the client .jar file for a specific version from Mojang's servers.
+
+    Args:
+        version (str): version to download
+        download_path (str, optional): directory to download the file to
+
+    Returns:
+        str: path of the downloaded file
+    """
 
     for v in get_version_manifest()['versions']:
         if v['id'] == version:
@@ -80,27 +124,28 @@ def download_client_jar(
     json = requests.get(url, timeout=10).json()
     client_jar_url = json['downloads']['client']['url']
 
-    make_dir(download_path)
+    make_dir(download_dir)
     print_stylized("Downloading assets...")
-    urllib.request.urlretrieve(client_jar_url, f'{download_path}/{version}.jar')
-    return f'{download_path}/{version}.jar'
+    urllib.request.urlretrieve(client_jar_url, f'{download_dir}/{version}.jar')
+    return f'{download_dir}/{version}.jar'
 
 
-def extract_textures(input_path: str,
-                     output_path: str = f'{TEMP_PATH}/extracted-textures'):
-    """Extracts textures from .jar file located in /.minecraft/ directory
+def extract_textures(
+        input_path: str,
+        output_path: str = f'{TEMP_PATH}/extracted-textures') -> str:
+    """Extracts textures from .jar file.
 
     Args:
-        version -- the version that the textures will be extracted from, for example: "1.18.2"
+        input_path (str): path of the .jar file
+        output_path (str, optional): path of the output directory
+
     Returns:
-        string: path of the directory the files are extracted to
+        str: path of the output directory
     """
 
-    print_stylized(
-        f"{len(ZipFile(input_path).namelist())} files are being extracted...")
-
-    # extract the .jar file to a different directory
     with ZipFile(input_path, 'r') as zip_object:
+        file_amount = len(zip_object.namelist())
+        print_stylized(f"{file_amount} files are being extracted...")
         zip_object.extractall(f'{TEMP_PATH}/extracted-files/')
     rmtree(f'{TEMP_PATH}/version-jars/')
 
@@ -134,12 +179,15 @@ def filter_non_icons(input_path: str, output_dir: str = DEFAULT_OUTPUT_DIR):
     return output_dir
 
 
-def scale_icons(path: str, scale_factor: int = 100, do_merge: bool = True):
+def scale_icons(path: str,
+                scale_factor: int = 100,
+                do_merge: bool = True) -> str:
     """Scales images within a directory by a factor
 
     Args:
         path (string): path of the icons that will be scaled
         scale_factor (int): factor that the icons will be scaled by
+        do_merge (bool): whether to merge block and item texture files into a single directory
 
     Returns:
         string: path of the scaled icons
@@ -187,6 +235,9 @@ def get_icons(version_type: VersionType = VersionType.RELEASE,
         version (string): a Minecraft version number, for example "1.11" or "22w11a"
         output_dir (str, optional): directory that the final icons will go. Defaults to "".
         scale_factor (int, optional): factor that will be used to scale the icons. Defaults to 1.
+
+    Returns:
+        string: path of the final textures
     """
 
     print(f'\n{Fore.CYAN}TEXTURE MINER{Fore.RESET}')
@@ -200,11 +251,12 @@ def get_icons(version_type: VersionType = VersionType.RELEASE,
     print(
         f"{Fore.GREEN}Completed. You can find the textures on:\n{output_dir}{Fore.RESET}\n"
     )
+    return output_dir
 
 
 def main():
-    get_icons(VersionType.SNAPSHOT, scale_factor=100)
-    get_icons(VersionType.RELEASE, scale_factor=100)
+    get_icons(VersionType.RELEASE, scale_factor=1)
+    get_icons(VersionType.EXPERIMENTAL, scale_factor=1)
 
 
 if __name__ == '__main__':
