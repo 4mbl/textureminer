@@ -1,79 +1,93 @@
 from shutil import copytree, rmtree
 from zipfile import ZipFile
+from enum import Enum
+import urllib.request
 import os
 import re
 import tempfile
+import requests
 from forfiles import image, file as f
 from colorama import Fore, Back, Style
 
-HOME_DIR = os.path.expanduser('~')
+HOME_DIR = os.path.expanduser('~').replace('\\', '/')
 TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
-VERSIONS_PATH = f'{HOME_DIR}/AppData/Roaming/.minecraft/versions'
+DEFAULT_OUTPUT_DIR = f'{HOME_DIR}/Downloads/mc-textures'
+version_manifest = None
 
 
-def make_temp_dir():
-    """Makes a temporary directory for this project if one does not already exist.
-    """
-    if not os.path.isdir(TEMP_PATH):
-        os.mkdir(TEMP_PATH)
+class VersionType(Enum):
+    SNAPSHOT = 'snapshot'
+    RELEASE = 'release'
 
 
-def get_latest_stable():
-    """Get latest installed Minecraft version
+def make_dir(path: str, do_delete_prev: bool = False):
+    """Makes a directory if one does not already exist.
 
     Args:
-        void
-
-    Returns:
-        string: latest stable version, for example: "1.18.1"
+        path (str): path of the directory that will be created
     """
+    if do_delete_prev and os.path.isdir(path):
+        rmtree(path)
 
-    versions = [
-        f for f in os.listdir(VERSIONS_PATH)
-        if os.path.isdir(os.path.join(VERSIONS_PATH, f))
-    ]
+    if not os.path.isdir(path):
+        os.makedirs(path)
 
-    stable_versions = []
-    for version in versions:
-        result = re.findall(r'[0-9]\.[0-9]+\.?[0-9]+?$', version)
-        if result:
-            stable_versions.append(result)
 
-    latest_version = max(stable_versions)[0]
+def print_stylized(text):
+    print(f"{Fore.CYAN}  * {Fore.RESET}{text}")
 
-    print(f"* Latest installed stable version of Minecraft: {latest_version}")
 
+def validate_version(version_type: VersionType, version: str):
+    REGEX_SNAPSHOT = r'^[0-9]{2}w[0-9]{2}[a-z]$'
+    REGEX_PRE = r'^[0-9]\.[0-9]+\.?[0-9]+-pre[0-9]?$'
+    REGEX_RC = r'^[0-9]\.[0-9]+\.?[0-9]+-rc[0-9]?$'
+    REGEX_RELEASE = r'^[0-9]\.[0-9]+\.?[0-9]+?$'
+
+    if version_type == VersionType.SNAPSHOT:
+        return re.match(REGEX_SNAPSHOT, version) or re.match(
+            REGEX_PRE, version) or re.match(REGEX_RC, version)
+    if version_type == VersionType.RELEASE:
+        return re.match(REGEX_RELEASE, version)
+
+
+def get_version_manifest():
+    return requests.get(
+        'https://launchermeta.mojang.com/mc/game/version_manifest.json',
+        timeout=10).json() if version_manifest is None else version_manifest
+
+
+def get_latest_version(version_type: VersionType) -> str:
+    print_stylized(f"Finding latest {version_type.value}...")
+    latest_version = get_version_manifest()['latest'][version_type.value]
+    if not validate_version(version_type, latest_version):
+        raise Exception(f"Invalid version number ({latest_version}).")
+    print_stylized(f"Latest {version_type.value} is {latest_version}.")
     return latest_version
 
 
-def get_latest_snapshot():
-    """Get latest installed Minecraft snapshot version number
+def download_client_jar(
+    version: str,
+    download_path: str = f'{TEMP_PATH}/version-jars',
+):
 
-    Returns:
-        string: latest snapshot version, for example "22w11a"
-    """
+    for v in get_version_manifest()['versions']:
+        if v['id'] == version:
+            url = v['url']
+            break
+        else:
+            url = None
 
-    versions = [
-        f for f in os.listdir(VERSIONS_PATH)
-        if os.path.isdir(os.path.join(VERSIONS_PATH, f))
-    ]
+    json = requests.get(url, timeout=10).json()
+    client_jar_url = json['downloads']['client']['url']
 
-    snapshots = []
-    for version in versions:
-        result = re.findall('[0-9]{2}w[0-9]{2}[a-z]', version)
-        if result:
-            snapshots.append(result[0])
-
-    latest_snapshot = sorted(snapshots)[-1]
-
-    print(
-        f"* Latest installed snapshot version of Minecraft: {latest_snapshot}")
-
-    return latest_snapshot
+    make_dir(download_path)
+    print_stylized("Downloading assets...")
+    urllib.request.urlretrieve(client_jar_url, f'{download_path}/{version}.jar')
+    return f'{download_path}/{version}.jar'
 
 
-def extract_textures(version: str,
-                     path: str = f"{TEMP_PATH}/extracted-textures"):
+def extract_textures(input_path: str,
+                     output_path: str = f'{TEMP_PATH}/extracted-textures'):
     """Extracts textures from .jar file located in /.minecraft/ directory
 
     Args:
@@ -82,38 +96,25 @@ def extract_textures(version: str,
         string: path of the directory the files are extracted to
     """
 
-    make_temp_dir()
-
-    if os.path.isdir(path):
-        rmtree(path)
-
-    if os.path.isdir(f'{TEMP_PATH}/version-files'):
-        rmtree(f'{TEMP_PATH}/version-files')
-
-    # %APPDATA%\.minecraft
-    copytree(
-        f'{HOME_DIR}/AppData/Roaming/.minecraft/versions/{version}/',
-        f'{TEMP_PATH}/version-files',
-    )
-
-    jar_path = f'{TEMP_PATH}/version-files/{version}.jar'
-
-    print(f"* {len(ZipFile(jar_path).namelist())} files are being extracted...")
+    print_stylized(
+        f"{len(ZipFile(input_path).namelist())} files are being extracted...")
 
     # extract the .jar file to a different directory
-    with ZipFile(f'{TEMP_PATH}/version-files/{version}.jar', 'r') as zip_object:
+    with ZipFile(input_path, 'r') as zip_object:
         zip_object.extractall(f'{TEMP_PATH}/extracted-files/')
-    rmtree(f'{TEMP_PATH}/version-files/')
+    rmtree(f'{TEMP_PATH}/version-jars/')
 
-    copytree(f'{TEMP_PATH}/extracted-files/assets/minecraft/textures', path)
+    if os.path.isdir(output_path):
+        rmtree(output_path)
+
+    copytree(f'{TEMP_PATH}/extracted-files/assets/minecraft/textures',
+             output_path)
     rmtree(f'{TEMP_PATH}/extracted-files/')
 
-    return path
+    return output_path
 
 
-def filter_non_icons(
-        input_path: str,
-        output_path: str = f'{HOME_DIR}/Downloads/mc-textures'):
+def filter_non_icons(input_path: str, output_dir: str = DEFAULT_OUTPUT_DIR):
     """Iterates through item and block icons and deletes other files
 
     Args:
@@ -124,19 +125,16 @@ def filter_non_icons(
         void
     """
 
-    if os.path.isdir(output_path):
-        rmtree(output_path)
-    else:
-        os.mkdir(output_path)
+    make_dir(output_dir, do_delete_prev=True)
 
-    copytree(f'{input_path}/block', f'{output_path}/block')
-    copytree(f'{input_path}/item', f'{output_path}/item')
+    copytree(f'{input_path}/block', f'{output_dir}/block')
+    copytree(f'{input_path}/item', f'{output_dir}/item')
     rmtree(TEMP_PATH)
 
-    return output_path
+    return output_dir
 
 
-def scale_icons(path: str, scale_factor: int = 100):
+def scale_icons(path: str, scale_factor: int = 100, do_merge: bool = True):
     """Scales images within a directory by a factor
 
     Args:
@@ -147,19 +145,19 @@ def scale_icons(path: str, scale_factor: int = 100):
         string: path of the scaled icons
     """
 
+    if do_merge:
+        merge_dirs(path, path)
+
     for subdir, _, files in os.walk(path):
-        if len(files) != 0:
-            print(
-                f"* {len(files)} {os.path.basename(subdir)} textures are being resized..."
-            )
+        if len(files) > 0:
+            print_stylized(
+                f"{len(files)} textures are being resized..." if do_merge else
+                f"{len(files)} {os.path.basename(subdir)} are being resized...")
 
-        for file in files:
+        for fil in files:
             f.filter(f'{os.path.abspath(subdir)}', ['.png'])
-            image.scale(f"{os.path.abspath(subdir)}/{file}", scale_factor,
+            image.scale(f"{os.path.abspath(subdir)}/{fil}", scale_factor,
                         scale_factor)
-
-    print(f"""{Fore.GREEN}Completed. You can find the textures on:
-{os.path.abspath(path)}{Fore.WHITE}.""")
 
     return path
 
@@ -172,13 +170,17 @@ def merge_dirs(input_dir: str, output_dir: str):
         input_dir (string): directory in which there are subdirectories 'block' and 'item'
         output_dir (string): directory in which the files will be merged into
     """
+    print_stylized("Merging block and item textures to a single directory...")
     copytree(f'{input_dir}/block', output_dir, dirs_exist_ok=True)
     rmtree(f'{input_dir}/block')
     copytree(f'{input_dir}/item', output_dir, dirs_exist_ok=True)
     rmtree(f'{input_dir}/item')
 
 
-def get_icons(version, output_dir=f'{HOME_DIR}/Downloads', scale_factor=1):
+def get_icons(version_type: VersionType = VersionType.RELEASE,
+              output_dir=DEFAULT_OUTPUT_DIR,
+              scale_factor=1,
+              do_merge=True):
     """Easily extract, filter, and scale item and block icons.
 
     Args:
@@ -187,25 +189,22 @@ def get_icons(version, output_dir=f'{HOME_DIR}/Downloads', scale_factor=1):
         scale_factor (int, optional): factor that will be used to scale the icons. Defaults to 1.
     """
 
-    extracted = extract_textures(version)
-    filtered = filter_non_icons(extracted, f'{output_dir}/{version}_textures')
-    scaled = scale_icons(filtered, scale_factor)
-    merge_dirs(scaled, scaled)
+    print(f'\n{Fore.CYAN}TEXTURE MINER{Fore.RESET}')
+    latest_version = get_latest_version(version_type)
+    assets = download_client_jar(latest_version)
+    extracted = extract_textures(assets)
+    filtered = filter_non_icons(extracted, f'{output_dir}/{latest_version}')
+    scale_icons(filtered, scale_factor, do_merge)
+
+    output_dir = os.path.abspath(filtered).replace('\\', '/')
+    print(
+        f"{Fore.GREEN}Completed. You can find the textures on:\n{output_dir}{Fore.RESET}\n"
+    )
 
 
 def main():
-    """
-    Main function
-
-    Args:
-        void
-
-    Returns:
-        void
-    """
-
-    get_icons(get_latest_stable(), scale_factor=100)
-    get_icons(get_latest_snapshot(), scale_factor=100)
+    get_icons(VersionType.SNAPSHOT, scale_factor=100)
+    get_icons(VersionType.RELEASE, scale_factor=100)
 
 
 if __name__ == '__main__':
