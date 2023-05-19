@@ -76,7 +76,7 @@ def get_version_manifest() -> dict:
         dict: version manifest
     """
     return requests.get(
-        'https://launchermeta.mojang.com/mc/game/version_manifest.json',
+        'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json',
         timeout=10).json() if VERSION_MANIFEST is None else VERSION_MANIFEST
 
 
@@ -255,8 +255,8 @@ def get_icons(version_type: VersionType = VersionType.RELEASE,
 
 
 def main():
-    get_icons(VersionType.RELEASE, scale_factor=1)
-    get_icons(VersionType.EXPERIMENTAL, scale_factor=1)
+    get_icons(VersionType.RELEASE, scale_factor=100)
+    get_icons(VersionType.EXPERIMENTAL, scale_factor=100)
 
 
 if __name__ == '__main__':
