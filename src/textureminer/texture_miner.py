@@ -196,6 +196,9 @@ def scale_textures(path: str,
     if do_merge:
         merge_dirs(path, path)
 
+    if scale_factor == 1:
+        return path
+
     for subdir, _, files in os.walk(path):
         if len(files) > 0:
             print_stylized(
