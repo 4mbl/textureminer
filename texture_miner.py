@@ -6,6 +6,7 @@ import tempfile
 from forfiles import image, file as f
 from colorama import Fore, Back, Style
 
+HOME_DIR = os.path.expanduser('~')
 TEMP_PATH = f"{tempfile.gettempdir()}/texture_miner".replace("\\", "/")
 VERSIONS_PATH = f"{os.path.expanduser('~')}/AppData/Roaming/.minecraft/versions"
 
@@ -128,8 +129,8 @@ def filter_non_icons(
     else:
         os.mkdir(output_path)
 
-    copytree(f"{input_path}/block", f"{output_path}/block")
-    copytree(f"{input_path}/item", f"{output_path}/item")
+    copytree(f'{input_path}/block', f'{output_path}/block')
+    copytree(f'{input_path}/item', f'{output_path}/item')
     rmtree(TEMP_PATH)
 
     return output_path
@@ -153,7 +154,7 @@ def scale_icons(path: str, scale_factor: int = 100):
             )
 
         for file in files:
-            f.filter(f"{os.path.abspath(subdir)}", [".png"])
+            f.filter(f'{os.path.abspath(subdir)}', ['.png'])
             image.scale(f"{os.path.abspath(subdir)}/{file}", scale_factor,
                         scale_factor)
 
@@ -171,10 +172,10 @@ def merge_dirs(input_dir: str, output_dir: str):
         input_dir (string): directory in which there are subdirectories 'block' and 'item'
         output_dir (string): directory in which the files will be merged into
     """
-    copytree(f"{input_dir}/block", output_dir, dirs_exist_ok=True)
-    rmtree(f"{input_dir}/block")
-    copytree(f"{input_dir}/item", output_dir, dirs_exist_ok=True)
-    rmtree(f"{input_dir}/item")
+    copytree(f'{input_dir}/block', output_dir, dirs_exist_ok=True)
+    rmtree(f'{input_dir}/block')
+    copytree(f'{input_dir}/item', output_dir, dirs_exist_ok=True)
+    rmtree(f'{input_dir}/item')
 
 
 def get_icons(version,
@@ -189,7 +190,7 @@ def get_icons(version,
     """
 
     extracted = extract_textures(version)
-    filtered = filter_non_icons(extracted, f"{output_dir}/{version}_textures")
+    filtered = filter_non_icons(extracted, f'{output_dir}/{version}_textures')
     scaled = scale_icons(filtered, scale_factor)
     merge_dirs(scaled, scaled)
 
