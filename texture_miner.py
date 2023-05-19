@@ -7,8 +7,8 @@ from forfiles import image, file as f
 from colorama import Fore, Back, Style
 
 HOME_DIR = os.path.expanduser('~')
-TEMP_PATH = f"{tempfile.gettempdir()}/texture_miner".replace("\\", "/")
-VERSIONS_PATH = f"{os.path.expanduser('~')}/AppData/Roaming/.minecraft/versions"
+TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
+VERSIONS_PATH = f'{HOME_DIR}/AppData/Roaming/.minecraft/versions'
 
 
 def make_temp_dir():
@@ -35,7 +35,7 @@ def get_latest_stable():
 
     stable_versions = []
     for version in versions:
-        result = re.findall(r"[0-9]\.[0-9]+\.?[0-9]+?$", version)
+        result = re.findall(r'[0-9]\.[0-9]+\.?[0-9]+?$', version)
         if result:
             stable_versions.append(result)
 
@@ -60,7 +60,7 @@ def get_latest_snapshot():
 
     snapshots = []
     for version in versions:
-        result = re.findall("[0-9]{2}w[0-9]{2}[a-z]", version)
+        result = re.findall('[0-9]{2}w[0-9]{2}[a-z]', version)
         if result:
             snapshots.append(result[0])
 
@@ -87,33 +87,33 @@ def extract_textures(version: str,
     if os.path.isdir(path):
         rmtree(path)
 
-    if os.path.isdir(f"{TEMP_PATH}/version-files"):
-        rmtree(f"{TEMP_PATH}/version-files")
+    if os.path.isdir(f'{TEMP_PATH}/version-files'):
+        rmtree(f'{TEMP_PATH}/version-files')
 
     # %APPDATA%\.minecraft
     copytree(
-        f"{os.path.expanduser('~')}/AppData/Roaming/.minecraft/versions/{version}/",
-        f"{TEMP_PATH}/version-files",
+        f'{HOME_DIR}/AppData/Roaming/.minecraft/versions/{version}/',
+        f'{TEMP_PATH}/version-files',
     )
 
-    jar_path = f"{TEMP_PATH}/version-files/{version}.jar"
+    jar_path = f'{TEMP_PATH}/version-files/{version}.jar'
 
     print(f"* {len(ZipFile(jar_path).namelist())} files are being extracted...")
 
     # extract the .jar file to a different directory
-    with ZipFile(f"{TEMP_PATH}/version-files/{version}.jar", "r") as zip_object:
-        zip_object.extractall(f"{TEMP_PATH}/extracted-files/")
-    rmtree(f"{TEMP_PATH}/version-files/")
+    with ZipFile(f'{TEMP_PATH}/version-files/{version}.jar', 'r') as zip_object:
+        zip_object.extractall(f'{TEMP_PATH}/extracted-files/')
+    rmtree(f'{TEMP_PATH}/version-files/')
 
-    copytree(f"{TEMP_PATH}/extracted-files/assets/minecraft/textures", path)
-    rmtree(f"{TEMP_PATH}/extracted-files/")
+    copytree(f'{TEMP_PATH}/extracted-files/assets/minecraft/textures', path)
+    rmtree(f'{TEMP_PATH}/extracted-files/')
 
     return path
 
 
 def filter_non_icons(
         input_path: str,
-        output_path: str = f"{os.path.expanduser('~')}/Downloads/mc-textures"):
+        output_path: str = f'{HOME_DIR}/Downloads/mc-textures'):
     """Iterates through item and block icons and deletes other files
 
     Args:
@@ -178,9 +178,7 @@ def merge_dirs(input_dir: str, output_dir: str):
     rmtree(f'{input_dir}/item')
 
 
-def get_icons(version,
-              output_dir=f"{os.path.expanduser('~')}/Downloads",
-              scale_factor=1):
+def get_icons(version, output_dir=f'{HOME_DIR}/Downloads', scale_factor=1):
     """Easily extract, filter, and scale item and block icons.
 
     Args:
@@ -210,5 +208,5 @@ def main():
     get_icons(get_latest_snapshot(), scale_factor=100)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
