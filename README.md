@@ -37,7 +37,7 @@ It's also recommended to use a [virtual environment](https://docs.python.org/3/l
 Use pip to install `texture_miner`.
 
 ```sh
-python3 -m pip install --upgrade texture_miner # TODO: replace with actual package name
+python3 -m pip install --upgrade textureminer
 ```
 
 Install the required libraried as listed on [requirements.txt](./requirements.txt).
@@ -51,7 +51,7 @@ python3 -m pip install -r requirements.txt
 To download and scale textures for the most recent stable release do the following.
 
 ```python
-# TODO: add usage examples
+python3 -m textureminer
 ```
 
 
