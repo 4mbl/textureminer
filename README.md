@@ -40,7 +40,7 @@ Use pip to install `texture_miner`.
 python3 -m pip install --upgrade textureminer
 ```
 
-Install the required libraried as listed on [requirements.txt](./requirements.txt).
+Install the required libraries as listed on [requirements.txt](./requirements.txt).
 
 ```shell
 python3 -m pip install -r requirements.txt
