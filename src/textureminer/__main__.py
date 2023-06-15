@@ -25,9 +25,11 @@ def get_textures(
     """
 
     if edition == EditionType.JAVA:
+        tabbed_print(texts.EDITION_USING_X.format(edition=edition.value))
         return java.get_textures(*args, **kwargs)
 
     if edition == EditionType.BEDROCK:
+        tabbed_print(texts.EDITION_USING_X.format(edition=edition.value))
         return bedrock.get_textures(*args, **kwargs)
     return None
 

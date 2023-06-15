@@ -156,6 +156,8 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
         version = version_or_type
     else:
         version = get_latest_version(version_type)
+
+    tabbed_print(texts.VERSION_USING_X.format(version=version))
     assets = download_client_jar(version)
     extracted = extract_textures(assets)
     filtered = filter_unwanted(extracted,

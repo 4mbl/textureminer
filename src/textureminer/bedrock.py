@@ -155,6 +155,7 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
         version = get_latest_version(version_type, asset_dir)
 
     change_repo_version(asset_dir, version)
+    tabbed_print(texts.VERSION_USING_X.format(version=version))
 
     filtered = filter_unwanted(asset_dir,
                                f'{output_dir}/bedrock/{version[1:]}',
