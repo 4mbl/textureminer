@@ -52,8 +52,8 @@ def cli():
 
     if len(args) == 0:
         tabbed_print(texts.EDITION_USING_DEFAULT)
-        return get_textures(DEFAULT_EDITION,
-                            DEFAULT_VERSION,
+        return get_textures(edition=DEFAULT_EDITION,
+                            version_or_type=DEFAULT_VERSION,
                             scale_factor=DEFAULT_SCALE_FACTOR)
 
     version = args[0].lower()
@@ -72,26 +72,27 @@ def cli():
 
     if len(args) == 1:
         tabbed_print(texts.EDITION_USING_DEFAULT)
-        return get_textures(version,
-                            DEFAULT_EDITION,
+        return get_textures(version_or_type=version,
+                            edition=DEFAULT_EDITION,
                             scale_factor=DEFAULT_SCALE_FACTOR)
 
     edition = args[1].lower()
 
     if edition == EditionType.JAVA.value.lower() and java.validate_version(
             version):
-        return get_textures(version,
-                            EditionType.JAVA,
+        return get_textures(version_or_type=version,
+                            edition=EditionType.JAVA,
                             scale_factor=DEFAULT_SCALE_FACTOR)
     if edition == EditionType.BEDROCK.value.lower(
     ) and bedrock.validate_version(version):
-        return get_textures(version,
-                            EditionType.BEDROCK,
+        return get_textures(version_or_type=version,
+                            edition=EditionType.BEDROCK,
                             scale_factor=DEFAULT_SCALE_FACTOR)
 
     tabbed_print(texts.INVALID_COMBINATION)
     tabbed_print(texts.EDITION_USING_DEFAULT)
-    return get_textures(DEFAULT_VERSION, DEFAULT_EDITION)
+    return get_textures(version_or_type=DEFAULT_VERSION,
+                        edition=DEFAULT_EDITION)
 
 
 cli()

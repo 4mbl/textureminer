@@ -102,7 +102,7 @@ def validate_version(version: str,
         bool: whether the version is valid
     """
 
-    if edition == EditionType.BEDROCK:
+    if edition == EditionType.BEDROCK.value:
         if version[0] != 'v':
             version = f'v{version}'
         if version_type is None:
@@ -113,7 +113,7 @@ def validate_version(version: str,
         if version_type == VersionType.EXPERIMENTAL:
             return re.match(REGEX_BEDROCK_PREVIEW, version)
 
-    elif edition == EditionType.JAVA:
+    if edition == EditionType.JAVA.value:
         if version_type is None:
             return re.match(REGEX_JAVA_RELEASE, version) or re.match(
                 REGEX_JAVA_SNAPSHOT, version) or re.match(
@@ -124,6 +124,18 @@ def validate_version(version: str,
         if version_type == VersionType.EXPERIMENTAL:
             return re.match(REGEX_JAVA_SNAPSHOT, version) or re.match(
                 REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version)
+
+    is_valid = re.match(REGEX_BEDROCK_PREVIEW, version) or re.match(
+        REGEX_BEDROCK_RELEASE,
+        version) or re.match(REGEX_JAVA_RELEASE, version) or re.match(
+            REGEX_JAVA_SNAPSHOT, version) or re.match(
+                REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version)
+
+    if is_valid:
+        return True
+
+    if version[0] != 'v':
+        version = f'v{version}'
 
     return re.match(REGEX_BEDROCK_PREVIEW, version) or re.match(
         REGEX_BEDROCK_RELEASE,
