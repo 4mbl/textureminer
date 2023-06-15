@@ -2,8 +2,8 @@ from enum import Enum
 import os
 from shutil import copytree, rmtree
 import tempfile
-from colorama import Fore
 from forfiles import image, file as f
+from textureminer import texts
 
 HOME_DIR = os.path.expanduser('~').replace('\\', '/')
 TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
@@ -37,7 +37,7 @@ class EditionType(Enum):
 def print_stylized(text):
     """Prints a message to the console with cyan text and a bullet point.
     """
-    print(f"{Fore.CYAN}{' '*4}* {Fore.RESET}{text}")
+    print(f"{texts.STYLED_TAB}{text}")
 
 
 def make_dir(path: str, do_delete_prev: bool = False):
@@ -95,7 +95,7 @@ def merge_dirs(input_dir: str, output_dir: str):
     block_folder = f'{input_dir}/blocks'
     item_folder = f'{input_dir}/items'
 
-    print_stylized("Merging block and item textures to a single directory...")
+    print_stylized(texts.TEXTURES_MERGING)
     copytree(block_folder, output_dir, dirs_exist_ok=True)
     rmtree(block_folder)
     copytree(item_folder, output_dir, dirs_exist_ok=True)
@@ -118,13 +118,8 @@ def scale_textures(path: str,
 
     if do_merge:
         merge_dirs(path, path)
-
-    print_stylized("Textures are being filtered...")
+    print_stylized(texts.TEXTURES_FILTERING)
     for subdir, _, files in os.walk(path):
-        if not do_merge:
-            print_stylized(
-                f"{os.path.basename(subdir).capitalize()} textures are being filtered..."
-            )
         f.filter(f'{os.path.abspath(subdir)}', ['.png'])
 
         if scale_factor == 1:
@@ -132,9 +127,9 @@ def scale_textures(path: str,
 
         if len(files) > 0:
             print_stylized(
-                f"{len(files)} textures are being resized..." if do_merge else
-                f"{len(files)} {os.path.basename(subdir)} textures are being resized..."
-            )
+                texts.TEXTURES_RESIZING_AMOUNT.format(len(files))
+                if do_merge else texts.TEXTURES_RESISING_AMOUNT_IN_DIR.
+                format(len(files), os.path.basename(subdir)))
 
         for fil in files:
             image.scale(f"{os.path.abspath(subdir)}/{fil}", scale_factor,

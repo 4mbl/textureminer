@@ -5,8 +5,8 @@ from shutil import rmtree
 import stat
 import subprocess
 from typing import Tuple
-from colorama import Fore
 from textureminer.common import VersionType, filter_unwanted, print_stylized, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH
+from textureminer import texts
 
 REPO_URL = 'https://github.com/Mojang/bedrock-samples'
 REGEX_STABLE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
@@ -97,7 +97,7 @@ def get_latest_version(version_type: VersionType, repo_dir) -> str:
 
 def clone_repo() -> str:
 
-    print_stylized("Downloading assets...")
+    print_stylized(texts.FILE_DOWNLOADING)
 
     repo_dir = f'{TEMP_PATH}/bedrock-samples/'
 
@@ -111,9 +111,7 @@ def clone_repo() -> str:
                        stdout=subprocess.DEVNULL,
                        stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as err:
-        print(
-            f"The command failed with return code {err.returncode}: {err.stderr}"
-        )
+        print(texts.ERROR_COMMAND_FAILED.format(err.returncode, err.stderr))
 
     return repo_dir
 
@@ -131,11 +129,14 @@ def change_repo_version(repo_dir,
                         fetch_tags: bool = True) -> Tuple[str, str]:
     if fetch_tags:
         update_tags(repo_dir)
-    subprocess.run(f'git checkout tags/v{version}',
-                   check=False,
-                   cwd=repo_dir,
-                   stdout=subprocess.DEVNULL,
-                   stderr=subprocess.STDOUT)
+    try:
+        subprocess.run(f'git checkout tags/v{version}',
+                       check=False,
+                       cwd=repo_dir,
+                       stdout=subprocess.DEVNULL,
+                       stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as err:
+        print(texts.ERROR_COMMAND_FAILED.format(err.returncode, err.stderr))
 
 
 def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
@@ -152,11 +153,11 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
     Returns:
         string: path of the final textures
     """
-    print(f'\n{Fore.CYAN}TEXTURE MINER{Fore.RESET}')
+    print(texts.TITLE)
 
     if isinstance(version_or_type,
                   str) and not validate_version(version_or_type):
-        print('invalid version')
+        print(texts.VERSION_INVALID.format(version_or_type))
         return
 
     version_type = version_or_type if isinstance(version_or_type,
@@ -176,9 +177,7 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
     scale_textures(filtered, scale_factor, do_merge)
 
     output_dir = os.path.abspath(filtered).replace('\\', '/')
-    print(
-        f"{Fore.GREEN}Completed. You can find the textures on:\n{output_dir}{Fore.RESET}\n"
-    )
+    print(texts.COMPLETED.format(output_dir=output_dir))
     return output_dir
 
 

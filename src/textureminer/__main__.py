@@ -1,6 +1,6 @@
 import sys
 from textureminer.common import EditionType, VersionType
-from textureminer import java, bedrock
+from textureminer import java, bedrock, texts
 
 
 def mine(version: str = None,
@@ -14,7 +14,7 @@ def mine(version: str = None,
     elif edition == EditionType.BEDROCK:
         bedrock.get_textures(version_or_type=version, scale_factor=scale_factor)
     else:
-        print('Invalid edition')
+        print(texts.EDITION_INVALID)
 
 
 def main():
@@ -28,23 +28,21 @@ def main():
             '-h'
             'help',
     ]:
-        print(
-            '\n\tpy -m textureminer <version> <edition>\n\te.g.\n\tpy -m textureminer 1.17 java\n\tpt -m textureminer 1.17 bedrock\n\tdefaults to java if no edition is specified, and defaults to latest version if no version is specified'
-        )
+        print(texts.COMMAND_SYNTAX)
         return
 
     if len(args) == 0:
-        print('defaulting to latest java version')
+        print(texts.EDITION_USING_DEFAULT)
     elif len(args) == 1:
         version = args[0].lower()
-        print('defaulting to java edition')
+        print(texts.EDITION_USING_DEFAULT)
     elif len(args) <= 2:
         if args[1].lower() == EditionType.JAVA.value:
             edition = EditionType.JAVA
         elif args[1].lower() == EditionType.BEDROCK.value:
             edition = EditionType.BEDROCK
         else:
-            print('invalid edition')
+            print(texts.EDITION_INVALID)
 
     mine(version, edition, scale_factor=100)
 

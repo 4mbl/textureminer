@@ -3,8 +3,8 @@ import re
 from shutil import copytree, rmtree
 from zipfile import ZipFile
 import urllib.request
-from colorama import Fore
 import requests
+from textureminer import texts
 from textureminer.common import DEFAULT_OUTPUT_DIR, EditionType, VersionType, filter_unwanted, make_dir, print_stylized, TEMP_PATH, scale_textures
 
 VERSION_MANIFEST = None
@@ -56,11 +56,12 @@ def get_latest_version(version_type: VersionType) -> str:
     Returns:
         str: latest version as a string
     """
-    print_stylized(f"Finding latest {version_type.value}...")
+    print_stylized(texts.VERSION_LATEST_FINDING.format(version_type.value))
     latest_version = get_version_manifest()['latest'][version_type.value]
     if not validate_version(version_type, latest_version):
-        raise Exception(f"Invalid version number ({latest_version}).")
-    print_stylized(f"Latest {version_type.value} is {latest_version}.")
+
+        raise Exception(texts.VERSION_INVALID.format(latest_version))
+    print_stylized(texts.VERSION_LATEST_IS.format(version_type, latest_version))
     return latest_version
 
 
@@ -89,7 +90,7 @@ def download_client_jar(
     client_jar_url = json['downloads']['client']['url']
 
     make_dir(download_dir)
-    print_stylized("Downloading assets...")
+    print_stylized(texts.FILE_DOWNLOADING)
     urllib.request.urlretrieve(client_jar_url, f'{download_dir}/{version}.jar')
     return f'{download_dir}/{version}.jar'
 
@@ -109,7 +110,7 @@ def extract_textures(
 
     with ZipFile(input_path, 'r') as zip_object:
         file_amount = len(zip_object.namelist())
-        print_stylized(f"{file_amount} files are being extracted...")
+        print_stylized(texts.FILES_EXTRACTING.format(file_amount))
         zip_object.extractall(f'{TEMP_PATH}/extracted-files/')
     rmtree(f'{TEMP_PATH}/version-jars/')
 
@@ -138,7 +139,7 @@ def get_textures(version_type: VersionType = VersionType.RELEASE,
         string: path of the final textures
     """
 
-    print(f'\n{Fore.CYAN}TEXTURE MINER{Fore.RESET}')
+    print(texts.TITLE)
     latest_version = get_latest_version(version_type)
     assets = download_client_jar(latest_version)
     extracted = extract_textures(assets)
@@ -148,9 +149,7 @@ def get_textures(version_type: VersionType = VersionType.RELEASE,
     scale_textures(filtered, scale_factor, do_merge)
 
     output_dir = os.path.abspath(filtered).replace('\\', '/')
-    print(
-        f"{Fore.GREEN}Completed. You can find the textures on:\n{output_dir}{Fore.RESET}\n"
-    )
+    print(texts.COMPLETED.format(output_dir=output_dir))
     return output_dir
 
 
