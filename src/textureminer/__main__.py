@@ -1,5 +1,5 @@
 import sys
-from textureminer.common import EditionType, VersionType, print_stylized
+from textureminer.common import EditionType, VersionType, tabbed_print
 from textureminer import java, bedrock, texts
 
 
@@ -11,13 +11,13 @@ def mine(version: str = None,
 
     if version is None:
         if edition == EditionType.JAVA or edition is None:
-            print_stylized(
+            tabbed_print(
                 texts.EDITION_USING_X.format(
                     edition=EditionType.JAVA.value.capitalize()))
             java.get_textures(VersionType.RELEASE, scale_factor=scale_factor)
             return
         if edition == EditionType.BEDROCK:
-            print_stylized(
+            tabbed_print(
                 texts.EDITION_USING_X.format(
                     edition=EditionType.BEDROCK.value.capitalize()))
             bedrock.get_textures(VersionType.RELEASE, scale_factor=scale_factor)
@@ -27,21 +27,21 @@ def mine(version: str = None,
     if version:
         if edition == EditionType.JAVA or edition is None and java.validate_version(
                 version):
-            print_stylized(
+            tabbed_print(
                 texts.EDITION_USING_X.format(
                     edition=EditionType.JAVA.value.capitalize()))
             version_type = java.get_version_type(version)
-            print_stylized(
+            tabbed_print(
                 texts.VERSION_USING_X.format(edition=version_type.value))
             java.get_textures(version_or_type=version,
                               scale_factor=scale_factor)
             return
         if edition == EditionType.BEDROCK and bedrock.validate_version(version):
-            print_stylized(
+            tabbed_print(
                 texts.EDITION_USING_X.format(
                     edition=EditionType.BEDROCK.value.capitalize()))
             version_type = bedrock.get_version_type(version)
-            print_stylized(
+            tabbed_print(
                 texts.VERSION_USING_X.format(edition=version_type.value))
             bedrock.get_textures(version_or_type=version,
                                  scale_factor=scale_factor)
@@ -65,10 +65,10 @@ def main():
         return
 
     if len(args) == 0:
-        print_stylized(texts.EDITION_USING_DEFAULT)
+        tabbed_print(texts.EDITION_USING_DEFAULT)
     elif len(args) == 1:
         version = args[0].lower()
-        print_stylized(texts.EDITION_USING_DEFAULT)
+        tabbed_print(texts.EDITION_USING_DEFAULT)
     elif len(args) >= 2:
         if args[1].lower() == EditionType.JAVA.value.lower():
             edition = EditionType.JAVA

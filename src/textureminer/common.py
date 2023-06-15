@@ -2,6 +2,7 @@ from enum import Enum
 import os
 import re
 from shutil import copytree, rmtree
+import stat
 import tempfile
 from forfiles import image, file as f
 from textureminer import texts
@@ -43,7 +44,17 @@ class EditionType(Enum):
     """
 
 
-def print_stylized(text):
+def on_rm_error(func, path, exc_info):
+    os.chmod(path, stat.S_IWRITE)
+    os.unlink(path)
+
+
+def rm_if_exists(path: str):
+    if os.path.exists(path):
+        rmtree(path, onerror=on_rm_error)
+
+
+def tabbed_print(text):
     """Prints a message to the console with cyan text and a bullet point.
     """
     print(f"{texts.STYLED_TAB}{text}")
@@ -54,6 +65,7 @@ def make_dir(path: str, do_delete_prev: bool = False):
 
     Args:
         path (str): path of the directory that will be created
+        do_delete_prev (bool): whether to delete the previous directory if it exists
     """
     if do_delete_prev and os.path.isdir(path):
         rmtree(path)
@@ -136,7 +148,7 @@ def merge_dirs(input_dir: str, output_dir: str):
     block_folder = f'{input_dir}/blocks'
     item_folder = f'{input_dir}/items'
 
-    print_stylized(texts.TEXTURES_MERGING)
+    tabbed_print(texts.TEXTURES_MERGING)
     copytree(block_folder, output_dir, dirs_exist_ok=True)
     rmtree(block_folder)
     copytree(item_folder, output_dir, dirs_exist_ok=True)
@@ -159,7 +171,7 @@ def scale_textures(path: str,
 
     if do_merge:
         merge_dirs(path, path)
-    print_stylized(texts.TEXTURES_FILTERING)
+    tabbed_print(texts.TEXTURES_FILTERING)
     for subdir, _, files in os.walk(path):
         f.filter(f'{os.path.abspath(subdir)}', ['.png'])
 
@@ -167,7 +179,7 @@ def scale_textures(path: str,
             continue
 
         if len(files) > 0:
-            print_stylized(
+            tabbed_print(
                 texts.TEXTURES_RESIZING_AMOUNT.format(texture_amount=len(files))
                 if do_merge else texts.TEXTURES_RESISING_AMOUNT_IN_DIR.
                 format(len(files), os.path.basename(subdir)))

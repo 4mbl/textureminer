@@ -5,7 +5,7 @@ from zipfile import ZipFile
 import urllib.request
 import requests
 from textureminer import texts
-from textureminer.common import DEFAULT_OUTPUT_DIR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, make_dir, print_stylized, TEMP_PATH, scale_textures, validate_version
+from textureminer.common import DEFAULT_OUTPUT_DIR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, make_dir, tabbed_print, TEMP_PATH, scale_textures, validate_version
 
 VERSION_MANIFEST = None
 
@@ -44,7 +44,7 @@ def get_latest_version(version_type: VersionType) -> str:
     Returns:
         str: latest version as a string
     """
-    print_stylized(
+    tabbed_print(
         texts.VERSION_LATEST_FINDING.format(version_type=version_type.value))
     latest_version = get_version_manifest()['latest'][version_type.value]
     if not validate_version(
@@ -52,7 +52,7 @@ def get_latest_version(version_type: VersionType) -> str:
 
         raise Exception(
             texts.VERSION_INVALID.format(version="" + latest_version))
-    print_stylized(
+    tabbed_print(
         texts.VERSION_LATEST_IS.format(version_type=version_type.value,
                                        latest_version="" + latest_version))
     return latest_version
@@ -83,7 +83,7 @@ def download_client_jar(
     client_jar_url = json['downloads']['client']['url']
 
     make_dir(download_dir)
-    print_stylized(texts.FILE_DOWNLOADING)
+    tabbed_print(texts.FILE_DOWNLOADING)
     urllib.request.urlretrieve(client_jar_url, f'{download_dir}/{version}.jar')
     return f'{download_dir}/{version}.jar'
 
@@ -103,7 +103,7 @@ def extract_textures(
 
     with ZipFile(input_path, 'r') as zip_object:
         file_amount = len(zip_object.namelist())
-        print_stylized(texts.FILES_EXTRACTING.format(file_amount=file_amount))
+        tabbed_print(texts.FILES_EXTRACTING.format(file_amount=file_amount))
         zip_object.extractall(f'{TEMP_PATH}/extracted-files/')
     rmtree(f'{TEMP_PATH}/version-jars/')
 

@@ -1,24 +1,11 @@
-from enum import Enum
 import os
 import re
-from shutil import rmtree
-import stat
 import subprocess
 from typing import Tuple
-from textureminer.common import REGEX_BEDROCK_PREVIEW, REGEX_BEDROCK_RELEASE, EditionType, VersionType, filter_unwanted, print_stylized, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH, validate_version
+from textureminer.common import REGEX_BEDROCK_PREVIEW, REGEX_BEDROCK_RELEASE, EditionType, VersionType, filter_unwanted, rm_if_exists, tabbed_print, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH, validate_version
 from textureminer import texts
 
 REPO_URL = 'https://github.com/Mojang/bedrock-samples'
-
-
-def on_rm_error(func, path, exc_info):
-    os.chmod(path, stat.S_IWRITE)
-    os.unlink(path)
-
-
-def rm_if_exists(path: str):
-    if os.path.exists(path):
-        rmtree(path, onerror=on_rm_error)
 
 
 def get_version_type(version: str) -> VersionType:
@@ -58,7 +45,7 @@ def get_latest_version(version_type: VersionType, repo_dir) -> str:
         if validate_version(tag, version_type, edition=EditionType.BEDROCK):
             break
 
-    print_stylized(
+    tabbed_print(
         texts.VERSION_LATEST_IS.format(version_type=version_type.value,
                                        latest_version="" + tag))
     return tag
@@ -66,7 +53,7 @@ def get_latest_version(version_type: VersionType, repo_dir) -> str:
 
 def clone_repo() -> str:
 
-    print_stylized(texts.FILE_DOWNLOADING)
+    tabbed_print(texts.FILE_DOWNLOADING)
 
     repo_dir = f'{TEMP_PATH}/bedrock-samples/'
 
@@ -154,7 +141,8 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
 
 
 def main():
-    get_textures()
+    get_textures(VersionType.RELEASE, scale_factor=100)
+    get_textures(VersionType.EXPERIMENTAL, scale_factor=100)
 
 
 if __name__ == '__main__':
