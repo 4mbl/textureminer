@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 * Java Edition being selected even when Bedrock Edition was specified
+* Capitalization of edition names
 
 ### Removed
 
