@@ -23,6 +23,8 @@ def get_version_type(version: str) -> VersionType:
     if re.match(REGEX_BEDROCK_PREVIEW, version):
         return VersionType.EXPERIMENTAL
 
+    return None
+
 
 def get_latest_version(version_type: VersionType, repo_dir) -> str:
     """Gets the latest version of a certain type.
