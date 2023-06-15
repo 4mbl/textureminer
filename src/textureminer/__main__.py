@@ -9,23 +9,33 @@ def mine(version: str = None,
 
     if version is None:
         if edition == EditionType.JAVA or edition is None:
+            print(texts.EDITION_USING_X.format(edition=EditionType.JAVA))
             java.get_textures(VersionType.RELEASE, scale_factor=scale_factor)
             return
         if edition == EditionType.BEDROCK:
+            print(texts.EDITION_USING_X.format(edition=EditionType.BEDROCK))
             bedrock.get_textures(VersionType.RELEASE, scale_factor=scale_factor)
             return
         print(texts.EDITION_INVALID)
 
     if version:
-        if edition == EditionType.JAVA or edition is None:
+        if edition == EditionType.JAVA or edition is None and java.validate_version(
+                version):
+            print(texts.EDITION_USING_X.format(edition=EditionType.JAVA))
+            version_type = java.get_version_type(version)
+            print(texts.VERSION_USING_X.format(edition=version_type.value))
             java.get_textures(version_or_type=version,
                               scale_factor=scale_factor)
             return
-        if edition == EditionType.BEDROCK:
+        if edition == EditionType.BEDROCK and bedrock.validate_version(version):
+            print(texts.EDITION_USING_X.format(edition=EditionType.BEDROCK))
+            version_type = bedrock.get_version_type(version)
+            print(texts.VERSION_USING_X.format(edition=version_type.value))
             bedrock.get_textures(version_or_type=version,
                                  scale_factor=scale_factor)
             return
         print(texts.EDITION_INVALID)
+        return
 
 
 def main():

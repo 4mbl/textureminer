@@ -5,7 +5,7 @@ from shutil import rmtree
 import stat
 import subprocess
 from typing import Tuple
-from textureminer.common import REGEX_BEDROCK_PREVIEW, REGEX_BEDROCK_STABLE, EditionType, VersionType, filter_unwanted, print_stylized, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH, validate_version
+from textureminer.common import REGEX_BEDROCK_PREVIEW, REGEX_BEDROCK_RELEASE, EditionType, VersionType, filter_unwanted, print_stylized, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH, validate_version
 from textureminer import texts
 
 REPO_URL = 'https://github.com/Mojang/bedrock-samples'
@@ -24,10 +24,10 @@ def rm_if_exists(path: str):
 def get_version_type(version: str) -> VersionType:
     if version[0] != 'v':
         version = f'v{version}'
+    if re.match(REGEX_BEDROCK_RELEASE, version):
+        return VersionType.RELEASE
     if re.match(REGEX_BEDROCK_PREVIEW, version):
         return VersionType.EXPERIMENTAL
-    if re.match(REGEX_BEDROCK_STABLE, version):
-        return VersionType.RELEASE
 
 
 def get_latest_version(version_type: VersionType, repo_dir) -> str:
@@ -52,9 +52,16 @@ def get_latest_version(version_type: VersionType, repo_dir) -> str:
 
     tags = out.stdout.decode('utf-8').splitlines()
 
+    tag = None
+
     for tag in reversed(tags):
         if validate_version(tag, version_type, edition=EditionType.BEDROCK):
-            return tag
+            break
+
+    print_stylized(
+        texts.VERSION_LATEST_IS.format(version_type=version_type.value,
+                                       latest_version="" + tag))
+    return tag
 
 
 def clone_repo() -> str:

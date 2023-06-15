@@ -5,9 +5,19 @@ from zipfile import ZipFile
 import urllib.request
 import requests
 from textureminer import texts
-from textureminer.common import DEFAULT_OUTPUT_DIR, EditionType, VersionType, filter_unwanted, make_dir, print_stylized, TEMP_PATH, scale_textures, validate_version
+from textureminer.common import DEFAULT_OUTPUT_DIR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, make_dir, print_stylized, TEMP_PATH, scale_textures, validate_version
 
 VERSION_MANIFEST = None
+
+
+def get_version_type(version: str) -> VersionType:
+    if version[0] != 'v':
+        version = f'v{version}'
+    if re.match(REGEX_JAVA_RELEASE, version):
+        return VersionType.RELEASE
+    if re.match(REGEX_JAVA_SNAPSHOT, version) or re.match(
+            REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version):
+        return VersionType.EXPERIMENTAL
 
 
 def get_version_manifest() -> dict:
@@ -22,7 +32,7 @@ def get_version_manifest() -> dict:
         timeout=10).json() if VERSION_MANIFEST is None else VERSION_MANIFEST
 
 
-def     get_latest_version(version_type: VersionType) -> str:
+def get_latest_version(version_type: VersionType) -> str:
     """Gets the latest version of a certain type.
 
     Args:

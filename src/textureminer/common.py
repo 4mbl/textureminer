@@ -10,7 +10,7 @@ HOME_DIR = os.path.expanduser('~').replace('\\', '/')
 TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
 DEFAULT_OUTPUT_DIR = f'{HOME_DIR}/Downloads/textures'
 
-REGEX_BEDROCK_STABLE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
+REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
 REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
 
 REGEX_JAVA_SNAPSHOT = r'^[0-9]{2}w[0-9]{2}[a-z]$'
@@ -80,9 +80,9 @@ def validate_version(version: str,
             version = f'v{version}'
         if version_type is None:
             return re.match(REGEX_BEDROCK_PREVIEW, version) or re.match(
-                REGEX_BEDROCK_STABLE, version)
+                REGEX_BEDROCK_RELEASE, version)
         if version_type == VersionType.RELEASE:
-            return re.match(REGEX_BEDROCK_STABLE, version)
+            return re.match(REGEX_BEDROCK_RELEASE, version)
         if version_type == VersionType.EXPERIMENTAL:
             return re.match(REGEX_BEDROCK_PREVIEW, version)
 
