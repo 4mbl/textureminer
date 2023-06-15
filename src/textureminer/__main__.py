@@ -44,7 +44,7 @@ def main():
         else:
             print(texts.EDITION_INVALID)
 
-    mine(version, edition, scale_factor=100)
+    mine(version, edition, scale_factor=1)
 
 
 main()

@@ -127,7 +127,7 @@ def scale_textures(path: str,
 
         if len(files) > 0:
             print_stylized(
-                texts.TEXTURES_RESIZING_AMOUNT.format(len(files))
+                texts.TEXTURES_RESIZING_AMOUNT.format(texture_amount=len(files))
                 if do_merge else texts.TEXTURES_RESISING_AMOUNT_IN_DIR.
                 format(len(files), os.path.basename(subdir)))
 

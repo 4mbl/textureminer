@@ -56,12 +56,15 @@ def get_latest_version(version_type: VersionType) -> str:
     Returns:
         str: latest version as a string
     """
-    print_stylized(texts.VERSION_LATEST_FINDING.format(version_type.value))
+    print_stylized(
+        texts.VERSION_LATEST_FINDING.format(version_type=version_type.value))
     latest_version = get_version_manifest()['latest'][version_type.value]
     if not validate_version(version_type, latest_version):
 
-        raise Exception(texts.VERSION_INVALID.format(latest_version))
-    print_stylized(texts.VERSION_LATEST_IS.format(version_type, latest_version))
+        raise Exception(texts.VERSION_INVALID.format(version=latest_version))
+    print_stylized(
+        texts.VERSION_LATEST_IS.format(version_type=version_type.value,
+                                       latest_version=latest_version))
     return latest_version
 
 
@@ -110,7 +113,7 @@ def extract_textures(
 
     with ZipFile(input_path, 'r') as zip_object:
         file_amount = len(zip_object.namelist())
-        print_stylized(texts.FILES_EXTRACTING.format(file_amount))
+        print_stylized(texts.FILES_EXTRACTING.format(file_amount=file_amount))
         zip_object.extractall(f'{TEMP_PATH}/extracted-files/')
     rmtree(f'{TEMP_PATH}/version-jars/')
 

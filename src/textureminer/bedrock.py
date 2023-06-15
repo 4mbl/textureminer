@@ -111,7 +111,9 @@ def clone_repo() -> str:
                        stdout=subprocess.DEVNULL,
                        stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as err:
-        print(texts.ERROR_COMMAND_FAILED.format(err.returncode, err.stderr))
+        print(
+            texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode,
+                                              error_msg=err.stderr))
 
     return repo_dir
 
@@ -136,7 +138,9 @@ def change_repo_version(repo_dir,
                        stdout=subprocess.DEVNULL,
                        stderr=subprocess.STDOUT)
     except subprocess.CalledProcessError as err:
-        print(texts.ERROR_COMMAND_FAILED.format(err.returncode, err.stderr))
+        print(
+            texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode,
+                                              error_msg=err.stderr))
 
 
 def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
@@ -157,7 +161,7 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
 
     if isinstance(version_or_type,
                   str) and not validate_version(version_or_type):
-        print(texts.VERSION_INVALID.format(version_or_type))
+        print(texts.VERSION_INVALID.format(version=version_or_type))
         return
 
     version_type = version_or_type if isinstance(version_or_type,
