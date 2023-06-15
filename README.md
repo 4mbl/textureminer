@@ -48,10 +48,19 @@ python3 -m pip install -r requirements.txt
 
 ## Usage
 
-To download and scale textures for the most recent stable release do the following.
+To download and scale textures for the most recent stable Java release do the following.
 
 ```python
 python3 -m textureminer
+```
+
+You can also specify the version and edition.
+
+```python
+python3 -m textureminer <version> <edition>
+
+# for example
+python3 -m textureminer 1.20 java
 ```
 
 
