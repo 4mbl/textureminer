@@ -45,11 +45,23 @@ class EditionType(Enum):
 
 
 def on_rm_error(func, path, exc_info):
+    """Removes read-only files on Windows.
+
+    Args:
+        func (function): Function that raised the exception
+        path (str): Path of the file that couldn't be deleted
+        exc_info (exception): Exception info
+    """
     os.chmod(path, stat.S_IWRITE)
     os.unlink(path)
 
 
 def rm_if_exists(path: str):
+    """Removes a file or directory if it exists.
+
+    Args:
+        path (str): path of the file or directory that will be removed
+    """
     if os.path.exists(path):
         rmtree(path, onerror=on_rm_error)
 
@@ -76,12 +88,13 @@ def make_dir(path: str, do_delete_prev: bool = False):
 
 def validate_version(version: str,
                      version_type: VersionType = None,
-                     edition: EditionType = None):
+                     edition: EditionType = None) -> bool:
     """Validates a version string based on the version type using regex.
 
     Args:
-        version_type (VersionType):
-        version (str):
+        version (str): version string to validate
+        version_type (VersionType): type of version, defaults to None, which will validate any version
+        edition (EditionType): type of edition, defaults to None, which will validate any version
 
     Returns:
         bool: whether the version is valid
@@ -91,18 +104,29 @@ def validate_version(version: str,
         if version[0] != 'v':
             version = f'v{version}'
         if version_type is None:
-            return re.match(REGEX_BEDROCK_PREVIEW, version) or re.match(
-                REGEX_BEDROCK_RELEASE, version)
+            return re.match(REGEX_BEDROCK_RELEASE, version) or re.match(
+                REGEX_BEDROCK_PREVIEW, version)
         if version_type == VersionType.RELEASE:
             return re.match(REGEX_BEDROCK_RELEASE, version)
         if version_type == VersionType.EXPERIMENTAL:
             return re.match(REGEX_BEDROCK_PREVIEW, version)
 
     elif edition == EditionType.JAVA:
+        if version_type is None:
+            return re.match(REGEX_JAVA_RELEASE, version) or re.match(
+                REGEX_JAVA_SNAPSHOT, version) or re.match(
+                    REGEX_JAVA_PRE, version) or re.match(
+                        REGEX_JAVA_RC, version)
         if version_type == VersionType.RELEASE:
             return re.match(REGEX_JAVA_RELEASE, version)
         if version_type == VersionType.EXPERIMENTAL:
             return re.match(REGEX_JAVA_SNAPSHOT, version) or re.match(
+                REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version)
+
+    return re.match(REGEX_BEDROCK_PREVIEW, version) or re.match(
+        REGEX_BEDROCK_RELEASE,
+        version) or re.match(REGEX_JAVA_RELEASE, version) or re.match(
+            REGEX_JAVA_SNAPSHOT, version) or re.match(
                 REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version)
 
 
@@ -114,9 +138,7 @@ def filter_unwanted(input_dir: str,
     Args:
         input_path (string): directory where the input files are
         output_path (string): directory where accepted files will end up
-
-    Returns:
-        void
+        edition (EditionType): type of edition, defaults to `EditionType.JAVA`
     """
 
     make_dir(output_dir, do_delete_prev=True)

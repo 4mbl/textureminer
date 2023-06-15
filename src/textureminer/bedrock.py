@@ -1,7 +1,6 @@
 import os
 import re
 import subprocess
-from typing import Tuple
 from textureminer.common import REGEX_BEDROCK_PREVIEW, REGEX_BEDROCK_RELEASE, EditionType, VersionType, filter_unwanted, rm_if_exists, tabbed_print, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH, validate_version
 from textureminer import texts
 
@@ -9,6 +8,14 @@ REPO_URL = 'https://github.com/Mojang/bedrock-samples'
 
 
 def get_version_type(version: str) -> VersionType:
+    """Gets the type of a version based on regex.
+
+    Args:
+        version (str): version to get the type of
+
+    Returns:
+        VersionType: type of version
+    """
     if version[0] != 'v':
         version = f'v{version}'
     if re.match(REGEX_BEDROCK_RELEASE, version):
@@ -22,9 +29,7 @@ def get_latest_version(version_type: VersionType, repo_dir) -> str:
 
     Args:
         version_type (VersionType): type of version to get
-
-    Raises:
-        Exception: if the version number is invalid
+        repo_dir (str): directory of the repository
 
     Returns:
         str: latest version as a string
@@ -52,6 +57,11 @@ def get_latest_version(version_type: VersionType, repo_dir) -> str:
 
 
 def clone_repo() -> str:
+    """Clones the mojang/bedrock-samples repository.
+
+    Returns:
+        str: path of the repository
+    """
 
     tabbed_print(texts.FILE_DOWNLOADING)
 
@@ -74,7 +84,12 @@ def clone_repo() -> str:
     return repo_dir
 
 
-def update_tags(repo_dir):
+def update_tags(repo_dir: str):
+    """Updates the tags of the repository.
+
+    Args:
+        repo_dir (str): directory of the repository
+    """
     subprocess.run(
         'git fetch --tags',
         check=False,
@@ -82,9 +97,17 @@ def update_tags(repo_dir):
     )
 
 
-def change_repo_version(repo_dir,
-                        version,
-                        fetch_tags: bool = True) -> Tuple[str, str]:
+def change_repo_version(repo_dir: str, version: str, fetch_tags: bool = True):
+    """Changes the version of the repository.
+
+    Args:
+        repo_dir (str): directory of the repository
+        version (str): version to change to
+        fetch_tags (bool, optional): whether to fetch tags from the repository. Defaults to True.
+
+    Raises:
+        Exception: if the command fails
+    """
     if fetch_tags:
         update_tags(repo_dir)
     try:
@@ -102,13 +125,14 @@ def change_repo_version(repo_dir,
 def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
                  output_dir=DEFAULT_OUTPUT_DIR,
                  scale_factor=1,
-                 do_merge=True):
+                 do_merge=True) -> str:
     """Easily extract, filter, and scale item and block textures.
 
     Args:
-        version (string): a Minecraft version number, for example "1.11" or "22w11a"
-        output_dir (str, optional): directory that the final textures will go. Defaults to "".
+        version_or_type (string): a Minecraft Bedrock version, for example "v1.20.0.1" or "v1.20.10.21-preview"
+        output_dir (str, optional): directory that the final textures will go. Defaults to `DEFAULT_OUTPUT_DIR`.
         scale_factor (int, optional): factor that will be used to scale the textures. Defaults to 1.
+        do_merge (bool, optional): whether to merge the block and item textures into a single directory. Defaults to True.
 
     Returns:
         string: path of the final textures
@@ -117,7 +141,7 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
     if isinstance(version_or_type, str) and not validate_version(
             version_or_type, edition=EditionType.BEDROCK):
         print(texts.VERSION_INVALID.format(version=version_or_type))
-        return
+        return None
 
     version_type = version_or_type if isinstance(version_or_type,
                                                  VersionType) else None

@@ -8,9 +8,18 @@ from textureminer import texts
 from textureminer.common import DEFAULT_OUTPUT_DIR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, make_dir, tabbed_print, TEMP_PATH, scale_textures, validate_version
 
 VERSION_MANIFEST = None
+VERSION_MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
 
 
 def get_version_type(version: str) -> VersionType:
+    """Gets the type of a version based on regex.
+
+    Args:
+        version (str): version to get the type of
+
+    Returns:
+        VersionType: type of version
+    """
     if version[0] != 'v':
         version = f'v{version}'
     if re.match(REGEX_JAVA_RELEASE, version):
@@ -18,6 +27,7 @@ def get_version_type(version: str) -> VersionType:
     if re.match(REGEX_JAVA_SNAPSHOT, version) or re.match(
             REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version):
         return VersionType.EXPERIMENTAL
+    return None
 
 
 def get_version_manifest() -> dict:
@@ -28,7 +38,7 @@ def get_version_manifest() -> dict:
         dict: version manifest
     """
     return requests.get(
-        'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json',
+        VERSION_MANIFEST_URL,
         timeout=10).json() if VERSION_MANIFEST is None else VERSION_MANIFEST
 
 
@@ -66,7 +76,7 @@ def download_client_jar(
 
     Args:
         version (str): version to download
-        download_path (str, optional): directory to download the file to
+        download_dir (str, optional): directory to download the file to
 
     Returns:
         str: path of the downloaded file
@@ -120,13 +130,14 @@ def extract_textures(
 def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
                  output_dir=DEFAULT_OUTPUT_DIR,
                  scale_factor=1,
-                 do_merge=True):
+                 do_merge=True) -> str:
     """Easily extract, filter, and scale item and block textures.
 
     Args:
-        version (string): a Minecraft version number, for example "1.11" or "22w11a"
-        output_dir (str, optional): directory that the final textures will go. Defaults to "".
+        version_or_type (string): a Minecraft Java version, for example "1.11" or "22w11a"
+        output_dir (str, optional): directory that the final textures will go. Defaults to `DEFAULT_OUTPUT_DIR`.
         scale_factor (int, optional): factor that will be used to scale the textures. Defaults to 1.
+        do_merge (bool, optional): whether to merge the block and item textures into a single directory. Defaults to True.
 
     Returns:
         string: path of the final textures
@@ -135,7 +146,7 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
     if isinstance(version_or_type, str) and not validate_version(
             version_or_type, edition=EditionType.JAVA):
         print(texts.VERSION_INVALID.format(version=version_or_type))
-        return
+        return None
 
     version_type = version_or_type if isinstance(version_or_type,
                                                  VersionType) else None
