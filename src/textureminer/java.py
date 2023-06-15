@@ -5,31 +5,9 @@ from zipfile import ZipFile
 import urllib.request
 import requests
 from textureminer import texts
-from textureminer.common import DEFAULT_OUTPUT_DIR, EditionType, VersionType, filter_unwanted, make_dir, print_stylized, TEMP_PATH, scale_textures
+from textureminer.common import DEFAULT_OUTPUT_DIR, EditionType, VersionType, filter_unwanted, make_dir, print_stylized, TEMP_PATH, scale_textures, validate_version
 
 VERSION_MANIFEST = None
-
-
-def validate_version(version_type: VersionType, version: str):
-    """Validates a version string based on the version type using regex.
-
-    Args:
-        version_type (VersionType):
-        version (str):
-
-    Returns:
-        bool: whether the version is valid
-    """
-    REGEX_SNAPSHOT = r'^[0-9]{2}w[0-9]{2}[a-z]$'
-    REGEX_PRE = r'^[0-9]\.[0-9]+\.?[0-9]+-pre[0-9]?$'
-    REGEX_RC = r'^[0-9]\.[0-9]+\.?[0-9]+-rc[0-9]?$'
-    REGEX_RELEASE = r'^[0-9]\.[0-9]+\.?[0-9]+?$'
-
-    if version_type == VersionType.EXPERIMENTAL:
-        return re.match(REGEX_SNAPSHOT, version) or re.match(
-            REGEX_PRE, version) or re.match(REGEX_RC, version)
-    if version_type == VersionType.RELEASE:
-        return re.match(REGEX_RELEASE, version)
 
 
 def get_version_manifest() -> dict:
@@ -44,7 +22,7 @@ def get_version_manifest() -> dict:
         timeout=10).json() if VERSION_MANIFEST is None else VERSION_MANIFEST
 
 
-def get_latest_version(version_type: VersionType) -> str:
+def     get_latest_version(version_type: VersionType) -> str:
     """Gets the latest version of a certain type.
 
     Args:
@@ -59,12 +37,14 @@ def get_latest_version(version_type: VersionType) -> str:
     print_stylized(
         texts.VERSION_LATEST_FINDING.format(version_type=version_type.value))
     latest_version = get_version_manifest()['latest'][version_type.value]
-    if not validate_version(version_type, latest_version):
+    if not validate_version(
+            latest_version, version_type, edition=EditionType.JAVA):
 
-        raise Exception(texts.VERSION_INVALID.format(version=latest_version))
+        raise Exception(
+            texts.VERSION_INVALID.format(version="" + latest_version))
     print_stylized(
         texts.VERSION_LATEST_IS.format(version_type=version_type.value,
-                                       latest_version=latest_version))
+                                       latest_version="" + latest_version))
     return latest_version
 
 
@@ -127,7 +107,7 @@ def extract_textures(
     return output_path
 
 
-def get_textures(version_type: VersionType = VersionType.RELEASE,
+def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
                  output_dir=DEFAULT_OUTPUT_DIR,
                  scale_factor=1,
                  do_merge=True):
@@ -143,11 +123,24 @@ def get_textures(version_type: VersionType = VersionType.RELEASE,
     """
 
     print(texts.TITLE)
-    latest_version = get_latest_version(version_type)
-    assets = download_client_jar(latest_version)
+
+    if isinstance(version_or_type, str) and not validate_version(
+            version_or_type, edition=EditionType.JAVA):
+        print(texts.VERSION_INVALID.format(version=version_or_type))
+        return
+
+    version_type = version_or_type if isinstance(version_or_type,
+                                                 VersionType) else None
+
+    version = None
+    if isinstance(version_or_type, str):
+        version = version_or_type
+    else:
+        version = get_latest_version(version_type)
+    assets = download_client_jar(version)
     extracted = extract_textures(assets)
     filtered = filter_unwanted(extracted,
-                               f'{output_dir}/java/{latest_version}',
+                               f'{output_dir}/java/{version}',
                                edition=EditionType.JAVA)
     scale_textures(filtered, scale_factor, do_merge)
 

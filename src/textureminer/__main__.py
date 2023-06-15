@@ -6,20 +6,31 @@ from textureminer import java, bedrock, texts
 def mine(version: str = None,
          edition: EditionType = None,
          scale_factor: int = 100):
-    if edition == EditionType.JAVA or edition is None:
-        if version is None:
-            version = java.get_latest_version(VersionType.RELEASE)
+
+    if version is None:
+        if edition == EditionType.JAVA or edition is None:
+            java.get_textures(VersionType.RELEASE, scale_factor=scale_factor)
             return
-        java.get_textures(VersionType.RELEASE, scale_factor=scale_factor)
-    elif edition == EditionType.BEDROCK:
-        bedrock.get_textures(version_or_type=version, scale_factor=scale_factor)
-    else:
+        if edition == EditionType.BEDROCK:
+            bedrock.get_textures(VersionType.RELEASE, scale_factor=scale_factor)
+            return
+        print(texts.EDITION_INVALID)
+
+    if version:
+        if edition == EditionType.JAVA or edition is None:
+            java.get_textures(version_or_type=version,
+                              scale_factor=scale_factor)
+            return
+        if edition == EditionType.BEDROCK:
+            bedrock.get_textures(version_or_type=version,
+                                 scale_factor=scale_factor)
+            return
         print(texts.EDITION_INVALID)
 
 
 def main():
-    version = VersionType.RELEASE
-    edition = EditionType.JAVA
+    version = None
+    edition = None
 
     args = sys.argv[1:]
 
@@ -36,10 +47,10 @@ def main():
     elif len(args) == 1:
         version = args[0].lower()
         print(texts.EDITION_USING_DEFAULT)
-    elif len(args) <= 2:
-        if args[1].lower() == EditionType.JAVA.value:
+    elif len(args) >= 2:
+        if args[1].lower() == EditionType.JAVA.value.lower():
             edition = EditionType.JAVA
-        elif args[1].lower() == EditionType.BEDROCK.value:
+        elif args[1].lower() == EditionType.BEDROCK.value.lower():
             edition = EditionType.BEDROCK
         else:
             print(texts.EDITION_INVALID)

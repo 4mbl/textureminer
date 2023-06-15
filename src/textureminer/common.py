@@ -1,5 +1,6 @@
 from enum import Enum
 import os
+import re
 from shutil import copytree, rmtree
 import tempfile
 from forfiles import image, file as f
@@ -8,6 +9,14 @@ from textureminer import texts
 HOME_DIR = os.path.expanduser('~').replace('\\', '/')
 TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
 DEFAULT_OUTPUT_DIR = f'{HOME_DIR}/Downloads/textures'
+
+REGEX_BEDROCK_STABLE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
+REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
+
+REGEX_JAVA_SNAPSHOT = r'^[0-9]{2}w[0-9]{2}[a-z]$'
+REGEX_JAVA_PRE = r'^[0-9]\.[0-9]+\.?[0-9]+-pre[0-9]?$'
+REGEX_JAVA_RC = r'^[0-9]\.[0-9]+\.?[0-9]+-rc[0-9]?$'
+REGEX_JAVA_RELEASE = r'^[0-9]\.[0-9]+\.?[0-9]+?$'
 
 
 class VersionType(Enum):
@@ -51,6 +60,38 @@ def make_dir(path: str, do_delete_prev: bool = False):
 
     if not os.path.isdir(path):
         os.makedirs(path)
+
+
+def validate_version(version: str,
+                     version_type: VersionType = None,
+                     edition: EditionType = None):
+    """Validates a version string based on the version type using regex.
+
+    Args:
+        version_type (VersionType):
+        version (str):
+
+    Returns:
+        bool: whether the version is valid
+    """
+
+    if edition == EditionType.BEDROCK:
+        if version[0] != 'v':
+            version = f'v{version}'
+        if version_type is None:
+            return re.match(REGEX_BEDROCK_PREVIEW, version) or re.match(
+                REGEX_BEDROCK_STABLE, version)
+        if version_type == VersionType.RELEASE:
+            return re.match(REGEX_BEDROCK_STABLE, version)
+        if version_type == VersionType.EXPERIMENTAL:
+            return re.match(REGEX_BEDROCK_PREVIEW, version)
+
+    elif edition == EditionType.JAVA:
+        if version_type == VersionType.RELEASE:
+            return re.match(REGEX_JAVA_RELEASE, version)
+        if version_type == VersionType.EXPERIMENTAL:
+            return re.match(REGEX_JAVA_SNAPSHOT, version) or re.match(
+                REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version)
 
 
 def filter_unwanted(input_dir: str,

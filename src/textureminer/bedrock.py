@@ -5,24 +5,10 @@ from shutil import rmtree
 import stat
 import subprocess
 from typing import Tuple
-from textureminer.common import VersionType, filter_unwanted, print_stylized, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH
+from textureminer.common import REGEX_BEDROCK_PREVIEW, REGEX_BEDROCK_STABLE, EditionType, VersionType, filter_unwanted, print_stylized, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH, validate_version
 from textureminer import texts
 
 REPO_URL = 'https://github.com/Mojang/bedrock-samples'
-REGEX_STABLE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
-REGEX_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
-
-
-class EditionType(Enum):
-    """Enum class representing different editions of Minecraft
-    """
-
-    BEDROCK = 'bedrock'
-    """Bedrock Edition
-    """
-    JAVA = 'java'
-    """Java Edition
-    """
 
 
 def on_rm_error(func, path, exc_info):
@@ -35,36 +21,12 @@ def rm_if_exists(path: str):
         rmtree(path, onerror=on_rm_error)
 
 
-def validate_version(version: str, version_type: VersionType = None):
-    """Validates a version string based on the version type using regex.
-
-    Args:
-        version_type (VersionType):
-        version (str):
-
-    Returns:
-        bool: whether the version is valid
-    """
-
-    if version[0] != 'v':
-        version = f'v{version}'
-
-    if version_type is None:
-        return re.match(REGEX_PREVIEW, version) or re.match(
-            REGEX_STABLE, version)
-
-    if version_type == VersionType.EXPERIMENTAL:
-        return re.match(REGEX_PREVIEW, version)
-    if version_type == VersionType.RELEASE:
-        return re.match(REGEX_STABLE, version)
-
-
 def get_version_type(version: str) -> VersionType:
     if version[0] != 'v':
         version = f'v{version}'
-    if re.match(REGEX_PREVIEW, version):
+    if re.match(REGEX_BEDROCK_PREVIEW, version):
         return VersionType.EXPERIMENTAL
-    if re.match(REGEX_STABLE, version):
+    if re.match(REGEX_BEDROCK_STABLE, version):
         return VersionType.RELEASE
 
 
@@ -91,7 +53,7 @@ def get_latest_version(version_type: VersionType, repo_dir) -> str:
     tags = out.stdout.decode('utf-8').splitlines()
 
     for tag in reversed(tags):
-        if validate_version(tag, version_type):
+        if validate_version(tag, version_type, edition=EditionType.BEDROCK):
             return tag
 
 
@@ -159,8 +121,8 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
     """
     print(texts.TITLE)
 
-    if isinstance(version_or_type,
-                  str) and not validate_version(version_or_type):
+    if isinstance(version_or_type, str) and not validate_version(
+            version_or_type, edition=EditionType.BEDROCK):
         print(texts.VERSION_INVALID.format(version=version_or_type))
         return
 
