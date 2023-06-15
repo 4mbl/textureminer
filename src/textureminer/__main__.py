@@ -25,11 +25,13 @@ def get_textures(
     """
 
     if edition == EditionType.JAVA:
-        tabbed_print(texts.EDITION_USING_X.format(edition=edition.value))
+        tabbed_print(
+            texts.EDITION_USING_X.format(edition=edition.value.capitalize()))
         return java.get_textures(*args, **kwargs)
 
     if edition == EditionType.BEDROCK:
-        tabbed_print(texts.EDITION_USING_X.format(edition=edition.value))
+        tabbed_print(
+            texts.EDITION_USING_X.format(edition=edition.value.capitalize()))
         return bedrock.get_textures(*args, **kwargs)
     return None
 
@@ -40,7 +42,6 @@ def cli():
     Returns:
         str: path to the output directory
     """
-    args = sys.argv[1:]
 
     if len(args) > 0 and args[0].lower() in [
             '--help',
@@ -97,4 +98,5 @@ def cli():
                         edition=DEFAULT_EDITION)
 
 
+args = sys.argv[1:]
 cli()

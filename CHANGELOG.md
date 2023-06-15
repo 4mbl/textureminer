@@ -13,11 +13,12 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-* ...
+* Clone only the required parts of the `bedrock-samples` repository on use
 
 ### Fixed
 
-* ...
+* Java Edition being selected even when Bedrock Edition was specified
+* Capitalization of edition names
 
 ### Removed
 

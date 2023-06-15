@@ -71,13 +71,21 @@ def clone_repo() -> str:
 
     rm_if_exists(repo_dir)
 
-    clone_command = ['git', 'clone', REPO_URL, repo_dir]
+    command_1 = f'git clone --filter=blob:none --sparse {REPO_URL} {repo_dir}'
+    command_2 = 'git config core.sparsecheckout true && echo "resource_pack" >> .git/info/sparse-checkout && git sparse-checkout init --cone && git sparse-checkout set resource_pack'
 
     try:
-        subprocess.run(clone_command,
+        subprocess.run(command_1,
                        check=True,
                        stdout=subprocess.DEVNULL,
                        stderr=subprocess.STDOUT)
+        subprocess.run(command_2,
+                       check=True,
+                       stdout=subprocess.DEVNULL,
+                       stderr=subprocess.STDOUT,
+                       cwd=repo_dir,
+                       shell=True)
+
     except subprocess.CalledProcessError as err:
         print(
             texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode,
@@ -92,11 +100,7 @@ def update_tags(repo_dir: str):
     Args:
         repo_dir (str): directory of the repository
     """
-    subprocess.run(
-        'git fetch --tags',
-        check=False,
-        cwd=repo_dir,
-    )
+    subprocess.run('git fetch --tags', check=False, cwd=repo_dir)
 
 
 def change_repo_version(repo_dir: str, version: str, fetch_tags: bool = True):
