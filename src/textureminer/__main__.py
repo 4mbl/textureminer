@@ -1,17 +1,14 @@
 import sys
-from textureminer.common import EditionType, VersionType, tabbed_print
+from textureminer.common import DEFAULT_SCALE_FACTOR, EditionType, VersionType, tabbed_print
 from textureminer import java, bedrock, texts
 
 DEFAULT_VERSION = VersionType.RELEASE
 DEFAULT_EDITION = EditionType.JAVA
-DEFAULT_SCALE_FACTOR = 100
 
 
 def get_textures(
     *args,
     edition: EditionType = EditionType.JAVA,
-    version_or_type: VersionType | str = VersionType.RELEASE,
-    scale_factor: int = 1,
     **kwargs,
 ) -> str:
     """Easily extract, filter, and scale item and block textures.

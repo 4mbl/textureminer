@@ -5,7 +5,7 @@ from zipfile import ZipFile
 import urllib.request
 import requests
 from textureminer import texts
-from textureminer.common import DEFAULT_OUTPUT_DIR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, mk_dir, rm_if_exists, tabbed_print, TEMP_PATH, scale_textures, validate_version
+from textureminer.common import DEFAULT_OUTPUT_DIR, DEFAULT_SCALE_FACTOR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, mk_dir, rm_if_exists, tabbed_print, TEMP_PATH, scale_textures, validate_version
 
 VERSION_MANIFEST = None
 VERSION_MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
@@ -129,14 +129,14 @@ def extract_textures(
 
 def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
                  output_dir=DEFAULT_OUTPUT_DIR,
-                 scale_factor=1,
+                 scale_factor=DEFAULT_SCALE_FACTOR,
                  do_merge=True) -> str:
     """Easily extract, filter, and scale item and block textures.
 
     Args:
         version_or_type (string): a Minecraft Java version, for example "1.11" or "22w11a"
         output_dir (str, optional): directory that the final textures will go. Defaults to `DEFAULT_OUTPUT_DIR`.
-        scale_factor (int, optional): factor that will be used to scale the textures. Defaults to 1.
+        scale_factor (int, optional): factor that will be used to scale the textures. Defaults to `DEFAULT_SCALE_FACTOR`.
         do_merge (bool, optional): whether to merge the block and item textures into a single directory. Defaults to True.
 
     Returns:

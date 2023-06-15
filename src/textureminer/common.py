@@ -9,7 +9,9 @@ from textureminer import texts
 
 HOME_DIR = os.path.expanduser('~').replace('\\', '/')
 TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
+
 DEFAULT_OUTPUT_DIR = f'{HOME_DIR}/Downloads/textures'
+DEFAULT_SCALE_FACTOR = 100
 
 REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
 REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'

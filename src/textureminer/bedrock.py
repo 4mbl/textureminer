@@ -1,7 +1,7 @@
 import os
 import re
 import subprocess
-from textureminer.common import REGEX_BEDROCK_PREVIEW, REGEX_BEDROCK_RELEASE, EditionType, VersionType, filter_unwanted, rm_if_exists, tabbed_print, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH, validate_version
+from textureminer.common import DEFAULT_SCALE_FACTOR, REGEX_BEDROCK_PREVIEW, REGEX_BEDROCK_RELEASE, EditionType, VersionType, filter_unwanted, rm_if_exists, tabbed_print, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH, validate_version
 from textureminer import texts
 
 REPO_URL = 'https://github.com/Mojang/bedrock-samples'
@@ -126,14 +126,14 @@ def change_repo_version(repo_dir: str, version: str, fetch_tags: bool = True):
 
 def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
                  output_dir=DEFAULT_OUTPUT_DIR,
-                 scale_factor=1,
+                 scale_factor=DEFAULT_SCALE_FACTOR,
                  do_merge=True) -> str:
     """Easily extract, filter, and scale item and block textures.
 
     Args:
         version_or_type (string): a Minecraft Bedrock version, for example "v1.20.0.1" or "v1.20.10.21-preview"
         output_dir (str, optional): directory that the final textures will go. Defaults to `DEFAULT_OUTPUT_DIR`.
-        scale_factor (int, optional): factor that will be used to scale the textures. Defaults to 1.
+        scale_factor (int, optional): factor that will be used to scale the textures. Defaults to `DEFAULT_SCALE_FACTOR`.
         do_merge (bool, optional): whether to merge the block and item textures into a single directory. Defaults to True.
 
     Returns:
