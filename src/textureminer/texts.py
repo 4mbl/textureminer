@@ -24,6 +24,7 @@ ERROR_COMMAND_FAILED = "The command failed with return code {error_code}: {error
 FILE_DOWNLOADING = "Downloading assets..."
 FILES_EXTRACTING = "Extracting {file_amount} files..."
 CLEARING_TEMP = "Clearing temporary files..."
+INVALID_COMBINATION = "Invalid combination of version and edition"
 TEXTURES_FILTERING = "Filtering textures..."
 TEXTURES_MERGING = "Merging block and item textures to a single directory..."
 TEXTURES_RESISING_AMOUNT_IN_DIR = "Resizing {texture_amount} {dir_name} textures..."

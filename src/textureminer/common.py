@@ -5,7 +5,7 @@ from shutil import copytree, rmtree
 import stat
 import tempfile
 from forfiles import image, file as f
-from textureminer import texts
+from textureminer import bedrock, java, texts
 
 HOME_DIR = os.path.expanduser('~').replace('\\', '/')
 TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
@@ -24,8 +24,8 @@ class VersionType(Enum):
     """Enum class representing different types of versions for Minecraft
     """
 
-    EXPERIMENTAL = 'snapshot'
-    """snapshot, pre-release, or release candidate
+    EXPERIMENTAL = 'experimental'
+    """snapshot, pre-release, release candidate, or preview
     """
     RELEASE = 'release'
     """stable release
@@ -211,3 +211,37 @@ def scale_textures(path: str,
                         scale_factor)
 
     return path
+
+
+def get_textures(
+    *args,
+    edition: EditionType = EditionType.JAVA,
+    version_or_type: VersionType | str = VersionType.RELEASE,
+    scale_factor: int = 1,
+    **kwargs,
+) -> str:
+    """Easily extract, filter, and scale item and block textures.
+
+    Args:
+        *args: arguments that will be passed to the get_textures function of the specified edition
+        edition (EditionType): type of edition, defaults to `EditionType.JAVA`
+        version_or_type (string): a Minecraft Java version, for example "1.11" or "22w11a"
+        scale_factor (int): factor that will be used to scale the textures
+        **kwargs: keyword arguments that will be passed to the get_textures function of the specified edition
+
+    Returns:
+        string: path of the final textures
+    """
+
+    if edition == EditionType.JAVA:
+        return java.get_textures(*args,
+                                 version_or_type=version_or_type,
+                                 scale_factor=scale_factor,
+                                 **kwargs)
+
+    if edition == EditionType.BEDROCK:
+        return bedrock.get_textures(*args,
+                                    version_or_type=version_or_type,
+                                    scale_factor=scale_factor,
+                                    **kwargs)
+    return None
