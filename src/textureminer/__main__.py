@@ -6,6 +6,12 @@ DEFAULT_VERSION = VersionType.RELEASE
 DEFAULT_EDITION = EditionType.JAVA
 DEFAULT_SCALE_FACTOR = 100
 
+release = ['stable'
+           'release']
+experimental = [
+    'experimental', 'snapshot', 'pre-release', 'release candidate', 'preview'
+]
+
 
 def cli():
     """CLI entrypoint.
@@ -32,6 +38,11 @@ def cli():
                             scale_factor=DEFAULT_SCALE_FACTOR)
 
     version = args[0].lower()
+
+    if version in release:
+        version = VersionType.RELEASE
+    if version in experimental:
+        version = VersionType.EXPERIMENTAL
 
     if len(args) == 1:
         tabbed_print(texts.EDITION_USING_DEFAULT)
