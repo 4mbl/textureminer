@@ -7,7 +7,7 @@ from forfiles import image, file as f
 
 HOME_DIR = os.path.expanduser('~').replace('\\', '/')
 TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
-DEFAULT_OUTPUT_DIR = f'{HOME_DIR}/Downloads/mc-textures'
+DEFAULT_OUTPUT_DIR = f'{HOME_DIR}/Downloads/textures'
 
 
 class VersionType(Enum):
@@ -119,11 +119,12 @@ def scale_textures(path: str,
     if do_merge:
         merge_dirs(path, path)
 
+    print_stylized("Textures are being filtered...")
     for subdir, _, files in os.walk(path):
-        print_stylized(
-            "Textures are being filtered..." if do_merge else
-            f"{os.path.basename(subdir).capitalize()} textures are being filtered..."
-        )
+        if not do_merge:
+            print_stylized(
+                f"{os.path.basename(subdir).capitalize()} textures are being filtered..."
+            )
         f.filter(f'{os.path.abspath(subdir)}', ['.png'])
 
         if scale_factor == 1:

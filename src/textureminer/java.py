@@ -143,7 +143,7 @@ def get_textures(version_type: VersionType = VersionType.RELEASE,
     assets = download_client_jar(latest_version)
     extracted = extract_textures(assets)
     filtered = filter_unwanted(extracted,
-                               f'{output_dir}/{latest_version}',
+                               f'{output_dir}/java/{latest_version}',
                                edition=EditionType.JAVA)
     scale_textures(filtered, scale_factor, do_merge)
 

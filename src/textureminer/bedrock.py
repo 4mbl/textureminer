@@ -4,10 +4,13 @@ import re
 from shutil import rmtree
 import stat
 import subprocess
+from typing import Tuple
 from colorama import Fore
 from textureminer.common import VersionType, filter_unwanted, print_stylized, scale_textures, DEFAULT_OUTPUT_DIR, TEMP_PATH
 
 REPO_URL = 'https://github.com/Mojang/bedrock-samples'
+REGEX_STABLE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
+REGEX_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
 
 
 class EditionType(Enum):
@@ -32,7 +35,7 @@ def rm_if_exists(path: str):
         rmtree(path, onerror=on_rm_error)
 
 
-def validate_version(version_type: VersionType, version: str):
+def validate_version(version: str, version_type: VersionType = None):
     """Validates a version string based on the version type using regex.
 
     Args:
@@ -43,13 +46,26 @@ def validate_version(version_type: VersionType, version: str):
         bool: whether the version is valid
     """
 
-    REGEX_STABLE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
-    REGEX_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
+    if version[0] != 'v':
+        version = f'v{version}'
+
+    if version_type is None:
+        return re.match(REGEX_PREVIEW, version) or re.match(
+            REGEX_STABLE, version)
 
     if version_type == VersionType.EXPERIMENTAL:
         return re.match(REGEX_PREVIEW, version)
     if version_type == VersionType.RELEASE:
         return re.match(REGEX_STABLE, version)
+
+
+def get_version_type(version: str) -> VersionType:
+    if version[0] != 'v':
+        version = f'v{version}'
+    if re.match(REGEX_PREVIEW, version):
+        return VersionType.EXPERIMENTAL
+    if re.match(REGEX_STABLE, version):
+        return VersionType.RELEASE
 
 
 def get_latest_version(version_type: VersionType, repo_dir) -> str:
@@ -65,11 +81,7 @@ def get_latest_version(version_type: VersionType, repo_dir) -> str:
         str: latest version as a string
     """
 
-    subprocess.run(
-        'git fetch --tags',
-        check=False,
-        cwd=repo_dir,
-    )
+    update_tags(repo_dir)
 
     out = subprocess.run('git tag --list',
                          check=False,
@@ -79,11 +91,11 @@ def get_latest_version(version_type: VersionType, repo_dir) -> str:
     tags = out.stdout.decode('utf-8').splitlines()
 
     for tag in reversed(tags):
-        if validate_version(version_type, tag):
+        if validate_version(tag, version_type):
             return tag
 
 
-def clone_repo(version_type: VersionType = VersionType.RELEASE) -> str:
+def clone_repo() -> str:
 
     print_stylized("Downloading assets...")
 
@@ -103,22 +115,30 @@ def clone_repo(version_type: VersionType = VersionType.RELEASE) -> str:
             f"The command failed with return code {err.returncode}: {err.stderr}"
         )
 
-    version = get_latest_version(version_type, repo_dir)
-
-    try:
-        subprocess.run(f'git checkout tags/v{version}',
-                       check=False,
-                       cwd=repo_dir,
-                       stdout=subprocess.DEVNULL,
-                       stderr=subprocess.STDOUT)
-    except subprocess.CalledProcessError as err:
-        print(
-            f"The command failed with return code {err.returncode}: {err.stderr}"
-        )
-    return (repo_dir, version)
+    return repo_dir
 
 
-def get_textures(version_type: VersionType = VersionType.RELEASE,
+def update_tags(repo_dir):
+    subprocess.run(
+        'git fetch --tags',
+        check=False,
+        cwd=repo_dir,
+    )
+
+
+def change_repo_version(repo_dir,
+                        version,
+                        fetch_tags: bool = True) -> Tuple[str, str]:
+    if fetch_tags:
+        update_tags(repo_dir)
+    subprocess.run(f'git checkout tags/v{version}',
+                   check=False,
+                   cwd=repo_dir,
+                   stdout=subprocess.DEVNULL,
+                   stderr=subprocess.STDOUT)
+
+
+def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
                  output_dir=DEFAULT_OUTPUT_DIR,
                  scale_factor=1,
                  do_merge=True):
@@ -132,11 +152,26 @@ def get_textures(version_type: VersionType = VersionType.RELEASE,
     Returns:
         string: path of the final textures
     """
-
     print(f'\n{Fore.CYAN}TEXTURE MINER{Fore.RESET}')
-    (asset_dir, version) = clone_repo(version_type)
+
+    if isinstance(version_or_type,
+                  str) and not validate_version(version_or_type):
+        print('invalid version')
+        return
+
+    version_type = version_or_type if isinstance(version_or_type,
+                                                 VersionType) else None
+    version = None
+    asset_dir = clone_repo()
+    if isinstance(version_or_type, str):
+        version = version_or_type
+    else:
+        version = get_latest_version(version_type, asset_dir)
+
+    change_repo_version(asset_dir, version)
+
     filtered = filter_unwanted(asset_dir,
-                               f'{output_dir}/{version}',
+                               f'{output_dir}/bedrock/{version[1:]}',
                                edition=EditionType.BEDROCK)
     scale_textures(filtered, scale_factor, do_merge)
 
