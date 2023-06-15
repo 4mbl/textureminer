@@ -28,16 +28,10 @@ def get_textures(
     """
 
     if edition == EditionType.JAVA:
-        return java.get_textures(*args,
-                                 version_or_type=version_or_type,
-                                 scale_factor=scale_factor,
-                                 **kwargs)
+        return java.get_textures(*args, **kwargs)
 
     if edition == EditionType.BEDROCK:
-        return bedrock.get_textures(*args,
-                                    version_or_type=version_or_type,
-                                    scale_factor=scale_factor,
-                                    **kwargs)
+        return bedrock.get_textures(*args, **kwargs)
     return None
 
 
