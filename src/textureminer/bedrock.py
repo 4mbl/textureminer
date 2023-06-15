@@ -126,7 +126,6 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
     Returns:
         string: path of the final textures
     """
-    print(texts.TITLE)
 
     if isinstance(version_or_type, str) and not validate_version(
             version_or_type, edition=EditionType.BEDROCK):
