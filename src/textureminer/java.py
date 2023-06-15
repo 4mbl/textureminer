@@ -5,7 +5,7 @@ from zipfile import ZipFile
 import urllib.request
 import requests
 from textureminer import texts
-from textureminer.common import DEFAULT_OUTPUT_DIR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, make_dir, tabbed_print, TEMP_PATH, scale_textures, validate_version
+from textureminer.common import DEFAULT_OUTPUT_DIR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, make_dir, rm_if_exists, tabbed_print, TEMP_PATH, scale_textures, validate_version
 
 VERSION_MANIFEST = None
 VERSION_MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
@@ -162,6 +162,9 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
                                f'{output_dir}/java/{version}',
                                edition=EditionType.JAVA)
     scale_textures(filtered, scale_factor, do_merge)
+
+    tabbed_print(texts.CLEARING_TEMP)
+    rm_if_exists(TEMP_PATH)
 
     output_dir = os.path.abspath(filtered).replace('\\', '/')
     print(texts.COMPLETED.format(output_dir=output_dir))

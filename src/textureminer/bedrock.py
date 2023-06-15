@@ -159,6 +159,9 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
                                edition=EditionType.BEDROCK)
     scale_textures(filtered, scale_factor, do_merge)
 
+    tabbed_print(texts.CLEARING_TEMP)
+    rm_if_exists(TEMP_PATH)
+
     output_dir = os.path.abspath(filtered).replace('\\', '/')
     print(texts.COMPLETED.format(output_dir=output_dir))
     return output_dir
