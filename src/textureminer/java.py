@@ -1,49 +1,13 @@
-from shutil import copytree, rmtree
-from zipfile import ZipFile
-from enum import Enum
-import urllib.request
 import os
 import re
-import tempfile
+from shutil import copytree, rmtree
+from zipfile import ZipFile
+import urllib.request
+from colorama import Fore
 import requests
-from forfiles import image, file as f
-from colorama import Fore, Back, Style
+from textureminer.common import DEFAULT_OUTPUT_DIR, EditionType, VersionType, filter_unwanted, make_dir, print_stylized, TEMP_PATH, scale_textures
 
-HOME_DIR = os.path.expanduser('~').replace('\\', '/')
-TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
-DEFAULT_OUTPUT_DIR = f'{HOME_DIR}/Downloads/mc-textures'
 VERSION_MANIFEST = None
-
-
-class VersionType(Enum):
-    """Enum class representing different types of versions for Minecraft
-    """
-
-    EXPERIMENTAL = 'snapshot'
-    """snapshot, pre-release, or release candidate
-    """
-    RELEASE = 'release'
-    """stable release
-    """
-
-
-def make_dir(path: str, do_delete_prev: bool = False):
-    """Makes a directory if one does not already exist.
-
-    Args:
-        path (str): path of the directory that will be created
-    """
-    if do_delete_prev and os.path.isdir(path):
-        rmtree(path)
-
-    if not os.path.isdir(path):
-        os.makedirs(path)
-
-
-def print_stylized(text):
-    """Prints a message to the console with cyan text and a bullet point.
-    """
-    print(f"{Fore.CYAN}{' '*4}* {Fore.RESET}{text}")
 
 
 def validate_version(version_type: VersionType, version: str):
@@ -159,81 +123,6 @@ def extract_textures(
     return output_path
 
 
-def filter_non_unwanted(input_path: str, output_dir: str = DEFAULT_OUTPUT_DIR):
-    """Removes non-essential item and block textures from the extracted textures.
-
-    Args:
-        input_path (string): directory where the input files are
-        output_path (string): directory where accepted files will end up
-
-    Returns:
-        void
-    """
-
-    make_dir(output_dir, do_delete_prev=True)
-
-    copytree(f'{input_path}/block', f'{output_dir}/block')
-    copytree(f'{input_path}/item', f'{output_dir}/item')
-    rmtree(TEMP_PATH)
-
-    return output_dir
-
-
-def scale_textures(path: str,
-                   scale_factor: int = 100,
-                   do_merge: bool = True) -> str:
-    """Scales textures within a directory by a factor
-
-    Args:
-        path (string): path of the textures that will be scaled
-        scale_factor (int): factor that the textures will be scaled by
-        do_merge (bool): whether to merge block and item texture files into a single directory
-
-    Returns:
-        string: path of the scaled textures
-    """
-
-    if do_merge:
-        merge_dirs(path, path)
-
-    for subdir, _, files in os.walk(path):
-        print_stylized(
-            "Textures are being filtered..." if do_merge else
-            f"{os.path.basename(subdir).capitalize()} textures are being filtered..."
-        )
-        f.filter(f'{os.path.abspath(subdir)}', ['.png'])
-
-        if scale_factor == 1:
-            continue
-
-        if len(files) > 0:
-            print_stylized(
-                f"{len(files)} textures are being resized..." if do_merge else
-                f"{len(files)} {os.path.basename(subdir)} textures are being resized..."
-            )
-
-        for fil in files:
-            image.scale(f"{os.path.abspath(subdir)}/{fil}", scale_factor,
-                        scale_factor)
-
-    return path
-
-
-def merge_dirs(input_dir: str, output_dir: str):
-    """Merges block and item textures to a single directory.
-    Item textures are given priority when there are conflicts.
-
-    Args:
-        input_dir (string): directory in which there are subdirectories 'block' and 'item'
-        output_dir (string): directory in which the files will be merged into
-    """
-    print_stylized("Merging block and item textures to a single directory...")
-    copytree(f'{input_dir}/block', output_dir, dirs_exist_ok=True)
-    rmtree(f'{input_dir}/block')
-    copytree(f'{input_dir}/item', output_dir, dirs_exist_ok=True)
-    rmtree(f'{input_dir}/item')
-
-
 def get_textures(version_type: VersionType = VersionType.RELEASE,
                  output_dir=DEFAULT_OUTPUT_DIR,
                  scale_factor=1,
@@ -253,7 +142,9 @@ def get_textures(version_type: VersionType = VersionType.RELEASE,
     latest_version = get_latest_version(version_type)
     assets = download_client_jar(latest_version)
     extracted = extract_textures(assets)
-    filtered = filter_non_unwanted(extracted, f'{output_dir}/{latest_version}')
+    filtered = filter_unwanted(extracted,
+                               f'{output_dir}/{latest_version}',
+                               edition=EditionType.JAVA)
     scale_textures(filtered, scale_factor, do_merge)
 
     output_dir = os.path.abspath(filtered).replace('\\', '/')
