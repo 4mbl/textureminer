@@ -40,7 +40,6 @@ def cli():
     Returns:
         str: path to the output directory
     """
-    args = sys.argv[1:]
 
     if len(args) > 0 and args[0].lower() in [
             '--help',
@@ -97,4 +96,5 @@ def cli():
                         edition=DEFAULT_EDITION)
 
 
+args = sys.argv[1:]
 cli()
