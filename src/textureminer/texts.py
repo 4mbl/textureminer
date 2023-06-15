@@ -16,7 +16,11 @@ STYLED_TAB = style(f"{' '*4}* ", fg=Fg.CYAN)
 COMPLETED = style("Completed. You can find the textures on:\n{output_dir}\n",
                   fg=Fg.GREEN)
 
-COMMAND_SYNTAX = "\n\tpy -m textureminer <version> <edition>\n\te.g.\n\tpy -m textureminer 1.17 java\n\tpt -m textureminer 1.17 bedrock\n\tdefaults to java if no edition is specified, and defaults to latest version if no version is specified"
+COMMAND_SYNTAX = """\n\tpy -m textureminer <version> <edition>
+\te.g.
+\tpy -m textureminer 1.17 java
+\tpt -m textureminer 1.17 bedrock
+\tdefaults to java if no edition is specified, and defaults to latest stable if no version is specified"""
 EDITION_INVALID = "Invalid edition"
 EDITION_USING_DEFAULT = "Using default edition (Java Edition)"
 EDITION_USING_X = "Using {edition} Edition"
