@@ -5,7 +5,7 @@ from zipfile import ZipFile
 import urllib.request
 import requests
 from textureminer import texts
-from textureminer.common import DEFAULT_OUTPUT_DIR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, make_dir, rm_if_exists, tabbed_print, TEMP_PATH, scale_textures, validate_version
+from textureminer.common import DEFAULT_OUTPUT_DIR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, mk_dir, rm_if_exists, tabbed_print, TEMP_PATH, scale_textures, validate_version
 
 VERSION_MANIFEST = None
 VERSION_MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
@@ -92,7 +92,7 @@ def download_client_jar(
     json = requests.get(url, timeout=10).json()
     client_jar_url = json['downloads']['client']['url']
 
-    make_dir(download_dir)
+    mk_dir(download_dir)
     tabbed_print(texts.FILE_DOWNLOADING)
     urllib.request.urlretrieve(client_jar_url, f'{download_dir}/{version}.jar')
     return f'{download_dir}/{version}.jar'

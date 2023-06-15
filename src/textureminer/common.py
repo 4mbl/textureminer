@@ -72,7 +72,7 @@ def tabbed_print(text):
     print(f"{texts.STYLED_TAB}{text}")
 
 
-def make_dir(path: str, do_delete_prev: bool = False):
+def mk_dir(path: str, do_delete_prev: bool = False):
     """Makes a directory if one does not already exist.
 
     Args:
@@ -141,7 +141,7 @@ def filter_unwanted(input_dir: str,
         edition (EditionType): type of edition, defaults to `EditionType.JAVA`
     """
 
-    make_dir(output_dir, do_delete_prev=True)
+    mk_dir(output_dir, do_delete_prev=True)
 
     blocks_input = f'{input_dir}/block' if edition.value == EditionType.JAVA.value else f'{input_dir}/resource_pack/textures/blocks'
     items_input = f'{input_dir}/item' if edition.value == EditionType.JAVA.value else f'{input_dir}/resource_pack/textures/items'
