@@ -1,16 +1,44 @@
 import sys
-from textureminer.common import EditionType, VersionType, tabbed_print, get_textures
+from textureminer.common import EditionType, VersionType, tabbed_print
 from textureminer import java, bedrock, texts
 
 DEFAULT_VERSION = VersionType.RELEASE
 DEFAULT_EDITION = EditionType.JAVA
 DEFAULT_SCALE_FACTOR = 100
 
-release = ['stable'
-           'release']
-experimental = [
-    'experimental', 'snapshot', 'pre-release', 'release candidate', 'preview'
-]
+
+def get_textures(
+    *args,
+    edition: EditionType = EditionType.JAVA,
+    version_or_type: VersionType | str = VersionType.RELEASE,
+    scale_factor: int = 1,
+    **kwargs,
+) -> str:
+    """Easily extract, filter, and scale item and block textures.
+
+    Args:
+        *args: arguments that will be passed to the get_textures function of the specified edition
+        edition (EditionType): type of edition, defaults to `EditionType.JAVA`
+        version_or_type (string): a Minecraft Java version, for example "1.11" or "22w11a"
+        scale_factor (int): factor that will be used to scale the textures
+        **kwargs: keyword arguments that will be passed to the get_textures function of the specified edition
+
+    Returns:
+        string: path of the final textures
+    """
+
+    if edition == EditionType.JAVA:
+        return java.get_textures(*args,
+                                 version_or_type=version_or_type,
+                                 scale_factor=scale_factor,
+                                 **kwargs)
+
+    if edition == EditionType.BEDROCK:
+        return bedrock.get_textures(*args,
+                                    version_or_type=version_or_type,
+                                    scale_factor=scale_factor,
+                                    **kwargs)
+    return None
 
 
 def cli():
@@ -38,6 +66,13 @@ def cli():
                             scale_factor=DEFAULT_SCALE_FACTOR)
 
     version = args[0].lower()
+
+    release = ['stable'
+               'release']
+    experimental = [
+        'experimental', 'snapshot', 'pre-release', 'release candidate',
+        'preview'
+    ]
 
     if version in release:
         version = VersionType.RELEASE
