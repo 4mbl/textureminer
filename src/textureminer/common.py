@@ -4,13 +4,14 @@ import re
 from shutil import copytree, rmtree
 import stat
 import tempfile
+from PIL import Image as pil_image
 from forfiles import image, file as f
 from textureminer import texts
 
 HOME_DIR = os.path.expanduser('~').replace('\\', '/')
 TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
 
-DEFAULT_OUTPUT_DIR = f'{HOME_DIR}/Downloads/textures'
+DEFAULT_OUTPUT_DIR = os.path.normpath(f'{HOME_DIR}/Downloads/textures')
 DEFAULT_SCALE_FACTOR = 100
 
 REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
@@ -193,13 +194,15 @@ def merge_dirs(input_dir: str, output_dir: str):
 
 def scale_textures(path: str,
                    scale_factor: int = 100,
-                   do_merge: bool = True) -> str:
+                   do_merge: bool = True,
+                   crop: bool = True) -> str:
     """Scales textures within a directory by a factor
 
     Args:
         path (string): path of the textures that will be scaled
         scale_factor (int): factor that the textures will be scaled by
         do_merge (bool): whether to merge block and item texture files into a single directory
+        crop (bool): whether to crop non-square textures to be square
 
     Returns:
         string: path of the scaled textures
@@ -211,17 +214,21 @@ def scale_textures(path: str,
     for subdir, _, files in os.walk(path):
         f.filter(f'{os.path.abspath(subdir)}', ['.png'])
 
-        if scale_factor == 1:
-            continue
-
-        if len(files) > 0:
+        if scale_factor != 1 and len(files) > 0:
             tabbed_print(
                 texts.TEXTURES_RESIZING_AMOUNT.format(texture_amount=len(files))
                 if do_merge else texts.TEXTURES_RESISING_AMOUNT_IN_DIR.
                 format(len(files), os.path.basename(subdir)))
 
         for fil in files:
-            image.scale(f"{os.path.abspath(subdir)}/{fil}", scale_factor,
-                        scale_factor)
+            image_path = os.path.normpath(f"{os.path.abspath(subdir)}/{fil}")
+            if crop:
+                with pil_image.open(image_path) as img:
+                    if img.size[0] > 16 or img.size[1] > 16:
+                        img = img.crop((0, 0, 16, 16))
+                        img.save(image_path)
+
+            if scale_factor != 1:
+                image.scale(image_path, scale_factor, scale_factor)
 
     return path

@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-* ...
+* Crop large textures to 16×16 pixels
 
 ### Removed
 
