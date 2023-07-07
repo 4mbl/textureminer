@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 ---
 
 ## Unreleased
-<!-- ## x.y.z | yyyy.mm.dd -->
+## 1.2.0 | yyyy.mm.dd
 
 ### Added
 
