@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-* ...
+* Add missing punctuation
 
 ### Removed
 
