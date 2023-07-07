@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased
+## 1.2.0 | yyyy.mm.dd
+
+### Added
+
+* ...
+
+### Changed
+
+* Clone only the required parts of the `bedrock-samples` repository on use
+
+### Fixed
+
+* Java Edition being selected even when Bedrock Edition was specified
+* Capitalization of edition names
+
+### Removed
+
+* ...
+
+### Known Issues
+
+* ...
+
+---
+
 ## 1.1.0 | 2023-07-07
 
 ### Changed
