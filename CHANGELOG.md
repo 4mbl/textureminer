@@ -4,28 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## Unreleased
-<!-- ## x.y.z | yyyy.mm.dd -->
-
-### Added
-
-* ...
+## 1.1.0 | 2023-07-07
 
 ### Changed
 
-* ...
-
-### Fixed
-
 * Crop large textures to 16×16 pixels
-
-### Removed
-
-* ...
-
-### Known Issues
-
-* ...
 
 ---
 
