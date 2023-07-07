@@ -9,7 +9,7 @@ from forfiles import image, file as f
 from textureminer import texts
 
 HOME_DIR = os.path.expanduser('~').replace('\\', '/')
-TEMP_PATH = f'{tempfile.gettempdir()}/texture_miner'.replace('\\', '/')
+TEMP_PATH = f'{tempfile.gettempdir()}/textureminer'.replace('\\', '/')
 
 DEFAULT_OUTPUT_DIR = os.path.normpath(f'{HOME_DIR}/Downloads/textures')
 DEFAULT_SCALE_FACTOR = 100

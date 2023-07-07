@@ -1,6 +1,31 @@
-# texture_miner Changelog
+# textureminer Changelog
 
 All notable changes to this project will be documented in this file.
+
+---
+
+## Unreleased
+<!-- ## x.y.z | yyyy.mm.dd -->
+
+### Added
+
+* ...
+
+### Changed
+
+* Make project naming more consistent
+
+### Fixed
+
+* ...
+
+### Removed
+
+* ...
+
+### Known Issues
+
+* ...
 
 ---
 
