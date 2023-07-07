@@ -1,4 +1,4 @@
-# [texture_miner](https://4mbl.link/gh/texture-miner)
+# [textureminer](https://4mbl.link/gh/texture-miner)
 
 `textureminer` is a Python script that allows you to extract and scale Minecraft's item and block textures. It automates the process of downloading the necessary files and performing the required operations.
 
@@ -34,7 +34,7 @@ It's also recommended to use a [virtual environment](https://docs.python.org/3/l
 
 ### Installation
 
-Use pip to install `texture_miner`.
+Use pip to install `textureminer`.
 
 ```sh
 python3 -m pip install --upgrade textureminer
