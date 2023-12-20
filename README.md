@@ -52,16 +52,16 @@ pip install -r requirements.txt
 
 ## Usage
 
-To download and scale textures for the most recent stable Java release do the following.
+To download and scale textures for the most recent Java version, run the following command.
 
 ```shell
 python3 -m textureminer
 ```
 
-You can also specify the version and edition of Minecraft with the following command syntax: `python3 -m textureminer <version> <edition>`. The version must be a valid Minecraft version, and the edition must be either `java` or `bedrock`. If no edition is specified, the default is `java`
+You can also specify the version and edition of Minecraft with the following syntax: `python3 -m textureminer <version> <edition>`. The version must be a valid Minecraft version, and the edition must be either `java` or `bedrock`. If no edition is specified, the default is `java`.
 
 ```shell
-python3 -m textureminer 1.20 java
+python3 -m textureminer 1.20.00 bedrock
 ```
 
 At a high level, the script follows the following steps:
