@@ -1,4 +1,4 @@
-from fortext import style, Fg
+from fortext import style, Fg  # type: ignore
 
 TITLE = style(r"""
 
@@ -34,6 +34,16 @@ TEXTURES_MERGING = "Merging block and item textures to a single directory..."
 TEXTURES_RESISING_AMOUNT_IN_DIR = "Resizing {texture_amount} {dir_name} textures..."
 TEXTURES_RESIZING_AMOUNT = "Resizing {texture_amount} textures..."
 VERSION_INVALID = "Invalid version ({version})!"
+VERSION_USING_DEFAULT = "Using default version (latest release)."
 VERSION_LATEST_FINDING = "Finding latest {version_type} version..."
 VERSION_LATEST_IS = "Latest {version_type} is {latest_version}."
 VERSION_USING_X = "Using {version} version."
+
+
+def tabbed_print(text: str):
+    """Prints text with a tab at the beginning.
+
+    Args:
+        text (str): text that will be printed
+    """
+    print(f"{STYLED_TAB}{text}")
