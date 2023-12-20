@@ -14,6 +14,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 * Make project naming more consistent
+* Major refactor into class-based structure
 
 ### Fixed
 
