@@ -4,8 +4,8 @@ import re
 from shutil import copytree, rmtree
 import stat
 import tempfile
-from PIL import Image as pil_image
-from forfiles import image, file as f
+from PIL import Image as pil_image  # type: ignore
+from forfiles import image, file as f  # type: ignore
 from textureminer import texts
 
 HOME_DIR = os.path.expanduser('~').replace('\\', '/')
@@ -47,13 +47,11 @@ class EditionType(Enum):
     """
 
 
-def on_rm_error(func, path, exc_info):
+def on_rm_error(path: str):
     """Removes read-only files on Windows.
 
     Args:
-        func (function): Function that raised the exception
         path (str): Path of the file that couldn't be deleted
-        exc_info (exception): Exception info
     """
     os.chmod(path, stat.S_IWRITE)
     os.unlink(path)
@@ -69,8 +67,11 @@ def rm_if_exists(path: str):
         rmtree(path, onerror=on_rm_error)
 
 
-def tabbed_print(text):
-    """Prints a message to the console with cyan text and a bullet point.
+def tabbed_print(text: str):
+    """Prints text with a tab at the beginning.
+
+    Args:
+        text (str): text that will be printed
     """
     print(f"{texts.STYLED_TAB}{text}")
 
@@ -80,7 +81,7 @@ def mk_dir(path: str, do_delete_prev: bool = False):
 
     Args:
         path (str): path of the directory that will be created
-        do_delete_prev (bool): whether to delete the previous directory if it exists
+        do_delete_prev (bool, optional): whether to delete the previous directory if it exists
     """
     if do_delete_prev and os.path.isdir(path):
         rmtree(path)
@@ -90,14 +91,14 @@ def mk_dir(path: str, do_delete_prev: bool = False):
 
 
 def validate_version(version: str,
-                     version_type: VersionType = None,
-                     edition: EditionType = None) -> bool:
+                     version_type: VersionType | None = None,
+                     edition: EditionType | None = None) -> bool:
     """Validates a version string based on the version type using regex.
 
     Args:
-        version (str): version string to validate
-        version_type (VersionType): type of version, defaults to None, which will validate any version
-        edition (EditionType): type of edition, defaults to None, which will validate any version
+        version (str): version to validate
+        version_type (VersionType | None, optional): type of version, defaults to None, which will validate any version
+        edition (EditionType | None, optional): type of edition, defaults to None, which will validate any version
 
     Returns:
         bool: whether the version is valid
@@ -107,24 +108,28 @@ def validate_version(version: str,
         if version[0] != 'v':
             version = f'v{version}'
         if version_type is None:
-            return re.match(REGEX_BEDROCK_RELEASE, version) or re.match(
-                REGEX_BEDROCK_PREVIEW, version)
+            return bool(
+                re.match(REGEX_BEDROCK_RELEASE, version) or
+                re.match(REGEX_BEDROCK_PREVIEW, version))
         if version_type == VersionType.RELEASE:
-            return re.match(REGEX_BEDROCK_RELEASE, version)
+            return bool(re.match(REGEX_BEDROCK_RELEASE, version))
         if version_type == VersionType.EXPERIMENTAL:
-            return re.match(REGEX_BEDROCK_PREVIEW, version)
+            return bool(re.match(REGEX_BEDROCK_PREVIEW, version))
 
     if edition == EditionType.JAVA.value:
         if version_type is None:
-            return re.match(REGEX_JAVA_RELEASE, version) or re.match(
-                REGEX_JAVA_SNAPSHOT, version) or re.match(
-                    REGEX_JAVA_PRE, version) or re.match(
-                        REGEX_JAVA_RC, version)
+            return bool(
+                re.match(REGEX_JAVA_RELEASE, version) or
+                re.match(REGEX_JAVA_SNAPSHOT, version) or
+                re.match(REGEX_JAVA_PRE, version) or
+                re.match(REGEX_JAVA_RC, version))
         if version_type == VersionType.RELEASE:
-            return re.match(REGEX_JAVA_RELEASE, version)
+            return bool(re.match(REGEX_JAVA_RELEASE, version))
         if version_type == VersionType.EXPERIMENTAL:
-            return re.match(REGEX_JAVA_SNAPSHOT, version) or re.match(
-                REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version)
+            return bool(
+                re.match(REGEX_JAVA_SNAPSHOT, version) or
+                re.match(REGEX_JAVA_PRE, version) or
+                re.match(REGEX_JAVA_RC, version))
 
     is_valid = re.match(REGEX_BEDROCK_PREVIEW, version) or re.match(
         REGEX_BEDROCK_RELEASE,
@@ -138,11 +143,12 @@ def validate_version(version: str,
     if version[0] != 'v':
         version = f'v{version}'
 
-    return re.match(REGEX_BEDROCK_PREVIEW, version) or re.match(
-        REGEX_BEDROCK_RELEASE,
-        version) or re.match(REGEX_JAVA_RELEASE, version) or re.match(
-            REGEX_JAVA_SNAPSHOT, version) or re.match(
-                REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version)
+    return bool(
+        re.match(REGEX_BEDROCK_PREVIEW, version) or
+        re.match(REGEX_BEDROCK_RELEASE, version) or
+        re.match(REGEX_JAVA_RELEASE, version) or
+        re.match(REGEX_JAVA_SNAPSHOT, version) or
+        re.match(REGEX_JAVA_PRE, version) or re.match(REGEX_JAVA_RC, version))
 
 
 def filter_unwanted(input_dir: str,
@@ -153,7 +159,7 @@ def filter_unwanted(input_dir: str,
     Args:
         input_path (string): directory where the input files are
         output_path (string): directory where accepted files will end up
-        edition (EditionType): type of edition, defaults to `EditionType.JAVA`
+        edition (EditionType, optional): type of edition, defaults to `EditionType.JAVA`
     """
 
     mk_dir(output_dir, do_delete_prev=True)
@@ -200,9 +206,9 @@ def scale_textures(path: str,
 
     Args:
         path (string): path of the textures that will be scaled
-        scale_factor (int): factor that the textures will be scaled by
-        do_merge (bool): whether to merge block and item texture files into a single directory
-        crop (bool): whether to crop non-square textures to be square
+        scale_factor (int, optional): factor that the textures will be scaled by
+        do_merge (bool, optional): whether to merge block and item texture files into a single directory
+        crop (bool, optional): whether to crop non-square textures to be square
 
     Returns:
         string: path of the scaled textures

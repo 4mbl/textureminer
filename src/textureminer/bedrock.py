@@ -7,14 +7,14 @@ from textureminer import texts
 REPO_URL = 'https://github.com/Mojang/bedrock-samples'
 
 
-def get_version_type(version: str) -> VersionType:
+def get_version_type(version: str) -> VersionType | None:
     """Gets the type of a version based on regex.
 
     Args:
         version (str): version to get the type of
 
     Returns:
-        VersionType: type of version
+        VersionType | None: type of version or None if invalid input
     """
     if version[0] != 'v':
         version = f'v{version}'
@@ -26,12 +26,12 @@ def get_version_type(version: str) -> VersionType:
     return None
 
 
-def get_latest_version(version_type: VersionType, repo_dir) -> str:
+def get_latest_version(version_type: VersionType, repo_dir: str) -> str:
     """Gets the latest version of a certain type.
 
     Args:
-        version_type (VersionType): type of version to get
         repo_dir (str): directory of the repository
+        version_type (VersionType): type of version to get
 
     Returns:
         str: latest version as a string
@@ -131,17 +131,17 @@ def change_repo_version(repo_dir: str, version: str, fetch_tags: bool = True):
 def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
                  output_dir=DEFAULT_OUTPUT_DIR,
                  scale_factor=DEFAULT_SCALE_FACTOR,
-                 do_merge=True) -> str:
+                 do_merge=True) -> str | None:
     """Easily extract, filter, and scale item and block textures.
 
     Args:
-        version_or_type (string): a Minecraft Bedrock version, for example "v1.20.0.1" or "v1.20.10.21-preview"
+        version_or_type (VersionType | string): a Minecraft Bedrock version type or version string, for example "v1.20.0.1" or "v1.20.10.21-preview"
         output_dir (str, optional): directory that the final textures will go. Defaults to `DEFAULT_OUTPUT_DIR`.
         scale_factor (int, optional): factor that will be used to scale the textures. Defaults to `DEFAULT_SCALE_FACTOR`.
         do_merge (bool, optional): whether to merge the block and item textures into a single directory. Defaults to True.
 
     Returns:
-        string: path of the final textures
+        string | None: path of the final textures or None if invalid input
     """
 
     if isinstance(version_or_type, str) and not validate_version(
@@ -156,7 +156,9 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
     if isinstance(version_or_type, str):
         version = version_or_type
     else:
-        version = get_latest_version(version_type, asset_dir)
+        version = get_latest_version(
+            version_type if version_type is not None else VersionType.RELEASE,
+            asset_dir)
 
     change_repo_version(asset_dir, version)
     tabbed_print(texts.VERSION_USING_X.format(version=version))

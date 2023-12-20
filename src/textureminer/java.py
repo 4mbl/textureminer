@@ -3,7 +3,7 @@ import re
 from shutil import copytree, rmtree
 from zipfile import ZipFile
 import urllib.request
-import requests
+import requests  # type: ignore
 from textureminer import texts
 from textureminer.common import DEFAULT_OUTPUT_DIR, DEFAULT_SCALE_FACTOR, REGEX_JAVA_PRE, REGEX_JAVA_RC, REGEX_JAVA_RELEASE, REGEX_JAVA_SNAPSHOT, EditionType, VersionType, filter_unwanted, mk_dir, rm_if_exists, tabbed_print, TEMP_PATH, scale_textures, validate_version
 
@@ -11,14 +11,14 @@ VERSION_MANIFEST = None
 VERSION_MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
 
 
-def get_version_type(version: str) -> VersionType:
+def get_version_type(version: str) -> VersionType | None:
     """Gets the type of a version based on regex.
 
     Args:
         version (str): version to get the type of
 
     Returns:
-        VersionType: type of version
+        VersionType | None: type of version or None if invalid input
     """
     if version[0] != 'v':
         version = f'v{version}'
@@ -128,19 +128,19 @@ def extract_textures(
 
 
 def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
-                 output_dir=DEFAULT_OUTPUT_DIR,
-                 scale_factor=DEFAULT_SCALE_FACTOR,
-                 do_merge=True) -> str:
+                 output_dir: str = DEFAULT_OUTPUT_DIR,
+                 scale_factor: int = DEFAULT_SCALE_FACTOR,
+                 do_merge: bool = True) -> str | None:
     """Easily extract, filter, and scale item and block textures.
 
     Args:
-        version_or_type (string): a Minecraft Java version, for example "1.11" or "22w11a"
+        version_or_type (string, optional): a Minecraft Java version type, or a version string like "1.11" or "22w11a"
         output_dir (str, optional): directory that the final textures will go. Defaults to `DEFAULT_OUTPUT_DIR`.
         scale_factor (int, optional): factor that will be used to scale the textures. Defaults to `DEFAULT_SCALE_FACTOR`.
         do_merge (bool, optional): whether to merge the block and item textures into a single directory. Defaults to True.
 
     Returns:
-        string: path of the final textures
+        string | None: path of the final textures or None if invalid input
     """
 
     if isinstance(version_or_type, str) and not validate_version(
@@ -155,7 +155,8 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
     if isinstance(version_or_type, str):
         version = version_or_type
     else:
-        version = get_latest_version(version_type)
+        version = get_latest_version(
+            version_type if version_type is not None else VersionType.RELEASE)
 
     tabbed_print(texts.VERSION_USING_X.format(version=version))
     assets = download_client_jar(version)

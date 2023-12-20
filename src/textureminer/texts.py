@@ -1,4 +1,4 @@
-from fortext import style, Fg
+from fortext import style, Fg  # type: ignore
 
 TITLE = style(r"""
 
