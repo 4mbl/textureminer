@@ -18,6 +18,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 * Add missing punctuation
+* Add Python 3.12 compatibility
 
 ### Removed
 
