@@ -164,7 +164,7 @@ def get_textures(version_or_type: VersionType | str = VersionType.RELEASE,
     tabbed_print(texts.VERSION_USING_X.format(version=version))
 
     filtered = filter_unwanted(asset_dir,
-                               f'{output_dir}/bedrock/{version[1:]}',
+                               f'{output_dir}/bedrock/{version}',
                                edition=EditionType.BEDROCK)
     scale_textures(filtered, scale_factor, do_merge)
 
