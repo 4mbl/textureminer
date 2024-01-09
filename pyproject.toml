@@ -5,19 +5,29 @@ build-backend = "hatchling.build"
 [project]
 name = "textureminer"
 version = "1.1.2"
-authors = [
-  { name="4MBL" },
-]
+authors = [{ name = "4MBL" }]
 description = "Script that allows you to extract and scale Minecraft's item and block textures."
 readme = "README.md"
-license = { file="LICENSE" }
+license = { file = "LICENSE" }
 requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+    "forfiles>=4.0.0, <4.1.0",
+    "fortext>=0.0.11, <0.0.12",
+    "pillow>=10.1.0, <10.2.0",
+    "requests>=2.31.0, <2.32.0",
+]
+keywords = ["minecraft", "cli"]
+
+[project.scripts]
+textureminer = "textureminer.__main__"
 
 [project.urls]
-"Homepage" = "https://github.com/4MBL/texture-miner"
-"Bug Tracker" = "https://github.com/4MBL/texture-miner/issues"
+"Homepage" = "https://github.com/4mbl/textureminer"
+"Bug Tracker" = "https://github.com/4mbl/textureminer/issues"
+"Source Code" = "https://github.com/4mbl/textureminer"
+"Changelog" = "https://github.com/4mbl/textureminer/blob/main/CHANGELOG.md"
