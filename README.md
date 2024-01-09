@@ -44,24 +44,20 @@ Use pip to install [`textureminer`](https://pypi.org/project/textureminer) packa
 pip install --upgrade textureminer
 ```
 
-Install the required dependencies as listed on [requirements.txt](./requirements.txt).
-
-```shell
-pip install -r requirements.txt
-```
-
 ## Usage
+
+After installing the package, `textureminer` will be available as a command line tool.
 
 To download and scale textures for the most recent Java version, run the following command.
 
 ```shell
-python3 -m textureminer
+textureminer
 ```
 
-You can also specify the version and edition of Minecraft with the following syntax: `python3 -m textureminer <version> <edition>`. The version must be a valid Minecraft version, and the edition must be either `java` or `bedrock`. If no edition is specified, the default is `java`.
+You can also specify the version and edition of Minecraft with the following syntax: `textureminer <version> <edition>`. The version must be a valid Minecraft version, and the edition must be either `java` or `bedrock`. If no edition is specified, the default is `java`.
 
 ```shell
-python3 -m textureminer 1.20.00 bedrock
+textureminer 1.20.00 bedrock
 ```
 
 At a high level, the script follows the following steps:
