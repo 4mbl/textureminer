@@ -25,8 +25,8 @@ class Bedrock(Edition):
     def get_version_type(self, version: str) -> VersionType | None:
         if version[0] != 'v':
             version = f'v{version}'
-        if Edition.validate_version(version=version, version_type=VersionType.RELEASE, edition=EditionType.BEDROCK):
-            return VersionType.RELEASE
+        if Edition.validate_version(version=version, version_type=VersionType.STABLE, edition=EditionType.BEDROCK):
+            return VersionType.STABLE
         if Edition.validate_version(version=version, version_type=VersionType.EXPERIMENTAL, edition=EditionType.BEDROCK):
             return VersionType.EXPERIMENTAL
         return None
@@ -45,12 +45,13 @@ class Bedrock(Edition):
         tag = None
 
         for tag in reversed(tags):
-            if Edition.validate_version(tag, version_type, edition=EditionType.BEDROCK):
+            print(tag, version_type.value)
+            if Edition.validate_version(version=tag, version_type=version_type, edition=EditionType.BEDROCK):
                 break
 
         tabbed_print(
             texts.VERSION_LATEST_IS.format(version_type=version_type.value,
-                                           latest_version="" + tag))
+                                           latest_version=str(tag)))
         return tag
 
     def _clone_repo(self,
@@ -119,7 +120,7 @@ class Bedrock(Edition):
         version_or_type: VersionType | str,
         output_dir=DEFAULTS['OUTPUT_DIR'],
         scale_factor=DEFAULTS['SCALE_FACTOR'],
-        do_merge=True,
+        do_merge=DEFAULTS['DO_MERGE'],
     ) -> str | None:
 
         if isinstance(version_or_type, str) and not Edition.validate_version(
@@ -136,7 +137,7 @@ class Bedrock(Edition):
         else:
             version = self.get_latest_version(
                 version_type if version_type is not None else VersionType.
-                RELEASE)
+                STABLE)
 
         self._change_repo_version(version)
 

@@ -2,7 +2,7 @@ import argparse
 import toml
 from . import texts
 from .edition import Edition, Bedrock, Java
-from .options import DEFAULTS, EditionType
+from .options import DEFAULTS, EditionType, VersionType
 from .texts import tabbed_print
 
 
@@ -36,7 +36,8 @@ def cli():
         default=DEFAULTS['VERSION'],
         nargs='?',
         help=
-        'version or type of version to use, e.g. "1.17.1", or "experimental"')
+        'version or type of version to use, e.g. "1.17.1", "stable", or "experimental"'
+    )
 
     edition_group = parser.add_mutually_exclusive_group()
     edition_group.add_argument('-j',
@@ -74,10 +75,12 @@ def cli():
     print(texts.TITLE)
 
     edition_type: EditionType | None = None
+    update: str | VersionType | None = None
+    edition: Edition | None = None
 
-    if args.bedrock:
+    if args.bedrock or args.update == 'preview':
         edition_type = EditionType.BEDROCK
-    elif args.java:
+    elif args.java or args.update == 'snapshot':
         edition_type = EditionType.JAVA
     elif args.update:
         edition_type = get_edition_from_version(args.update)
@@ -89,11 +92,27 @@ def cli():
     tabbed_print(
         texts.EDITION_USING_X.format(edition=edition_type.value.capitalize()))
 
-    mc_edition: Edition = Bedrock(
-    ) if edition_type == EditionType.BEDROCK else Java()
+    if update is None:
+        if args.update.lower() == 'preview':
+            update = VersionType.EXPERIMENTAL
+            edition = Bedrock()
+        elif args.update.lower() == 'snapshot':
+            update = VersionType.EXPERIMENTAL
+            edition = Java()
+        elif args.update.lower() == 'stable':
+            update = VersionType.STABLE
+        elif args.update.lower() == 'experimental' or args.update.lower(
+        ) == 'exp':
+            update = VersionType.EXPERIMENTAL
 
-    mc_edition.get_textures(version_or_type=args.update,
-                            scale_factor=args.scale)
+    if edition is None:
+        edition = Bedrock() if edition_type == EditionType.BEDROCK else Java()
+
+    edition.get_textures(
+        version_or_type=update if update else DEFAULTS['VERSION'],
+        scale_factor=args.scale,
+        output_dir=args.output,
+        do_merge=args.flatten)
 
 
 def read_version_from_pyproject(path: str = 'pyproject.toml'):

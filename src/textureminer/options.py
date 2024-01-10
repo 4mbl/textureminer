@@ -13,7 +13,7 @@ class VersionType(Enum):
     EXPERIMENTAL = 'experimental'
     """snapshot, pre-release, release candidate, or preview
     """
-    RELEASE = 'release'
+    STABLE = 'stable'
     """stable release
     """
 
@@ -56,5 +56,5 @@ DEFAULTS: Options = {
     'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textures'),
     'SCALE_FACTOR': 100,
     'TEMP_PATH': f'{tempfile.gettempdir()}/textureminer'.replace('\\', '/'),
-    'VERSION': VersionType.RELEASE,
+    'VERSION': VersionType.STABLE,
 }

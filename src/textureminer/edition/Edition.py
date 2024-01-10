@@ -85,7 +85,7 @@ class Edition(ABC):
                 return bool(
                     re.match(REGEX_BEDROCK_RELEASE, version) or
                     re.match(REGEX_BEDROCK_PREVIEW, version))
-            if version_type == VersionType.RELEASE:
+            if version_type == VersionType.STABLE:
                 return bool(re.match(REGEX_BEDROCK_RELEASE, version))
             if version_type == VersionType.EXPERIMENTAL:
                 return bool(re.match(REGEX_BEDROCK_PREVIEW, version))
@@ -97,7 +97,7 @@ class Edition(ABC):
                     re.match(REGEX_JAVA_SNAPSHOT, version) or
                     re.match(REGEX_JAVA_PRE, version) or
                     re.match(REGEX_JAVA_RC, version))
-            if version_type == VersionType.RELEASE:
+            if version_type == VersionType.STABLE:
                 return bool(re.match(REGEX_JAVA_RELEASE, version))
             if version_type == VersionType.EXPERIMENTAL:
                 return bool(

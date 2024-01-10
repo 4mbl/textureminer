@@ -28,8 +28,8 @@ class Java(Edition):
     def get_version_type(self, version: str) -> VersionType | None:
         if version[0] != 'v':
             version = f'v{version}'
-        if Edition.validate_version(version=version, version_type=VersionType.RELEASE, edition=EditionType.JAVA):
-            return VersionType.RELEASE
+        if Edition.validate_version(version=version, version_type=VersionType.STABLE, edition=EditionType.JAVA):
+            return VersionType.STABLE
         if Edition.validate_version(version=version, version_type=VersionType.EXPERIMENTAL, edition=EditionType.JAVA) :
             return VersionType.EXPERIMENTAL
         return None
@@ -52,7 +52,7 @@ class Java(Edition):
             texts.VERSION_LATEST_FINDING.format(
                 version_type=version_type.value))
 
-        version_id = 'release' if version_type.value == VersionType.RELEASE else 'snapshot'
+        version_id = 'release' if version_type.value == VersionType.STABLE else 'snapshot'
         latest_version = self._get_version_manifest()['latest'][version_id]
         tabbed_print(
             texts.VERSION_LATEST_IS.format(version_type=version_type.value,
@@ -143,7 +143,7 @@ class Java(Edition):
         else:
             version = self.get_latest_version(
                 version_type if version_type is not None else VersionType.
-                RELEASE)
+                STABLE)
 
         tabbed_print(texts.VERSION_USING_X.format(version=version))
         assets = self._download_client_jar(version)
