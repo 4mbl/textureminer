@@ -56,7 +56,7 @@ class Options(TypedDict):
 DEFAULTS: Options = {
     'DO_MERGE': False,
     'EDITION': EditionType.JAVA,
-    'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textures'),
+    'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textureminer'),
     'SCALE_FACTOR': 100,
     'TEMP_PATH': f'{tempfile.gettempdir()}/textureminer'.replace('\\', '/'),
     'VERSION': VersionType.ALL,
