@@ -16,6 +16,12 @@ All notable changes to this project will be documented in this file.
 
 ### Known Issues -->
 
+## 2.0.1 | 2024-01-10
+
+## Fixed
+
+* Changelog heading for version 2.0.0 was incorrect.
+
 ## 2.0.0 | 2024-01-10
 
 ### Added
