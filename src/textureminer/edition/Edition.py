@@ -4,10 +4,10 @@ import re
 from shutil import copytree, rmtree
 from PIL import Image as pil_image  # type: ignore
 from forfiles import image, file as f  # type: ignore
-from textureminer import texts
-from textureminer.file import mk_dir
-from textureminer.options import DEFAULTS, EditionType, VersionType
-from textureminer.texts import tabbed_print
+from .. import texts
+from ..file import mk_dir
+from ..options import DEFAULTS, EditionType, VersionType
+from ..texts import tabbed_print
 
 REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
 REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
@@ -78,7 +78,7 @@ class Edition(ABC):
             bool: whether the version is valid
         """
 
-        if edition == EditionType.BEDROCK.value:
+        if edition == EditionType.BEDROCK:
             if version[0] != 'v':
                 version = f'v{version}'
             if version_type is None:
@@ -90,7 +90,7 @@ class Edition(ABC):
             if version_type == VersionType.EXPERIMENTAL:
                 return bool(re.match(REGEX_BEDROCK_PREVIEW, version))
 
-        if edition == EditionType.JAVA.value:
+        if edition == EditionType.JAVA:
             if version_type is None:
                 return bool(
                     re.match(REGEX_JAVA_RELEASE, version) or

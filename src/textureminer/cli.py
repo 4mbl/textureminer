@@ -1,86 +1,105 @@
-import sys
-from typing import Tuple
-from textureminer import texts
-from textureminer.edition import Edition, Bedrock, Java
-from textureminer.options import DEFAULTS, EditionType, VersionType
-from textureminer.texts import tabbed_print
+import argparse
+import toml
+from . import texts
+from .edition import Edition, Bedrock, Java
+from .options import DEFAULTS, EditionType
+from .texts import tabbed_print
 
 
-def get_target(
-        args: list[str] = sys.argv[1:]
-) -> Tuple[EditionType, VersionType | str]:
-    """
-    Retrieves the target edition and version from the command line arguments.
+def get_edition_from_version(version: str) -> EditionType | None:
+    """Gets the edition from a version.
 
     Args:
-        args (list[str], optional): Command line arguments. Defaults to `sys.argv[1:]`.
+        version (str): version to get the edition from
 
     Returns:
-        Tuple[EditionType, VersionType | str]: A tuple containing the target edition and version.
+        EditionType: edition of the version
     """
 
-    if len(args) == 0:
-        tabbed_print(texts.EDITION_USING_DEFAULT)
-        return (DEFAULTS['EDITION'], DEFAULTS['VERSION'])
-
-    version_or_type: VersionType | str = args[0].lower()
-
-    release = ['stable'
-               'release']
-    experimental = [
-        'experimental', 'snapshot', 'pre-release', 'release candidate',
-        'preview'
-    ]
-
-    if version_or_type in release:
-        version_or_type = VersionType.RELEASE
-    elif version_or_type in experimental:
-        version_or_type = VersionType.EXPERIMENTAL
-
-    if len(args) == 1:
-        tabbed_print(texts.EDITION_USING_DEFAULT)
-        return (DEFAULTS['EDITION'], version_or_type)
-
-    edition = args[1].lower()
-
-    if edition == EditionType.JAVA.value.lower() and Edition.validate_version(
-            str(version_or_type)):
-        return (EditionType.JAVA, version_or_type)
-    if edition == EditionType.BEDROCK.value.lower(
-    ) and Edition.validate_version(str(version_or_type)):
-        return (EditionType.BEDROCK, version_or_type)
-
-    tabbed_print(texts.INVALID_COMBINATION)
-
-    tabbed_print(texts.EDITION_USING_DEFAULT)
-    return (DEFAULTS['EDITION'], DEFAULTS['VERSION'])
+    if Edition.validate_version(version=version, edition=EditionType.JAVA):
+        return EditionType.JAVA
+    if Edition.validate_version(version=version, edition=EditionType.BEDROCK):
+        return EditionType.BEDROCK
+    return None
 
 
-def cli(args: list[str] = sys.argv[1:]):
-    """
-    CLI entrypoint for textureminer.
-
-    Args:
-        args (list[str], optional): List of command-line arguments. Defaults to `sys.argv[1:]`.
+def cli():
+    """CLI entrypoint for textureminer.
 
     Returns:
         None
     """
+    parser = argparse.ArgumentParser(
+        prog='textureminer', description='extract and scale minecraft textures')
+    parser.add_argument(
+        'update',
+        default=DEFAULTS['VERSION'],
+        nargs='?',
+        help=
+        'version or type of version to use, e.g. "1.17.1", or "experimental"')
 
-    if len(args) > 0 and args[0].lower() in [
-            '--help',
-            '-h'
-            'help',
-    ]:
-        print(texts.COMMAND_SYNTAX)
-        return None
+    edition_group = parser.add_mutually_exclusive_group()
+    edition_group.add_argument('-j',
+                               '--java',
+                               action='store_true',
+                               help='use java edition')
+    edition_group.add_argument('-b',
+                               '--bedrock',
+                               action='store_true',
+                               help='use bedrock edition')
+
+    parser.add_argument('-o',
+                        '--output',
+                        metavar='DIR',
+                        default=DEFAULTS['OUTPUT_DIR'],
+                        help='path of output directory')
+    parser.add_argument(
+        '--flatten',
+        action='store_true',
+        default=DEFAULTS['DO_MERGE'],
+        help='merge block and item textures into a single directory')
+    parser.add_argument('--scale',
+                        default=DEFAULTS['SCALE_FACTOR'],
+                        type=int,
+                        help='scale factor for textures',
+                        metavar='N')
+    parser.add_argument('-v',
+                        '--version',
+                        action='version',
+                        version='%(prog)s ' + read_version_from_pyproject(),
+                        help='show textureminer version')
+
+    args = parser.parse_args()
 
     print(texts.TITLE)
 
-    (edition_type, version_or_type) = get_target()
+    edition_type: EditionType | None = None
+
+    if args.bedrock:
+        edition_type = EditionType.BEDROCK
+    elif args.java:
+        edition_type = EditionType.JAVA
+    elif args.update:
+        edition_type = get_edition_from_version(args.update)
+
+    if edition_type is None:
+        tabbed_print(texts.EDITION_USING_DEFAULT)
+        edition_type = DEFAULTS['EDITION']
+
+    tabbed_print(
+        texts.EDITION_USING_X.format(edition=edition_type.value.capitalize()))
 
     mc_edition: Edition = Bedrock(
     ) if edition_type == EditionType.BEDROCK else Java()
 
-    mc_edition.get_textures(version_or_type=version_or_type,
-                            scale_factor=DEFAULTS['SCALE_FACTOR'])
+    mc_edition.get_textures(version_or_type=args.update,
+                            scale_factor=args.scale)
+
+
+def read_version_from_pyproject(path: str = 'pyproject.toml'):
+    """Reads the version from pyproject.toml.
+    """
+
+    with open(path, 'r', encoding='utf-8') as pyproject:
+        pyproject_toml = toml.load(pyproject)
+        return pyproject_toml['project']['version']

@@ -1,10 +1,10 @@
 import os
 import subprocess
-from textureminer import texts
-from textureminer.file import rm_if_exists
-from textureminer.edition.Edition import Edition
-from textureminer.options import DEFAULTS, EditionType, VersionType
-from textureminer.texts import tabbed_print
+from .. import texts
+from ..file import rm_if_exists
+from ..edition.Edition import Edition
+from ..options import DEFAULTS, EditionType, VersionType
+from ..texts import tabbed_print
 
 
 class Bedrock(Edition):
@@ -139,7 +139,6 @@ class Bedrock(Edition):
                 RELEASE)
 
         self._change_repo_version(version)
-        tabbed_print(texts.VERSION_USING_X.format(version=version))
 
         filtered = Edition.filter_unwanted(self.repo_dir,
                                    f'{output_dir}/bedrock/{version}',

@@ -1,13 +1,14 @@
 import os
 from shutil import copytree, rmtree
+import sys
 from zipfile import ZipFile
 import urllib.request
 import requests  # type: ignore
-from textureminer import texts
-from textureminer.edition.Edition import Edition
-from textureminer.file import mk_dir, rm_if_exists
-from textureminer.options import DEFAULTS, EditionType, VersionType
-from textureminer.texts import tabbed_print
+from .. import texts
+from .Edition import Edition
+from ..file import mk_dir, rm_if_exists
+from ..options import DEFAULTS, EditionType, VersionType
+from ..texts import tabbed_print
 
 
 class Java(Edition):
@@ -79,6 +80,10 @@ class Java(Edition):
                 break
             else:
                 url = None
+
+        if url is None:
+            print(texts.VERSION_INVALID.format(version=version))
+            sys.exit(2)
 
         json = requests.get(url, timeout=10).json()
         client_jar_url = json['downloads']['client']['url']

@@ -51,7 +51,7 @@ class Options(TypedDict):
 
 
 DEFAULTS: Options = {
-    'DO_MERGE': True,
+    'DO_MERGE': False,
     'EDITION': EditionType.JAVA,
     'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textures'),
     'SCALE_FACTOR': 100,

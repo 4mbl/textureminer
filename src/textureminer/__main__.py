@@ -1,3 +1,3 @@
-from textureminer.cli import cli
+from .cli import cli
 
 cli()
