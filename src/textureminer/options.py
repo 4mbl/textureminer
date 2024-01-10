@@ -13,8 +13,11 @@ class VersionType(Enum):
     EXPERIMENTAL = 'experimental'
     """snapshot, pre-release, release candidate, or preview
     """
-    RELEASE = 'release'
+    STABLE = 'stable'
     """stable release
+    """
+    ALL = 'all'
+    """all versions
     """
 
 
@@ -51,10 +54,10 @@ class Options(TypedDict):
 
 
 DEFAULTS: Options = {
-    'DO_MERGE': True,
+    'DO_MERGE': False,
     'EDITION': EditionType.JAVA,
-    'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textures'),
+    'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textureminer'),
     'SCALE_FACTOR': 100,
     'TEMP_PATH': f'{tempfile.gettempdir()}/textureminer'.replace('\\', '/'),
-    'VERSION': VersionType.RELEASE,
+    'VERSION': VersionType.ALL,
 }

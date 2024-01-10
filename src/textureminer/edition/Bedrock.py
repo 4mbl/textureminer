@@ -1,10 +1,10 @@
 import os
 import subprocess
-from textureminer import texts
-from textureminer.file import rm_if_exists
-from textureminer.edition.Edition import Edition
-from textureminer.options import DEFAULTS, EditionType, VersionType
-from textureminer.texts import tabbed_print
+from .. import texts
+from ..file import rm_if_exists
+from ..edition.Edition import Edition
+from ..options import DEFAULTS, EditionType, VersionType
+from ..texts import tabbed_print
 
 
 class Bedrock(Edition):
@@ -25,8 +25,8 @@ class Bedrock(Edition):
     def get_version_type(self, version: str) -> VersionType | None:
         if version[0] != 'v':
             version = f'v{version}'
-        if Edition.validate_version(version=version, version_type=VersionType.RELEASE, edition=EditionType.BEDROCK):
-            return VersionType.RELEASE
+        if Edition.validate_version(version=version, version_type=VersionType.STABLE, edition=EditionType.BEDROCK):
+            return VersionType.STABLE
         if Edition.validate_version(version=version, version_type=VersionType.EXPERIMENTAL, edition=EditionType.BEDROCK):
             return VersionType.EXPERIMENTAL
         return None
@@ -45,12 +45,12 @@ class Bedrock(Edition):
         tag = None
 
         for tag in reversed(tags):
-            if Edition.validate_version(tag, version_type, edition=EditionType.BEDROCK):
+            if Edition.validate_version(version=tag, version_type=version_type if version_type != VersionType.ALL else None, edition=EditionType.BEDROCK):
                 break
 
         tabbed_print(
             texts.VERSION_LATEST_IS.format(version_type=version_type.value,
-                                           latest_version="" + tag))
+                                           latest_version=str(tag)))
         return tag
 
     def _clone_repo(self,
@@ -63,7 +63,7 @@ class Bedrock(Edition):
             repo_url (str, optional): URL of the repo to clone. Defaults to `BedrockEdition.REPO_URL`.
         """
 
-        tabbed_print(texts.FILE_DOWNLOADING)
+        tabbed_print(texts.FILES_DOWNLOADING)
 
         self.repo_dir = clone_dir
 
@@ -119,12 +119,12 @@ class Bedrock(Edition):
         version_or_type: VersionType | str,
         output_dir=DEFAULTS['OUTPUT_DIR'],
         scale_factor=DEFAULTS['SCALE_FACTOR'],
-        do_merge=True,
+        do_merge=DEFAULTS['DO_MERGE'],
     ) -> str | None:
 
         if isinstance(version_or_type, str) and not Edition.validate_version(
                 version_or_type, edition=EditionType.BEDROCK):
-            print(texts.VERSION_INVALID.format(version=version_or_type))
+            tabbed_print(texts.ERROR_VERSION_INVALID.format(version=version_or_type))
             return None
 
         version_type = version_or_type if isinstance(version_or_type,
@@ -134,12 +134,9 @@ class Bedrock(Edition):
         if isinstance(version_or_type, str):
             version = version_or_type
         else:
-            version = self.get_latest_version(
-                version_type if version_type is not None else VersionType.
-                RELEASE)
+            version = self.get_latest_version(version_type if version_type is not None else VersionType.ALL)
 
         self._change_repo_version(version)
-        tabbed_print(texts.VERSION_USING_X.format(version=version))
 
         filtered = Edition.filter_unwanted(self.repo_dir,
                                    f'{output_dir}/bedrock/{version}',
