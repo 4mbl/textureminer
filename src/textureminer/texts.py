@@ -15,28 +15,20 @@ STYLED_TAB = style(f"{' '*4}* ", fg=Fg.CYAN)
 
 COMPLETED = style("Completed. You can find the textures on:\n{output_dir}\n",
                   fg=Fg.GREEN)
-
-COMMAND_SYNTAX = """\n\tpy -m textureminer <version> <edition>
-\te.g.
-\tpy -m textureminer 1.17 java
-\tpt -m textureminer 1.17 bedrock
-\tdefaults to java if no edition is specified, and defaults to latest stable if no version is specified"""
-EDITION_INVALID = "Invalid edition!"
-EDITION_USING_DEFAULT = "Using default edition (Java Edition)."
+CLEARING_TEMP = "Clearing temporary files..."
 EDITION_USING_X = "Using {edition} Edition."
 ERROR_COMMAND_FAILED = "The command failed with return code {error_code}: {error_msg}!"
-FILE_DOWNLOADING = "Downloading assets..."
-FILES_EXTRACTING = "Extracting {file_amount} files..."
-CLEARING_TEMP = "Clearing temporary files..."
-INVALID_COMBINATION = "Invalid combination of version and edition!"
+ERROR_EDITION_INVALID = "Invalid edition!"
+ERROR_INVALID_COMBINATION = "Invalid combination of version and edition!"
+ERROR_VERSION_INVALID = "Invalid version ({version})!"
+FILES_DOWNLOADING = "Downloading assets..."
+FILES_EXTRACTING_N = "Extracting {file_amount} files..."
 TEXTURES_FILTERING = "Filtering textures..."
 TEXTURES_MERGING = "Merging block and item textures to a single directory..."
-TEXTURES_RESISING_AMOUNT_IN_DIR = "Resizing {texture_amount} {dir_name} textures..."
 TEXTURES_RESIZING_AMOUNT = "Resizing {texture_amount} textures..."
-VERSION_INVALID = "Invalid version ({version})!"
-VERSION_USING_DEFAULT = "Using default version (latest release)."
-VERSION_LATEST_FINDING = "Finding latest {version_type} version..."
-VERSION_LATEST_IS = "Latest {version_type} is {latest_version}."
+TEXTURES_RESISING_AMOUNT_IN_DIR = "Resizing {texture_amount} {dir_name} textures..."
+VERSION_LATEST_FINDING = "Finding latest version from {version_type} releases channel..."
+VERSION_LATEST_IS = "Latest version from {version_type} releases channel is {latest_version}."
 VERSION_USING_X = "Using {version} version."
 
 

@@ -122,7 +122,6 @@ def cli():
         edition_type = get_edition_from_version(args.update)
 
     if edition_type is None:
-        tabbed_print(texts.EDITION_USING_DEFAULT)
         edition_type = DEFAULTS['EDITION']
 
     tabbed_print(

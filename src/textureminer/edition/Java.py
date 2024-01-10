@@ -92,14 +92,14 @@ class Java(Edition):
                 break
 
         if url is None:
-            tabbed_print(texts.VERSION_INVALID.format(version=version))
+            tabbed_print(texts.ERROR_VERSION_INVALID.format(version=version))
             sys.exit(2)
 
         json = requests.get(url, timeout=10).json()
         client_jar_url = json['downloads']['client']['url']
 
         mk_dir(download_dir)
-        tabbed_print(texts.FILE_DOWNLOADING)
+        tabbed_print(texts.FILES_DOWNLOADING)
         urllib.request.urlretrieve(client_jar_url,
                                    f'{download_dir}/{version}.jar')
         return f'{download_dir}/{version}.jar'
@@ -120,7 +120,7 @@ class Java(Edition):
         """
         with ZipFile(input_path, 'r') as zip_object:
             file_amount = len(zip_object.namelist())
-            tabbed_print(texts.FILES_EXTRACTING.format(file_amount=file_amount))
+            tabbed_print(texts.FILES_EXTRACTING_N.format(file_amount=file_amount))
             zip_object.extractall(f'{DEFAULTS['TEMP_PATH']}/extracted-files/')
         rmtree(f'{DEFAULTS['TEMP_PATH']}/version-jars/')
 
@@ -147,7 +147,7 @@ class Java(Edition):
                 version_or_type, edition=EditionType.JAVA):
             version = version_or_type
         else:
-            tabbed_print(texts.VERSION_INVALID.format(version=version_or_type))
+            tabbed_print(texts.ERROR_VERSION_INVALID.format(version=version_or_type))
             return None
 
         tabbed_print(texts.VERSION_USING_X.format(version=version))
