@@ -16,6 +16,9 @@ class VersionType(Enum):
     STABLE = 'stable'
     """stable release
     """
+    ALL = 'all'
+    """all versions
+    """
 
 
 class EditionType(Enum):
@@ -56,5 +59,5 @@ DEFAULTS: Options = {
     'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textures'),
     'SCALE_FACTOR': 100,
     'TEMP_PATH': f'{tempfile.gettempdir()}/textureminer'.replace('\\', '/'),
-    'VERSION': VersionType.STABLE,
+    'VERSION': VersionType.ALL,
 }

@@ -45,8 +45,7 @@ class Bedrock(Edition):
         tag = None
 
         for tag in reversed(tags):
-            print(tag, version_type.value)
-            if Edition.validate_version(version=tag, version_type=version_type, edition=EditionType.BEDROCK):
+            if Edition.validate_version(version=tag, version_type=version_type if version_type != VersionType.ALL else None, edition=EditionType.BEDROCK):
                 break
 
         tabbed_print(
@@ -135,9 +134,7 @@ class Bedrock(Edition):
         if isinstance(version_or_type, str):
             version = version_or_type
         else:
-            version = self.get_latest_version(
-                version_type if version_type is not None else VersionType.
-                STABLE)
+            version = self.get_latest_version(version_type if version_type is not None else VersionType.ALL)
 
         self._change_repo_version(version)
 

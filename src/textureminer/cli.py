@@ -104,6 +104,8 @@ def cli():
         elif args.update.lower() == 'experimental' or args.update.lower(
         ) == 'exp':
             update = VersionType.EXPERIMENTAL
+        elif args.update.lower() == 'all':
+            update = VersionType.ALL
 
     if edition is None:
         edition = Bedrock() if edition_type == EditionType.BEDROCK else Java()
