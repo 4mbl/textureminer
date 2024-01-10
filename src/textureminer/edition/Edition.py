@@ -197,11 +197,15 @@ class Edition(ABC):
             f.filter(f'{os.path.abspath(subdir)}', ['.png'])
 
             if scale_factor != 1 and len(files) > 0:
-                tabbed_print(
-                    texts.TEXTURES_RESIZING_AMOUNT.format(
-                        texture_amount=len(files)) if do_merge else texts.
-                    TEXTURES_RESISING_AMOUNT_IN_DIR.
-                    format(len(files), os.path.basename(subdir)))
+                if do_merge:
+                    tabbed_print(
+                        texts.TEXTURES_RESIZING_AMOUNT.format(
+                            texture_amount=len(files)))
+                else:
+                    tabbed_print(
+                        texts.TEXTURES_RESISING_AMOUNT_IN_DIR.format(
+                            texture_amount=len(files),
+                            dir_name=os.path.basename(subdir)))
 
             for fil in files:
                 image_path = os.path.normpath(

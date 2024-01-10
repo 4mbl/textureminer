@@ -1,3 +1,4 @@
+from enum import Enum
 import os
 from shutil import copytree, rmtree
 import sys
@@ -9,6 +10,17 @@ from .Edition import Edition
 from ..file import mk_dir, rm_if_exists
 from ..options import DEFAULTS, EditionType, VersionType
 from ..texts import tabbed_print
+
+class VersionManifestIdentifiers(Enum):
+    """Enum class representing different types of version manifest identifiers for Minecraft
+    """
+
+    STABLE = 'release'
+    """stable release
+    """
+    EXPERIMENTAL = 'snapshot'
+    """snapshot
+    """
 
 
 class Java(Edition):
@@ -23,11 +35,9 @@ class Java(Edition):
     VERSION_MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
 
     def __init__(self):
-        self.VERSION_MANIFEST: dict = None
+        self.VERSION_MANIFEST: dict | None = None
 
     def get_version_type(self, version: str) -> VersionType | None:
-        if version[0] != 'v':
-            version = f'v{version}'
         if Edition.validate_version(version=version, version_type=VersionType.STABLE, edition=EditionType.JAVA):
             return VersionType.STABLE
         if Edition.validate_version(version=version, version_type=VersionType.EXPERIMENTAL, edition=EditionType.JAVA) :
@@ -52,7 +62,8 @@ class Java(Edition):
             texts.VERSION_LATEST_FINDING.format(
                 version_type=version_type.value))
 
-        version_id = 'release' if version_type.value == VersionType.STABLE else 'snapshot'
+
+        version_id = VersionManifestIdentifiers.STABLE.value if version_type == VersionType.STABLE else VersionManifestIdentifiers.EXPERIMENTAL.value
         latest_version = self._get_version_manifest()['latest'][version_id]
         tabbed_print(
             texts.VERSION_LATEST_IS.format(version_type=version_type.value,
@@ -74,15 +85,14 @@ class Java(Edition):
         Returns:
             str: The path of the downloaded file.
         """
+        url = None
         for v in self._get_version_manifest()['versions']:
             if v['id'] == version:
                 url = v['url']
                 break
-            else:
-                url = None
 
         if url is None:
-            print(texts.VERSION_INVALID.format(version=version))
+            tabbed_print(texts.VERSION_INVALID.format(version=version))
             sys.exit(2)
 
         json = requests.get(url, timeout=10).json()
@@ -129,21 +139,16 @@ class Java(Edition):
                      scale_factor: int = DEFAULTS['SCALE_FACTOR'],
                      do_merge: bool = True) -> str | None:
 
-        if isinstance(version_or_type, str) and not Edition.validate_version(
+        version: str | None = None
+
+        if isinstance(version_or_type, VersionType):
+            version = self.get_latest_version(version_or_type)
+        elif isinstance(version_or_type, str) and Edition.validate_version(
                 version_or_type, edition=EditionType.JAVA):
-            print(texts.VERSION_INVALID.format(version=version_or_type))
-            return None
-
-        version_type = version_or_type if isinstance(version_or_type,
-                                                     VersionType) else None
-
-        version = None
-        if isinstance(version_or_type, str):
             version = version_or_type
         else:
-            version = self.get_latest_version(
-                version_type if version_type is not None else VersionType.
-                STABLE)
+            tabbed_print(texts.VERSION_INVALID.format(version=version_or_type))
+            return None
 
         tabbed_print(texts.VERSION_USING_X.format(version=version))
         assets = self._download_client_jar(version)

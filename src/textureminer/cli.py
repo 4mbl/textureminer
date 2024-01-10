@@ -1,9 +1,31 @@
 import argparse
+from enum import Enum
 import toml
 from . import texts
 from .edition import Edition, Bedrock, Java
 from .options import DEFAULTS, EditionType, VersionType
 from .texts import tabbed_print
+
+
+class UpdateOption(Enum):
+    """Enum class representing different special update options for textureminer
+    """
+
+    STABLE = 'stable'
+    """stable release
+    """
+    EXPERIMENTAL = 'experimental'
+    """snapshot, pre-release, release candidate, or preview
+    """
+    EXPERIMENTAL_SHORT = 'exp'
+    """snapshot, pre-release, release candidate, or preview
+    """
+    SNAPSHOT = 'snapshot'
+    """snapshot
+    """
+    PREVIEW = 'preview'
+    """preview
+    """
 
 
 def get_edition_from_version(version: str) -> EditionType | None:
@@ -29,6 +51,7 @@ def cli():
     Returns:
         None
     """
+
     parser = argparse.ArgumentParser(
         prog='textureminer', description='extract and scale minecraft textures')
     parser.add_argument(
@@ -76,13 +99,26 @@ def cli():
 
     edition_type: EditionType | None = None
     update: str | VersionType | None = None
-    edition: Edition | None = None
 
-    if args.bedrock or args.update == 'preview':
+    if args.update == DEFAULTS['VERSION']:
+        update = DEFAULTS['VERSION']
+    elif args.update == UpdateOption.STABLE.value:
+        update = VersionType.STABLE
+    elif args.update in (UpdateOption.EXPERIMENTAL.value,
+                         UpdateOption.EXPERIMENTAL_SHORT.value):
+        update = VersionType.EXPERIMENTAL
+    elif args.update == UpdateOption.SNAPSHOT.value:
+        update = VersionType.EXPERIMENTAL
+    elif args.update == UpdateOption.PREVIEW.value:
+        update = VersionType.EXPERIMENTAL
+    else:
+        update = args.update
+
+    if args.bedrock or args.update == UpdateOption.PREVIEW.value:
         edition_type = EditionType.BEDROCK
-    elif args.java or args.update == 'snapshot':
+    elif args.java or args.update == UpdateOption.SNAPSHOT.value:
         edition_type = EditionType.JAVA
-    elif args.update:
+    elif args.update and args.update not in VersionType:
         edition_type = get_edition_from_version(args.update)
 
     if edition_type is None:
@@ -92,23 +128,8 @@ def cli():
     tabbed_print(
         texts.EDITION_USING_X.format(edition=edition_type.value.capitalize()))
 
-    if update is None:
-        if args.update.lower() == 'preview':
-            update = VersionType.EXPERIMENTAL
-            edition = Bedrock()
-        elif args.update.lower() == 'snapshot':
-            update = VersionType.EXPERIMENTAL
-            edition = Java()
-        elif args.update.lower() == 'stable':
-            update = VersionType.STABLE
-        elif args.update.lower() == 'experimental' or args.update.lower(
-        ) == 'exp':
-            update = VersionType.EXPERIMENTAL
-        elif args.update.lower() == 'all':
-            update = VersionType.ALL
-
-    if edition is None:
-        edition = Bedrock() if edition_type == EditionType.BEDROCK else Java()
+    edition: Edition = Bedrock(
+    ) if edition_type == EditionType.BEDROCK else Java()
 
     edition.get_textures(
         version_or_type=update if update else DEFAULTS['VERSION'],

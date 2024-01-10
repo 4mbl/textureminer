@@ -124,7 +124,7 @@ class Bedrock(Edition):
 
         if isinstance(version_or_type, str) and not Edition.validate_version(
                 version_or_type, edition=EditionType.BEDROCK):
-            print(texts.VERSION_INVALID.format(version=version_or_type))
+            tabbed_print(texts.VERSION_INVALID.format(version=version_or_type))
             return None
 
         version_type = version_or_type if isinstance(version_or_type,
