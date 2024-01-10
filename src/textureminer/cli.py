@@ -1,7 +1,7 @@
 import argparse
 from enum import Enum
-import toml
 from . import texts
+from ._metadata import __version__
 from .edition import Edition, Bedrock, Java
 from .options import DEFAULTS, EditionType, VersionType
 from .texts import tabbed_print
@@ -90,7 +90,7 @@ def cli():
     parser.add_argument('-v',
                         '--version',
                         action='version',
-                        version='%(prog)s ' + read_version_from_pyproject(),
+                        version='%(prog)s ' + __version__,
                         help='show textureminer version')
 
     args = parser.parse_args()
@@ -135,12 +135,3 @@ def cli():
         scale_factor=args.scale,
         output_dir=args.output,
         do_merge=args.flatten)
-
-
-def read_version_from_pyproject(path: str = 'pyproject.toml'):
-    """Reads the version from pyproject.toml.
-    """
-
-    with open(path, 'r', encoding='utf-8') as pyproject:
-        pyproject_toml = toml.load(pyproject)
-        return pyproject_toml['project']['version']
