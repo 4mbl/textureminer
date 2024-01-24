@@ -16,6 +16,12 @@ All notable changes to this project will be documented in this file.
 
 ### Known Issues -->
 
+## 2.0.2 | 2024-01-24
+
+## Fixed
+
+* Vulnerability in `"pillow` dependency.
+
 ## 2.0.1 | 2024-01-10
 
 ## Fixed
