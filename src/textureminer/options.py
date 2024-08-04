@@ -39,6 +39,7 @@ class Options(TypedDict):
 
     Attributes:
         DO_MERGE (bool): Whether to merge the block and item textures into a single directory.
+        DO_PARTIALS (bool): Whether to create partial textures.
         EDITION (EditionType): The type of edition to use.
         OUTPUT_DIR (str): The output directory for the textures.
         SCALE_FACTOR (int): The scale factor for the textures.
@@ -46,6 +47,7 @@ class Options(TypedDict):
         VERSION (VersionType): The version to use.
     """
     DO_MERGE: bool
+    DO_PARTIALS: bool
     EDITION: EditionType
     OUTPUT_DIR: str
     SCALE_FACTOR: int
@@ -55,6 +57,7 @@ class Options(TypedDict):
 
 DEFAULTS: Options = {
     'DO_MERGE': False,
+    'DO_PARTIALS': True,
     'EDITION': EditionType.JAVA,
     'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textureminer'),
     'SCALE_FACTOR': 100,

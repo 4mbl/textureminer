@@ -137,7 +137,8 @@ class Java(Edition):
                      version_or_type: VersionType | str,
                      output_dir: str = DEFAULTS['OUTPUT_DIR'],
                      scale_factor: int = DEFAULTS['SCALE_FACTOR'],
-                     do_merge: bool = True) -> str | None:
+                     do_merge: bool = DEFAULTS['DO_MERGE'],
+                     do_partials: bool = DEFAULTS['DO_PARTIALS']) -> str | None:
 
         version: str | None = None
 

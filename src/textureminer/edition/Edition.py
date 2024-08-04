@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
+from enum import Enum
 import os
 import re
 from shutil import copytree, rmtree
 from PIL import Image as pil_image  # type: ignore
 from forfiles import image, file as f  # type: ignore
+
 from .. import texts
 from ..file import mk_dir
 from ..options import DEFAULTS, EditionType, VersionType
@@ -18,6 +20,24 @@ REGEX_JAVA_RC = r'^[0-9]\.[0-9]+\.?[0-9]+-rc[0-9]?$'
 REGEX_JAVA_RELEASE = r'^[0-9]\.[0-9]+\.?[0-9]+?$'
 
 
+class BlockShape(Enum):
+    """Enum class representing different block shapes
+    """
+
+    FULL = 'full'
+    """full texture
+    """
+    SLAB = 'slab'
+    """bottom half of the texture
+    """
+    STAIR = 'stair'
+    """all corners of the texture except the top right corner
+    """
+    CARPET = 'carpet'
+    """only the bottom row of pixels on the texture
+    """
+
+
 class Edition(ABC):
 
     @abstractmethod
@@ -25,7 +45,8 @@ class Edition(ABC):
                      version_or_type: VersionType | str,
                      output_dir: str = DEFAULTS['OUTPUT_DIR'],
                      scale_factor: int = DEFAULTS['SCALE_FACTOR'],
-                     do_merge: bool = DEFAULTS['DO_MERGE']):
+                     do_merge: bool = DEFAULTS['DO_MERGE'],
+                     do_partials: bool = DEFAULTS['DO_PARTIALS']):
         """Extract, filter, and scale item and block textures.
 
         Args:
@@ -174,6 +195,44 @@ class Edition(ABC):
         return output_dir
 
     @staticmethod
+    def crop_texture(image_path: str,
+                     crop_shape: BlockShape,
+                     output_path: str | None = None):
+        """Crops a texture to a specific shape.
+
+        Args:
+            image_path (str): path of the texture to crop
+            crop (BlockShape): shape to crop the texture to
+            output_path (str, optional): path to save the cropped texture to. Defaults to `image_path`.
+        """
+
+        if output_path is None:
+            output_path = image_path
+
+        transparent_color = (255, 255, 255, 0)
+
+        match crop_shape:
+            case BlockShape.FULL:
+                pass
+
+            case BlockShape.SLAB:
+                pil_image.open(image_path).crop(
+                    (0, 8, 16, 16)).save(output_path)
+
+            case BlockShape.STAIR:
+                img = pil_image.open(image_path).convert("RGBA")
+                img.paste(transparent_color, (8, 0, 16, 8))
+                img.save(output_path)
+
+            case BlockShape.CARPET:
+                img = pil_image.open(image_path).convert("RGBA")
+                img.paste(transparent_color, (0, 0, 16, 15))
+                img.save(output_path)
+
+            case _:
+                raise ValueError(f'Unknown block shape {crop_shape}')
+
+    @staticmethod
     def scale_textures(path: str,
                        scale_factor: int = 100,
                        do_merge: bool = True,
@@ -220,3 +279,13 @@ class Edition(ABC):
                     image.scale(image_path, scale_factor, scale_factor)
 
         return path
+
+    @abstractmethod
+    def create_partial_textures(self, texture_dir: str,
+                                version_type: VersionType):
+        """Creates partial textures like stairs and slabs.
+
+        Args:
+            texture_dir (str): directory where non-partial textures are
+            version_type (VersionType): type of version
+        """

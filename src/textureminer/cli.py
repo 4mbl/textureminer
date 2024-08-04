@@ -82,6 +82,10 @@ def cli():
         action='store_true',
         default=DEFAULTS['DO_MERGE'],
         help='merge block and item textures into a single directory')
+    parser.add_argument('--partials',
+                        action='store_true',
+                        default=DEFAULTS['DO_PARTIALS'],
+                        help='create partial textures like stairs and slabs')
     parser.add_argument('--scale',
                         default=DEFAULTS['SCALE_FACTOR'],
                         type=int,
@@ -134,4 +138,5 @@ def cli():
         version_or_type=update if update else DEFAULTS['VERSION'],
         scale_factor=args.scale,
         output_dir=args.output,
-        do_merge=args.flatten)
+        do_merge=args.flatten,
+        do_partials=args.partials)
