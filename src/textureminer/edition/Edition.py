@@ -279,13 +279,3 @@ class Edition(ABC):
                     image.scale(image_path, scale_factor, scale_factor)
 
         return path
-
-    @abstractmethod
-    def create_partial_textures(self, texture_dir: str,
-                                version_type: VersionType):
-        """Creates partial textures like stairs and slabs.
-
-        Args:
-            texture_dir (str): directory where non-partial textures are
-            version_type (VersionType): type of version
-        """

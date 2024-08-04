@@ -1,7 +1,7 @@
 import json
 import os
 import subprocess
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import requests  # type: ignore
 
@@ -155,7 +155,7 @@ class Bedrock(Edition):
                                    edition=EditionType.BEDROCK)
 
         if do_partials:
-            self.create_partial_textures(filtered, version_type)
+            self._create_partial_textures(filtered, version_type)
 
         Edition.scale_textures(filtered, scale_factor, do_merge)
 
@@ -167,8 +167,8 @@ class Bedrock(Edition):
         return output_dir
 
 
-    def create_partial_textures(self, texture_dir: str, version_type: VersionType):
-        UNUSED_TEXTURES = ['carpet']
+    def _create_partial_textures(self, texture_dir: str, version_type: VersionType):
+        UNUSED_TEXTURES: List[str] = ['carpet']
 
         tabbed_print(texts.CREATING_PARTIALS)
         texture_dict = self._get_blocks_json(version_type=version_type)
