@@ -1,5 +1,6 @@
 import json
 import os
+from shutil import copyfile
 import subprocess
 from typing import Any
 
@@ -227,6 +228,30 @@ class Bedrock(Edition):
                 in_path = f'{texture_dir}/blocks/{base_texture}.png'
                 out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.CARPET, out_path)
+
+            # waxed copper blocks use same texture as the base variant
+            elif 'copper' in texture_name and 'waxed' in texture_name:
+                base_texture = texture_name.replace('waxed_', '')
+                sub_dir = texture_name.split('/').pop(
+                    0) if '/' in texture_name else ''
+
+                if '_door' in texture_name:
+                    base_texture_top = base_texture + '_top'
+                    base_texture_bottom = base_texture + '_bottom'
+                    in_path_top = f'{texture_dir}/blocks/{base_texture_top}.png'
+                    in_path_bottom = f'{texture_dir}/blocks/{base_texture_bottom}.png'
+                    out_path_top = f'{texture_dir}/blocks/{sub_dir}/{texture_name}_top.png'
+                    out_path_bottom = f'{texture_dir}/blocks/{sub_dir}/{texture_name}_bottom.png'
+                    copyfile(in_path_top, out_path_top)
+                    copyfile(in_path_bottom, out_path_bottom)
+                    continue
+
+                base_texture = base_texture.replace(
+                    'copper', 'copper_block'
+                ) if base_texture == 'copper' else base_texture
+                in_path = f'{texture_dir}/blocks/{base_texture}.png'
+                out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
+                copyfile(in_path, out_path)
 
     def _get_blocks_json(self, version_type: VersionType) -> dict[str, Any]:
         """Fetches the blocks dictionary from the repository.
