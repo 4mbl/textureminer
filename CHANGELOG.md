@@ -15,6 +15,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+* Upgraded dependencies to latest versions.
+
 ### Fixed
 
 ### Removed
