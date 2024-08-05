@@ -6,7 +6,7 @@ import sys
 from typing import Any, Dict, List
 from zipfile import ZipFile
 import urllib.request
-import requests # type: ignore
+import requests  # type: ignore
 
 from textureminer.exception import FileFormatException  # type: ignore
 from .. import texts
@@ -14,6 +14,7 @@ from .Edition import BlockShape, Edition, TextureOptions
 from ..file import mk_dir, rm_if_exists
 from ..options import DEFAULTS, EditionType, VersionType
 from ..texts import tabbed_print
+
 
 class VersionManifestIdentifiers(Enum):
     """Enum class representing different types of version manifest identifiers for Minecraft
@@ -39,19 +40,35 @@ class Java(Edition):
     VERSION_MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
     ALLOWED_PARTIALS = ['_slab', '_stairs', '_carpet']
     TEXTURE_EXCEPTIONS = [
-            {'from': 'smooth_quartz', 'to': 'quartz_block_bottom'},
-            {'from': 'smooth_sandstone', 'to': 'sandstone_top'},
-            {'from': 'smooth_red_sandstone', 'to': 'red_sandstone_top'},
-            {'from': 'smooth_stone', 'to': 'smooth_stone_slab_side'},
-        ]
+        {
+            'from': 'smooth_quartz',
+            'to': 'quartz_block_bottom'
+        },
+        {
+            'from': 'smooth_sandstone',
+            'to': 'sandstone_top'
+        },
+        {
+            'from': 'smooth_red_sandstone',
+            'to': 'red_sandstone_top'
+        },
+        {
+            'from': 'smooth_stone',
+            'to': 'smooth_stone_slab_side'
+        },
+    ]
 
     def __init__(self):
         self.VERSION_MANIFEST: dict | None = None
 
     def get_version_type(self, version: str) -> VersionType | None:
-        if Edition.validate_version(version=version, version_type=VersionType.STABLE, edition=EditionType.JAVA):
+        if Edition.validate_version(version=version,
+                                    version_type=VersionType.STABLE,
+                                    edition=EditionType.JAVA):
             return VersionType.STABLE
-        if Edition.validate_version(version=version, version_type=VersionType.EXPERIMENTAL, edition=EditionType.JAVA) :
+        if Edition.validate_version(version=version,
+                                    version_type=VersionType.EXPERIMENTAL,
+                                    edition=EditionType.JAVA):
             return VersionType.EXPERIMENTAL
         return None
 
@@ -64,7 +81,8 @@ class Java(Edition):
             dict: The version manifest.
         """
         if self.VERSION_MANIFEST is None:
-            self.VERSION_MANIFEST = requests.get(Java.VERSION_MANIFEST_URL, timeout=10).json()
+            self.VERSION_MANIFEST = requests.get(Java.VERSION_MANIFEST_URL,
+                                                 timeout=10).json()
 
         return self.VERSION_MANIFEST
 
@@ -73,7 +91,6 @@ class Java(Edition):
             texts.VERSION_LATEST_FINDING.format(
                 version_type=version_type.value))
 
-
         version_id = VersionManifestIdentifiers.STABLE.value if version_type == VersionType.STABLE else VersionManifestIdentifiers.EXPERIMENTAL.value
         latest_version = self._get_version_manifest()['latest'][version_id]
         tabbed_print(
@@ -81,11 +98,7 @@ class Java(Edition):
                                            latest_version="" + latest_version))
         return latest_version
 
-    def _download_client_jar(
-        self,
-        version: str,
-        download_dir: str = f'{DEFAULTS['TEMP_PATH']}/version-jars',
-    ) -> str:
+    def _download_client_jar(self, version: str, download_dir: str) -> str:
         """
         Downloads the client .jar file for a specific version from Mojang's servers.
 
@@ -115,11 +128,7 @@ class Java(Edition):
                                    f'{download_dir}/{version}.jar')
         return f'{download_dir}/{version}.jar'
 
-
-    def _extract_jar(
-            self,
-            jar_path: str,
-            output_dir: str = f'{DEFAULTS['TEMP_PATH']}/extracted-files') -> str:
+    def _extract_jar(self, jar_path: str, output_dir: str) -> str:
         """
         Extracts files from a .jar file.
 
@@ -132,15 +141,13 @@ class Java(Edition):
         """
         with ZipFile(jar_path, 'r') as zip_object:
             file_amount = len(zip_object.namelist())
-            tabbed_print(texts.FILES_EXTRACTING_N.format(file_amount=file_amount))
+            tabbed_print(
+                texts.FILES_EXTRACTING_N.format(file_amount=file_amount))
             zip_object.extractall(output_dir)
 
         return output_dir
 
-    def _extract_textures(
-            self,
-            input_path: str,
-            output_path: str = f'{DEFAULTS['TEMP_PATH']}/extracted-textures/textures') -> str:
+    def _extract_textures(self, input_path: str, output_path: str) -> str:
         """
         Extracts textures from a .jar file.
 
@@ -159,10 +166,7 @@ class Java(Edition):
 
         return output_path
 
-    def _extract_recipes(
-            self,
-            input_path: str,
-            output_path: str = f'{DEFAULTS['TEMP_PATH']}/extracted-textures/recipes') -> str:
+    def _extract_recipes(self, input_path: str, output_path: str) -> str:
         """
         Extracts recipes from a .jar file.
 
@@ -191,39 +195,39 @@ class Java(Edition):
 
         version: str | None = None
 
-        version_type = version_or_type if isinstance(version_or_type,
-                                                     VersionType) else VersionType.ALL
-
         if isinstance(version_or_type, VersionType):
             version = self.get_latest_version(version_or_type)
         elif isinstance(version_or_type, str) and Edition.validate_version(
                 version_or_type, edition=EditionType.JAVA):
             version = version_or_type
         else:
-            tabbed_print(texts.ERROR_VERSION_INVALID.format(version=version_or_type))
+            tabbed_print(
+                texts.ERROR_VERSION_INVALID.format(version=version_or_type))
             return None
 
         tabbed_print(texts.VERSION_USING_X.format(version=version))
-        assets = self._download_client_jar(version)
+        assets = self._download_client_jar(
+            version, DEFAULTS['TEMP_PATH'] + '/version-jars')
 
-        extracted = self._extract_jar(assets)
-        rmtree(f'{DEFAULTS['TEMP_PATH']}/version-jars/')
+        extracted = self._extract_jar(
+            assets, DEFAULTS['TEMP_PATH'] + '/extracted-files')
+        rmtree(DEFAULTS['TEMP_PATH'] + '/version-jars/')
 
-        textures = self._extract_textures(f'{extracted}/assets/minecraft/textures')
+        textures = self._extract_textures(
+            extracted + '/assets/minecraft/textures',
+            DEFAULTS['TEMP_PATH'] + '/extracted-textures/textures')
 
         if options['DO_PARTIALS']:
-            self._create_partial_textures(extracted, textures, version_type)
+            self._create_partial_textures(extracted, textures)
 
-        rmtree(f'{DEFAULTS['TEMP_PATH']}/extracted-files/')
+        rmtree(DEFAULTS['TEMP_PATH'] + '/extracted-files/')
 
         filtered = Edition.filter_unwanted(textures,
-                                   f'{output_dir}/java/{version}',
-                                   edition=EditionType.JAVA)
+                                           output_dir + '/java/' + version,
+                                           edition=EditionType.JAVA)
 
-        Edition.scale_textures(filtered,
-                               options['SCALE_FACTOR'],
-                               options['DO_MERGE'],
-                               options['DO_CROP'])
+        Edition.scale_textures(filtered, options['SCALE_FACTOR'],
+                               options['DO_MERGE'], options['DO_CROP'])
 
         tabbed_print(texts.CLEARING_TEMP)
         rm_if_exists(DEFAULTS['TEMP_PATH'])
@@ -232,13 +236,17 @@ class Java(Edition):
         print(texts.COMPLETED.format(output_dir=output_dir))
         return output_dir
 
-    def _is_allowed_partial(self, texture_name: str, allowed: List[str]) -> bool:
+    def _is_allowed_partial(self, texture_name: str,
+                            allowed: List[str]) -> bool:
         return any(partial in texture_name for partial in allowed)
 
     def _texture_exists(self, texture_name: str, texture_dir: str) -> bool:
-        return os.path.isfile(f'{texture_dir}/block/{texture_name}.png') if texture_name is not None else False
+        return os.path.isfile(f'{texture_dir}/block/{texture_name}.png'
+                             ) if texture_name is not None else False
 
-    def _handle_texture_exceptions(self, base_material: str, texture_exceptions: List[Dict[str, str]], texture_dir: str) -> str | None:
+    def _handle_texture_exceptions(self, base_material: str,
+                                   texture_exceptions: List[Dict[str, str]],
+                                   texture_dir: str) -> str | None:
         # waxed copper blocks use same texture as the base variant
         if 'copper' in base_material:
             base_material = base_material.replace('waxed_', '')
@@ -253,7 +261,8 @@ class Java(Edition):
 
         return base_material
 
-    def _get_base_material_from_recipe(self, recipe_file_path: str, texture_dir: str) -> str | None:
+    def _get_base_material_from_recipe(self, recipe_file_path: str,
+                                       texture_dir: str) -> str | None:
         with open(recipe_file_path, encoding='utf-8') as f:
             recipe_data = json.load(f)
 
@@ -264,20 +273,25 @@ class Java(Edition):
                     materials = recipe_data['key']["#"]
                     if isinstance(materials, list):
                         if i >= len(materials):
-                            raise FileFormatException(f'Unknown recipe file format: {recipe_file_path}')
+                            raise FileFormatException(
+                                f'Unknown recipe file format: {recipe_file_path}'
+                            )
                         base_material = materials[i]['item']
                     else:
                         base_material = materials['item']
                         continue_loop = False
                 elif 'ingredients' in recipe_data:
                     if i >= len(materials):
-                        raise FileFormatException(f'Unknown recipe file format: {recipe_file_path}')
+                        raise FileFormatException(
+                            f'Unknown recipe file format: {recipe_file_path}')
                     base_material = recipe_data['ingredients'][i]['item']
                 else:
-                    raise FileFormatException(f'Unknown recipe file format: {recipe_file_path}')
+                    raise FileFormatException(
+                        f'Unknown recipe file format: {recipe_file_path}')
 
                 base_material = base_material.replace('minecraft:', '')
-                base_material = self._handle_texture_exceptions(base_material, self.TEXTURE_EXCEPTIONS, texture_dir)
+                base_material = self._handle_texture_exceptions(
+                    base_material, self.TEXTURE_EXCEPTIONS, texture_dir)
 
                 if self._texture_exists(base_material, texture_dir):
                     return base_material
@@ -286,7 +300,8 @@ class Java(Edition):
 
         return None
 
-    def _get_texture_dict(self, recipe_dir: str, texture_dir: str) -> Dict[str, Any]:
+    def _get_texture_dict(self, recipe_dir: str,
+                          texture_dir: str) -> Dict[str, Any]:
         texture_dict = {}
         for root, _dirs, files in os.walk(recipe_dir):
             for file in files:
@@ -303,18 +318,21 @@ class Java(Edition):
                 if not self._is_allowed_partial(product, self.ALLOWED_PARTIALS):
                     continue
 
-                base_material = self._get_base_material_from_recipe(f'{root}/{file}', texture_dir)
+                base_material = self._get_base_material_from_recipe(
+                    f'{root}/{file}', texture_dir)
 
                 if base_material is None:
-                    raise FileFormatException(f'Could not find base material for {product}')
+                    raise FileFormatException(
+                        f'Could not find base material for {product}')
                 texture_dict[product] = base_material
 
         return texture_dict
 
-
-    def _create_partial_textures(self, extracted_dir: str, texture_dir: str, version_type: VersionType):
+    def _create_partial_textures(self, extracted_dir: str, texture_dir: str):
         tabbed_print(texts.CREATING_PARTIALS)
-        recipe_dir = self._extract_recipes(f'{extracted_dir}/data/minecraft/recipe')
+        recipe_dir = self._extract_recipes(
+            f'{extracted_dir}/data/minecraft/recipe',
+            DEFAULTS['TEMP_PATH'] + '/extracted-textures/recipes')
         texture_dict = self._get_texture_dict(recipe_dir, texture_dir)
 
         for texture_name, base_texture in texture_dict.items():

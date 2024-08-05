@@ -5,7 +5,6 @@ from typing import Any, Dict, List
 
 import requests  # type: ignore
 
-
 from .. import texts
 from ..file import rm_if_exists
 from ..edition.Edition import BlockShape, Edition, TextureOptions
@@ -34,9 +33,13 @@ class Bedrock(Edition):
     def get_version_type(self, version: str) -> VersionType | None:
         if version[0] != 'v':
             version = f'v{version}'
-        if Edition.validate_version(version=version, version_type=VersionType.STABLE, edition=EditionType.BEDROCK):
+        if Edition.validate_version(version=version,
+                                    version_type=VersionType.STABLE,
+                                    edition=EditionType.BEDROCK):
             return VersionType.STABLE
-        if Edition.validate_version(version=version, version_type=VersionType.EXPERIMENTAL, edition=EditionType.BEDROCK):
+        if Edition.validate_version(version=version,
+                                    version_type=VersionType.EXPERIMENTAL,
+                                    edition=EditionType.BEDROCK):
             return VersionType.EXPERIMENTAL
         return None
 
@@ -54,7 +57,11 @@ class Bedrock(Edition):
         tag = None
 
         for tag in reversed(tags):
-            if Edition.validate_version(version=tag, version_type=version_type if version_type != VersionType.ALL else None, edition=EditionType.BEDROCK):
+            if Edition.validate_version(
+                    version=tag,
+                    version_type=version_type
+                    if version_type != VersionType.ALL else None,
+                    edition=EditionType.BEDROCK):
                 break
 
         tabbed_print(
@@ -62,9 +69,7 @@ class Bedrock(Edition):
                                            latest_version=str(tag)))
         return tag
 
-    def _clone_repo(self,
-                    clone_dir: str = f'{DEFAULTS['TEMP_PATH']}/bedrock-samples/',
-                    repo_url: str = REPO_URL):
+    def _clone_repo(self, clone_dir: str, repo_url: str = REPO_URL):
         """Clones a git repository.
 
         Args:
@@ -133,32 +138,32 @@ class Bedrock(Edition):
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
 
-
         if isinstance(version_or_type, str) and not Edition.validate_version(
                 version_or_type, edition=EditionType.BEDROCK):
-            tabbed_print(texts.ERROR_VERSION_INVALID.format(version=version_or_type))
+            tabbed_print(
+                texts.ERROR_VERSION_INVALID.format(version=version_or_type))
             return None
 
-        version_type = version_or_type if isinstance(version_or_type,
-                                                     VersionType) else VersionType.ALL
+        version_type = version_or_type if isinstance(
+            version_or_type, VersionType) else VersionType.ALL
         version = None
-        self._clone_repo()
+        self._clone_repo(DEFAULTS['TEMP_PATH'] + '/bedrock-samples/')
         if isinstance(version_or_type, str):
             version = version_or_type
         else:
             version = self.get_latest_version(version_type)
 
-
         self._change_repo_version(version)
 
         filtered = Edition.filter_unwanted(self.repo_dir,
-                                   f'{output_dir}/bedrock/{version}',
-                                   edition=EditionType.BEDROCK)
+                                           output_dir + '/bedrock/' + version,
+                                           edition=EditionType.BEDROCK)
 
         if options['DO_PARTIALS']:
             self._create_partial_textures(filtered, version_type)
 
-        Edition.scale_textures(filtered, options['SCALE_FACTOR'], options['DO_MERGE'])
+        Edition.scale_textures(filtered, options['SCALE_FACTOR'],
+                               options['DO_MERGE'])
 
         tabbed_print(texts.CLEARING_TEMP)
         rm_if_exists(DEFAULTS['TEMP_PATH'])
@@ -167,13 +172,12 @@ class Bedrock(Edition):
         print(texts.COMPLETED.format(output_dir=output_dir))
         return output_dir
 
-
-    def _create_partial_textures(self, texture_dir: str, version_type: VersionType):
+    def _create_partial_textures(self, texture_dir: str,
+                                 version_type: VersionType):
         UNUSED_TEXTURES: List[str] = ['carpet']
 
         tabbed_print(texts.CREATING_PARTIALS)
         texture_dict = self._get_blocks_json(version_type=version_type)
-
 
         for texture_name in texture_dict:
             if texture_name in UNUSED_TEXTURES:
@@ -181,15 +185,19 @@ class Bedrock(Edition):
 
             if 'slab' in texture_name and 'double_slab' not in texture_name:
                 identifier = texture_dict[texture_name]["textures"]
-                base_texture = self._identifier_to_filename(identifier, version_type)
-                sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
+                base_texture = self._identifier_to_filename(
+                    identifier, version_type)
+                sub_dir = base_texture.split('/').pop(
+                    0) if '/' in base_texture else ''
                 in_path = f'{texture_dir}/blocks/{base_texture}.png'
                 out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.SLAB, out_path)
             elif 'stairs' in texture_name:
                 identifier = texture_dict[texture_name]["textures"]
-                base_texture = self._identifier_to_filename(identifier, version_type)
-                sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
+                base_texture = self._identifier_to_filename(
+                    identifier, version_type)
+                sub_dir = base_texture.split('/').pop(
+                    0) if '/' in base_texture else ''
                 in_path = f'{texture_dir}/blocks/{base_texture}.png'
                 out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.STAIR, out_path)
@@ -197,12 +205,13 @@ class Bedrock(Edition):
                 if 'moss' in texture_name:
                     base_texture = 'moss_block'
                 else:
-                    base_texture = 'wool_colored_' + texture_name.replace('_carpet', '').replace('light_gray', 'silver')
-                sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
+                    base_texture = 'wool_colored_' + texture_name.replace(
+                        '_carpet', '').replace('light_gray', 'silver')
+                sub_dir = base_texture.split('/').pop(
+                    0) if '/' in base_texture else ''
                 in_path = f'{texture_dir}/blocks/{base_texture}.png'
                 out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.CARPET, out_path)
-
 
     def _get_blocks_json(self, version_type: VersionType) -> Dict[str, Any]:
         """Fetches the blocks dictionary from the repository.
@@ -222,8 +231,8 @@ class Bedrock(Edition):
         self._blocks = data
         return data
 
-
-    def _get_terrain_texture_json(self, version_type: VersionType) -> Dict[str, Any]:
+    def _get_terrain_texture_json(self,
+                                  version_type: VersionType) -> Dict[str, Any]:
         """Fetches the texture dictionary from the repository.
         """
 
@@ -248,8 +257,8 @@ class Bedrock(Edition):
         self._terrain_texture = data
         return data
 
-
-    def _identifier_to_filename(self, identifier: str, version_type: VersionType) -> str:
+    def _identifier_to_filename(self, identifier: str,
+                                version_type: VersionType) -> str:
         if isinstance(identifier, dict):
             if 'side' in identifier:
                 identifier = identifier['side']
