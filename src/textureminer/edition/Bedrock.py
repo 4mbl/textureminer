@@ -24,6 +24,23 @@ class Bedrock(Edition):
 
     REPO_URL = 'https://github.com/Mojang/bedrock-samples'
 
+    REPLICATE_MAP: dict[str, str] = {
+        'glass_pane_top': 'glass_pane',
+        'glass_pane_top_red': 'red_glass_pane',
+        'glass_pane_top_orange': 'orange_glass_pane',
+        'glass_pane_top_yellow': 'yellow_glass_pane',
+        'glass_pane_top_lime': 'lime_glass_pane',
+        'glass_pane_top_green': 'green_glass_pane',
+        'glass_pane_top_cyan': 'cyan_glass_pane',
+        'glass_pane_top_light_blue': 'light_blue_glass_pane',
+        'glass_pane_top_blue': 'blue_glass_pane',
+        'glass_pane_top_purple': 'purple_glass_pane',
+        'glass_pane_top_magenta': 'magenta_glass_pane',
+        'glass_pane_top_pink': 'pink_glass_pane',
+        'glass_pane_top_black': 'black_glass_pane',
+        'glass_pane_top_brown': 'brown_glass_pane',
+    }
+
     _blocks: Dict[str, Any] | None = None
     _terrain_texture: Dict[str, Any] | None = None
 
@@ -161,6 +178,9 @@ class Bedrock(Edition):
 
         if options['DO_PARTIALS']:
             self._create_partial_textures(filtered, version_type)
+
+        if options['DO_REPLICATE']:
+            Edition.replicate_textures(filtered, self.REPLICATE_MAP)
 
         Edition.scale_textures(filtered, options['SCALE_FACTOR'],
                                options['DO_MERGE'])

@@ -2,7 +2,8 @@ from abc import ABC, abstractmethod
 from enum import Enum
 import os
 import re
-from shutil import copytree, rmtree
+from shutil import copytree, rmtree, copyfile
+from typing import Dict
 from PIL import Image as pil_image  # type: ignore
 from forfiles import image, file as f  # type: ignore
 
@@ -35,6 +36,9 @@ class BlockShape(Enum):
     """
     CARPET = 'carpet'
     """Only the bottom row of pixels on the texture
+    """
+    GLASS_PANE = 'glass_pane'
+    """Only the middle column of pixels on the texture
     """
 
 
@@ -211,13 +215,13 @@ class Edition(ABC):
 
         match crop_shape:
             case BlockShape.SQUARE:
-                if pil_image.open(image_path).size != (16, 16):
-                    pil_image.open(image_path).crop(
-                        (0, 0, 16, 16)).save(output_path)
+                pil_image.open(image_path).crop(
+                    (0, 0, 16, 16)).save(output_path)
 
             case BlockShape.SLAB:
-                pil_image.open(image_path).crop(
-                    (0, 8, 16, 16)).save(output_path)
+                img = pil_image.open(image_path).convert("RGBA")
+                img.paste(transparent_color, (0, 0, 16, 8))
+                img.save(output_path)
 
             case BlockShape.STAIR:
                 img = pil_image.open(image_path).convert("RGBA")
@@ -229,8 +233,47 @@ class Edition(ABC):
                 img.paste(transparent_color, (0, 0, 16, 15))
                 img.save(output_path)
 
+            case BlockShape.GLASS_PANE:
+                img = pil_image.open(image_path).convert("RGBA")
+                img.paste(transparent_color, (0, 0, 7, 16))
+                img.paste(transparent_color, (9, 0, 16, 16))
+                img.save(output_path)
+
             case _:
                 raise ValueError(f'Unknown block shape {crop_shape}')
+
+    @staticmethod
+    def replicate_textures(asset_dir: str, replication_rules: Dict[str,
+                                                                   str]) -> int:
+        """Replicates textures in a directory
+
+        Args:
+            asset_dir (str): path to the directory containing the textures
+            replication_rules (dict): dictionary containing the replication rules
+
+        Returns:
+            int: number of textures replicated
+        """
+
+        tabbed_print(texts.TEXTURES_REPLICATING)
+
+        count = 0
+        originals = list(replication_rules.keys())
+        for subdir, _, files in os.walk(asset_dir):
+            for fil in files:
+                file_name = fil.replace('.png', '')
+                if file_name in originals:
+                    original_path = os.path.normpath(
+                        f"{os.path.abspath(subdir)}/{fil}")
+                    replicated_path = os.path.normpath(
+                        f"{os.path.abspath(subdir)}/{replication_rules[file_name]}.png"
+                    )
+                    copyfile(original_path, replicated_path)
+                    Edition.crop_texture(replicated_path, BlockShape.GLASS_PANE,
+                                         replicated_path)
+                    count += 1
+
+        return count
 
     @staticmethod
     def scale_textures(
@@ -253,19 +296,25 @@ class Edition(ABC):
         if do_merge:
             Edition.merge_dirs(path, path)
         tabbed_print(texts.TEXTURES_FILTERING)
+
+        if scale_factor == 1:
+            return path
+
         for subdir, _, files in os.walk(path):
             f.filter(f'{os.path.abspath(subdir)}', ['.png'])
 
-            if scale_factor != 1 and len(files) > 0:
-                if do_merge:
-                    tabbed_print(
-                        texts.TEXTURES_RESIZING_AMOUNT.format(
-                            texture_amount=len(files)))
-                else:
-                    tabbed_print(
-                        texts.TEXTURES_RESISING_AMOUNT_IN_DIR.format(
-                            texture_amount=len(files),
-                            dir_name=os.path.basename(subdir)))
+            if len(files) == 0:
+                continue
+
+            if do_merge:
+                tabbed_print(
+                    texts.TEXTURES_RESIZING_AMOUNT.format(
+                        texture_amount=len(files)))
+            else:
+                tabbed_print(
+                    texts.TEXTURES_RESISING_AMOUNT_IN_DIR.format(
+                        texture_amount=len(files),
+                        dir_name=os.path.basename(subdir)))
 
             for fil in files:
                 image_path = os.path.normpath(
@@ -274,7 +323,6 @@ class Edition(ABC):
                     Edition.crop_texture(image_path, BlockShape.SQUARE,
                                          image_path)
 
-                if scale_factor != 1:
-                    image.scale(image_path, scale_factor, scale_factor)
+                image.scale(image_path, scale_factor, scale_factor)
 
         return path

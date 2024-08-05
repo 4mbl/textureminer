@@ -49,6 +49,10 @@ class TextureOptions(TypedDict):
     """Whether to create partial textures like stairs and slabs
     """
 
+    DO_REPLICATE: bool
+    """Whether to copy and rename only texture variant
+    """
+
     SCALE_FACTOR: int
     """Factor that will be used to scale the textures
     """
@@ -81,6 +85,7 @@ DEFAULTS: Options = {
         'DO_CROP': True,
         'DO_MERGE': False,
         'DO_PARTIALS': True,
+        'DO_REPLICATE': True,
         'SCALE_FACTOR': 100,
     }
 }

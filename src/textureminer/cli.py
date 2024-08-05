@@ -90,6 +90,13 @@ def cli():
                         action='store_true',
                         default=DEFAULTS['TEXTURE_OPTIONS']['DO_PARTIALS'],
                         help='create partial textures like stairs and slabs')
+    parser.add_argument(
+        '--replicate',
+        action='store_true',
+        default=DEFAULTS['TEXTURE_OPTIONS']['DO_REPLICATE'],
+        help=
+        'copy and rename only texture variant, for example "glass_pane_top" to "glass_pane"'
+    )
     parser.add_argument('--scale',
                         default=DEFAULTS['TEXTURE_OPTIONS']['SCALE_FACTOR'],
                         type=int,
@@ -145,5 +152,6 @@ def cli():
             'DO_CROP': args.crop,
             'DO_MERGE': args.flatten,
             'DO_PARTIALS': args.partials,
+            'DO_REPLICATE': args.replicate,
             'SCALE_FACTOR': args.scale,
         })

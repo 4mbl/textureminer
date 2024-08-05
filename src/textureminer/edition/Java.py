@@ -58,6 +58,23 @@ class Java(Edition):
         },
     ]
 
+    REPLICATE_MAP: dict[str, str] = {
+        'glass_pane_top': 'glass_pane',
+        'red_stained_glass_pane_top': 'red_glass_pane',
+        'orange_stained_glass_pane_top': 'orange_glass_pane',
+        'yellow_stained_glass_pane_top': 'yellow_glass_pane',
+        'lime_stained_glass_pane_top': 'lime_glass_pane',
+        'green_stained_glass_pane_top': 'green_glass_pane',
+        'cyan_stained_glass_pane_top': 'cyan_glass_pane',
+        'light_blue_stained_glass_pane_top': 'light_blue_glass_pane',
+        'blue_stained_glass_pane_top': 'blue_glass_pane',
+        'purple_stained_glass_pane_top': 'purple_glass_pane',
+        'magenta_stained_glass_pane_top': 'magenta_glass_pane',
+        'pink_stained_glass_pane_top': 'pink_glass_pane',
+        'black_stained_glass_pane_top': 'black_glass_pane',
+        'brown_stained_glass_pane_top': 'brown_glass_pane',
+    }
+
     def __init__(self):
         self.VERSION_MANIFEST: dict | None = None
 
@@ -220,11 +237,14 @@ class Java(Edition):
         if options['DO_PARTIALS']:
             self._create_partial_textures(extracted, textures)
 
-        rmtree(DEFAULTS['TEMP_PATH'] + '/extracted-files/')
+        rm_if_exists(DEFAULTS['TEMP_PATH'] + '/extracted-files/')
 
         filtered = Edition.filter_unwanted(textures,
                                            output_dir + '/java/' + version,
                                            edition=EditionType.JAVA)
+
+        if options['DO_REPLICATE']:
+            Edition.replicate_textures(filtered, self.REPLICATE_MAP)
 
         Edition.scale_textures(filtered, options['SCALE_FACTOR'],
                                options['DO_MERGE'], options['DO_CROP'])
