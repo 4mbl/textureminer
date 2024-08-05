@@ -3,7 +3,6 @@ from enum import Enum
 import os
 import re
 from shutil import copytree, rmtree, copyfile
-from typing import Dict
 from PIL import Image as pil_image  # type: ignore
 from forfiles import image, file as f  # type: ignore
 
@@ -224,7 +223,7 @@ class Edition(ABC):
                 raise ValueError(f'Unknown block shape {crop_shape}')
 
     @staticmethod
-    def replicate_textures(asset_dir: str, replication_rules: Dict[str,
+    def replicate_textures(asset_dir: str, replication_rules: dict[str,
                                                                    str]) -> int:
         """Replicates textures in a directory
 

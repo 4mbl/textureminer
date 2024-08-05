@@ -3,7 +3,7 @@ import json
 import os
 from shutil import copytree, rmtree
 import sys
-from typing import Any, Dict, List
+from typing import Any
 from zipfile import ZipFile
 import urllib.request
 import requests  # type: ignore
@@ -244,7 +244,7 @@ class Java(Edition):
             Edition.crop_texture(in_path, shape, out_path)
 
     def _get_texture_dict(self, recipe_dir: str,
-                          texture_dir: str) -> Dict[str, Any]:
+                          texture_dir: str) -> dict[str, Any]:
         texture_dict = {}
         for root, _dirs, files in os.walk(recipe_dir):
             for file in files:
@@ -272,7 +272,7 @@ class Java(Edition):
         return texture_dict
 
     def _is_allowed_partial(self, texture_name: str,
-                            allowed: List[str]) -> bool:
+                            allowed: list[str]) -> bool:
         return any(partial in texture_name for partial in allowed)
 
     def _get_base_material_from_recipe(self, recipe_file_path: str,
@@ -315,7 +315,7 @@ class Java(Edition):
         return None
 
     def _handle_texture_exceptions(self, base_material: str,
-                                   texture_exceptions: List[Dict[str, str]],
+                                   texture_exceptions: list[dict[str, str]],
                                    texture_dir: str) -> str | None:
 
         # waxed copper blocks use same texture as the base variant

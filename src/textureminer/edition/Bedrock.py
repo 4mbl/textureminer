@@ -1,7 +1,7 @@
 import json
 import os
 import subprocess
-from typing import Any, Dict, List
+from typing import Any
 
 import requests  # type: ignore
 
@@ -41,8 +41,8 @@ class Bedrock(Edition):
         'glass_pane_top_brown': 'brown_glass_pane',
     }
 
-    _blocks: Dict[str, Any] | None = None
-    _terrain_texture: Dict[str, Any] | None = None
+    _blocks: dict[str, Any] | None = None
+    _terrain_texture: dict[str, Any] | None = None
 
     def __init__(self):
         self.repo_dir: str = ''
@@ -189,7 +189,7 @@ class Bedrock(Edition):
 
     def _create_partial_textures(self, texture_dir: str,
                                  version_type: VersionType):
-        UNUSED_TEXTURES: List[str] = ['carpet']
+        UNUSED_TEXTURES: list[str] = ['carpet']
 
         tabbed_print(texts.CREATING_PARTIALS)
         texture_dict = self._get_blocks_json(version_type=version_type)
@@ -228,7 +228,7 @@ class Bedrock(Edition):
                 out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.CARPET, out_path)
 
-    def _get_blocks_json(self, version_type: VersionType) -> Dict[str, Any]:
+    def _get_blocks_json(self, version_type: VersionType) -> dict[str, Any]:
         """Fetches the blocks dictionary from the repository.
         """
 
@@ -261,7 +261,7 @@ class Bedrock(Edition):
         return textures.replace('textures/blocks/', '')
 
     def _get_terrain_texture_json(self,
-                                  version_type: VersionType) -> Dict[str, Any]:
+                                  version_type: VersionType) -> dict[str, Any]:
         """Fetches the texture dictionary from the repository.
         """
 
