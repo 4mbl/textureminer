@@ -220,7 +220,10 @@ class Java(Edition):
                                    f'{output_dir}/java/{version}',
                                    edition=EditionType.JAVA)
 
-        Edition.scale_textures(filtered, options['SCALE_FACTOR'], options['DO_MERGE'])
+        Edition.scale_textures(filtered,
+                               options['SCALE_FACTOR'],
+                               options['DO_MERGE'],
+                               options['DO_CROP'])
 
         tabbed_print(texts.CLEARING_TEMP)
         rm_if_exists(DEFAULTS['TEMP_PATH'])

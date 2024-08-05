@@ -37,6 +37,10 @@ class TextureOptions(TypedDict):
     """TypedDict class representing the options for textures.
     """
 
+    DO_CROP: bool
+    """Whether to crop non-square textures to be square
+    """
+
     DO_MERGE: bool
     """Whether to merge block and item textures into a single directory
     """
@@ -74,6 +78,7 @@ DEFAULTS: Options = {
     'TEMP_PATH': f'{tempfile.gettempdir()}/textureminer'.replace('\\', '/'),
     'VERSION': VersionType.ALL,
     'TEXTURE_OPTIONS': {
+        'DO_CROP': True,
         'DO_MERGE': False,
         'DO_PARTIALS': True,
         'SCALE_FACTOR': 100,

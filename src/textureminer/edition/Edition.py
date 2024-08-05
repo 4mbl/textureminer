@@ -24,8 +24,8 @@ class BlockShape(Enum):
     """Enum class representing different block shapes
     """
 
-    FULL = 'full'
-    """Full texture
+    SQUARE = 'square'
+    """Square texture
     """
     SLAB = 'slab'
     """Bottom half of the texture
@@ -200,7 +200,7 @@ class Edition(ABC):
 
         Args:
             image_path (str): path of the texture to crop
-            crop (BlockShape): shape to crop the texture to
+            crop_shape (BlockShape): shape to crop the texture to
             output_path (str, optional): path to save the cropped texture to. Defaults to `image_path`.
         """
 
@@ -210,8 +210,10 @@ class Edition(ABC):
         transparent_color = (255, 255, 255, 0)
 
         match crop_shape:
-            case BlockShape.FULL:
-                pass
+            case BlockShape.SQUARE:
+                if pil_image.open(image_path).size != (16, 16):
+                    pil_image.open(image_path).crop(
+                        (0, 0, 16, 16)).save(output_path)
 
             case BlockShape.SLAB:
                 pil_image.open(image_path).crop(
@@ -231,17 +233,18 @@ class Edition(ABC):
                 raise ValueError(f'Unknown block shape {crop_shape}')
 
     @staticmethod
-    def scale_textures(path: str,
-                       scale_factor: int = 100,
-                       do_merge: bool = True,
-                       crop: bool = True) -> str:
+    def scale_textures(
+            path: str,
+            scale_factor: int = DEFAULTS['TEXTURE_OPTIONS']['SCALE_FACTOR'],
+            do_merge: bool = DEFAULTS['TEXTURE_OPTIONS']['DO_MERGE'],
+            do_crop: bool = DEFAULTS['TEXTURE_OPTIONS']['DO_CROP']) -> str:
         """Scales textures within a directory by a factor
 
         Args:
             path (str): path of the textures that will be scaled
             scale_factor (int, optional): factor that the textures will be scaled by
             do_merge (bool, optional): whether to merge block and item texture files into a single directory
-            crop (bool, optional): whether to crop non-square textures to be square
+            do_crop (bool, optional): whether to crop non-square textures to be square
 
         Returns:
             string: path of the scaled textures
@@ -267,11 +270,9 @@ class Edition(ABC):
             for fil in files:
                 image_path = os.path.normpath(
                     f"{os.path.abspath(subdir)}/{fil}")
-                if crop:
-                    with pil_image.open(image_path) as img:
-                        if img.size[0] > 16 or img.size[1] > 16:
-                            img = img.crop((0, 0, 16, 16))
-                            img.save(image_path)
+                if do_crop:
+                    Edition.crop_texture(image_path, BlockShape.SQUARE,
+                                         image_path)
 
                 if scale_factor != 1:
                     image.scale(image_path, scale_factor, scale_factor)

@@ -77,6 +77,10 @@ def cli():
                         metavar='DIR',
                         default=DEFAULTS['OUTPUT_DIR'],
                         help='path of output directory')
+    parser.add_argument('--crop',
+                        action='store_true',
+                        default=DEFAULTS['TEXTURE_OPTIONS']['DO_CROP'],
+                        help='crop non-square textures to be square')
     parser.add_argument(
         '--flatten',
         action='store_true',
@@ -138,7 +142,8 @@ def cli():
         version_or_type=update if update else DEFAULTS['VERSION'],
         output_dir=args.output,
         options={
-            'SCALE_FACTOR': args.scale,
+            'DO_CROP': args.crop,
             'DO_MERGE': args.flatten,
-            'DO_PARTIALS': args.partials
+            'DO_PARTIALS': args.partials,
+            'SCALE_FACTOR': args.scale,
         })
