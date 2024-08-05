@@ -2,7 +2,7 @@ import json
 import os
 from shutil import copyfile
 import subprocess
-from typing import Any
+from typing import Any, override
 
 import requests  # type: ignore
 
@@ -14,12 +14,12 @@ from ..texts import tabbed_print
 
 
 class Bedrock(Edition):
-    """A class representing the Bedrock Edition of Minecraft.
-
-    This class provides methods for retrieving information about versions, downloading textures, and more.
+    """
+    Represents the Bedrock Edition of Minecraft.
 
     Attributes:
         REPO_URL (str): The URL of the Bedrock Edition repository.
+        REPLICATE_MAP (dict): A dictionary mapping texture names to their replication counterparts.
 
     """
 
@@ -42,12 +42,13 @@ class Bedrock(Edition):
         'glass_pane_top_brown': 'brown_glass_pane',
     }
 
-    _blocks: dict[str, Any] | None = None
-    _terrain_texture: dict[str, Any] | None = None
+    blocks_cache: dict[str, Any] | None = None
+    terrain_texture_cache: dict[str, Any] | None = None
 
     def __init__(self):
         self.repo_dir: str = ''
 
+    @override
     def get_textures(
         self,
         version_or_type: VersionType | str,
@@ -95,6 +96,7 @@ class Bedrock(Edition):
         print(texts.COMPLETED.format(output_dir=output_dir))
         return output_dir
 
+    @override
     def get_version_type(self, version: str) -> VersionType | None:
         if version[0] != 'v':
             version = f'v{version}'
@@ -108,6 +110,7 @@ class Bedrock(Edition):
             return VersionType.EXPERIMENTAL
         return None
 
+    @override
     def get_latest_version(self, version_type: VersionType) -> str:
 
         subprocess.run('git fetch --tags', check=False, cwd=self.repo_dir)
@@ -138,8 +141,8 @@ class Bedrock(Edition):
         """Clones a git repository.
 
         Args:
-            clone_dir (str, optional): directory to clone the repository to. Defaults to a temporary directory.
-            repo_url (str, optional): URL of the repo to clone. Defaults to `BedrockEdition.REPO_URL`.
+            clone_dir (str): directory to clone the repository to
+            repo_url (str): URL of the repo to clone
         """
 
         tabbed_print(texts.FILES_DOWNLOADING)
@@ -172,8 +175,8 @@ class Bedrock(Edition):
         """Changes the version of the repository.
 
         Args:
-            version (str): version to change to
-            fetch_tags (bool, optional): whether to fetch tags from the repository. Defaults to True.
+            version (str): version to change the repository to
+            fetch_tags (bool, optional): whether to fetch tags from the repository
         """
         if fetch_tags:
             subprocess.run('git fetch --tags', check=False, cwd=self.repo_dir)
@@ -190,6 +193,12 @@ class Bedrock(Edition):
 
     def _create_partial_textures(self, texture_dir: str,
                                  version_type: VersionType):
+        """Creates partial textures for the Bedrock Edition.
+
+        Args:
+            texture_dir (str): directory where the textures are
+            version_type (VersionType): type of version to create partials for
+        """
         UNUSED_TEXTURES: list[str] = ['carpet']
 
         tabbed_print(texts.CREATING_PARTIALS)
@@ -254,11 +263,17 @@ class Bedrock(Edition):
                 copyfile(in_path, out_path)
 
     def _get_blocks_json(self, version_type: VersionType) -> dict[str, Any]:
-        """Fetches the blocks dictionary from the repository.
+        """Fetches the blocks dictionary.
+
+        Args:
+            version_type (VersionType): type of version to fetch the blocks dictionary for
+
+        Returns:
+            dict[str, Any]: blocks dictionary
         """
 
-        if self._blocks is not None:
-            return self._blocks
+        if self.blocks_cache is not None:
+            return self.blocks_cache
 
         branch = 'main' if version_type == VersionType.STABLE else 'preview'
 
@@ -268,11 +283,21 @@ class Bedrock(Edition):
 
         data = file.json()
 
-        self._blocks = data
+        self.blocks_cache = data
         return data
 
     def _identifier_to_filename(self, identifier: str,
                                 version_type: VersionType) -> str:
+        """Converts a block identifier to a texture filename.
+
+        Args:
+            identifier (str): block identifier
+            version_type (VersionType): type of version to convert the identifier for
+
+        Returns:
+            str: texture filename
+        """
+
         if isinstance(identifier, dict):
             if 'side' in identifier:
                 identifier = identifier['side']
@@ -287,11 +312,17 @@ class Bedrock(Edition):
 
     def _get_terrain_texture_json(self,
                                   version_type: VersionType) -> dict[str, Any]:
-        """Fetches the texture dictionary from the repository.
+        """Fetches the terrain texture dictionary.
+
+        Args:
+            version_type (VersionType): type of version to fetch the terrain texture dictionary for
+
+        Returns:
+            dict[str, Any]: terrain texture dictionary
         """
 
-        if self._terrain_texture is not None:
-            return self._terrain_texture
+        if self.terrain_texture_cache is not None:
+            return self.terrain_texture_cache
 
         branch = 'main' if version_type == VersionType.STABLE else 'preview'
 
@@ -308,5 +339,5 @@ class Bedrock(Edition):
 
         data = json.loads(json_text)
 
-        self._terrain_texture = data
+        self.terrain_texture_cache = data
         return data

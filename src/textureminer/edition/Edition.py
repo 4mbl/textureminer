@@ -42,19 +42,20 @@ class BlockShape(Enum):
 
 
 class Edition(ABC):
+    """Base class for Minecraft editions.
+    """
 
     @abstractmethod
     def get_textures(self,
                      version_or_type: VersionType | str,
                      output_dir: str = DEFAULTS['OUTPUT_DIR'],
-                     options: TextureOptions | None = None):
+                     options: TextureOptions | None = None) -> str | None:
         """Extract, filter, and scale item and block textures.
 
         Args:
             version_or_type (str): a Minecraft version type, or a version string.
-            output_dir (str, optional): directory that the final textures will go.
-            scale_factor (int, optional): factor that will be used to scale the textures.
-            do_merge (bool, optional): whether to merge the block and item textures into a single directory.
+            output_dir (str, optional): directory that the final textures will go
+            options (TextureOptions | None, optional): options for the textures
 
         Returns:
             string | None: path of the final textures or None if invalid input
@@ -77,9 +78,6 @@ class Edition(ABC):
 
         Args:
             version_type (VersionType): type of version to get
-
-        Raises:
-            Exception: if the version number is invalid
 
         Returns:
             str: latest version as a string
@@ -157,7 +155,7 @@ class Edition(ABC):
         Args:
             input_path (str): directory where the input files are
             output_path (str): directory where accepted files will end up
-            edition (EditionType, optional): type of edition, defaults to `EditionType.JAVA`
+            edition (EditionType, optional): type of edition
         """
 
         mk_dir(output_dir, del_prev=True)
@@ -185,7 +183,7 @@ class Edition(ABC):
         Args:
             image_path (str): path of the texture to crop
             crop_shape (BlockShape): shape to crop the texture to
-            output_path (str, optional): path to save the cropped texture to. Defaults to `image_path`.
+            output_path (str, optional): path to save the cropped texture to
         """
 
         if output_path is None:

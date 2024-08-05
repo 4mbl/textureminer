@@ -3,7 +3,7 @@ import json
 import os
 from shutil import copytree, rmtree
 import sys
-from typing import Any
+from typing import override
 from zipfile import ZipFile
 import urllib.request
 import requests  # type: ignore
@@ -39,6 +39,7 @@ class Java(Edition):
     """
     VERSION_MANIFEST_URL = 'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
     ALLOWED_PARTIALS = ['_slab', '_stairs', '_carpet']
+
     TEXTURE_EXCEPTIONS = [
         {
             'from': 'smooth_quartz',
@@ -75,9 +76,12 @@ class Java(Edition):
         'brown_stained_glass_pane_top': 'brown_glass_pane',
     }
 
-    def __init__(self):
-        self.VERSION_MANIFEST: dict | None = None
+    version_manifest_cache: dict | None = None
 
+    def __init__(self):
+        pass
+
+    @override
     def get_textures(self,
                      version_or_type: VersionType | str,
                      output_dir: str = DEFAULTS['OUTPUT_DIR'],
@@ -133,6 +137,7 @@ class Java(Edition):
         print(texts.COMPLETED.format(output_dir=output_dir))
         return output_dir
 
+    @override
     def get_version_type(self, version: str) -> VersionType | None:
         if Edition.validate_version(version=version,
                                     version_type=VersionType.STABLE,
@@ -144,6 +149,7 @@ class Java(Edition):
             return VersionType.EXPERIMENTAL
         return None
 
+    @override
     def get_latest_version(self, version_type: VersionType) -> str:
         tabbed_print(
             texts.VERSION_LATEST_FINDING.format(
@@ -164,11 +170,11 @@ class Java(Edition):
         Returns:
             dict: The version manifest.
         """
-        if self.VERSION_MANIFEST is None:
-            self.VERSION_MANIFEST = requests.get(Java.VERSION_MANIFEST_URL,
-                                                 timeout=10).json()
+        if Java.version_manifest_cache is None:
+            Java.version_manifest_cache = requests.get(
+                Java.VERSION_MANIFEST_URL, timeout=10).json()
 
-        return self.VERSION_MANIFEST
+        return Java.version_manifest_cache
 
     def _download_client_jar(self, version: str, download_dir: str) -> str:
         """
@@ -176,7 +182,7 @@ class Java(Edition):
 
         Args:
             version (str): The version to download.
-            download_dir (str, optional): The directory to download the file to. Defaults to a temporary directory.
+            download_dir (str): The directory to download the file to
 
         Returns:
             str: The path of the downloaded file.
@@ -206,7 +212,7 @@ class Java(Edition):
 
         Args:
             jar_path (str): The path of the .jar file.
-            output_dir (str, optional): The path of the output directory.
+            output_dir (str): The path of the output directory.
 
         Returns:
             str: The path of the output directory.
@@ -244,7 +250,19 @@ class Java(Edition):
             Edition.crop_texture(in_path, shape, out_path)
 
     def _get_texture_dict(self, recipe_dir: str,
-                          texture_dir: str) -> dict[str, Any]:
+                          texture_dir: str) -> dict[str, str]:
+        """Get texture-material mapping from recipe files.
+
+        Args:
+            recipe_dir (str): directory where the recipe files are
+            texture_dir (str): directory where the texture files are
+
+        Raises:
+            FileFormatException: if the recipe file cannot be parsed
+
+        Returns:
+            dict[str, str]: texture-material mapping
+        """
         texture_dict = {}
         for root, _dirs, files in os.walk(recipe_dir):
             for file in files:
@@ -273,10 +291,31 @@ class Java(Edition):
 
     def _is_allowed_partial(self, texture_name: str,
                             allowed: list[str]) -> bool:
+        """Check if a texture name is within a allowed list.
+
+        Args:
+            texture_name (str): texture name to check
+            allowed (list[str]): list of allowed texture names
+
+        Returns:
+            bool: True if the texture name is in the allowed list, False otherwise
+        """
         return any(partial in texture_name for partial in allowed)
 
     def _get_base_material_from_recipe(self, recipe_file_path: str,
                                        texture_dir: str) -> str | None:
+        """Get the base material from a recipe file.
+
+        Args:
+            recipe_file_path (str): path of the recipe file
+            texture_dir (str): directory where the texture files are
+
+        Raises:
+            FileFormatException: if the recipe file cannot be parsed
+
+        Returns:
+            str | None: base material name or None if not found
+        """
         with open(recipe_file_path, encoding='utf-8') as f:
             recipe_data = json.load(f)
 
@@ -314,23 +353,33 @@ class Java(Edition):
 
         return None
 
-    def _handle_texture_exceptions(self, base_material: str,
+    def _handle_texture_exceptions(self, texture_name: str,
                                    texture_exceptions: list[dict[str, str]],
                                    texture_dir: str) -> str | None:
+        """Handle texture exceptions.
+
+        Args:
+            texture_name (str): name of the texture to handle
+            texture_exceptions (list[dict[str, str]]): list of texture exception rules
+            texture_dir (str): directory where the texture files are
+
+        Returns:
+            str | None: texture name or None if not found
+        """
 
         # waxed copper blocks use same texture as the base variant
-        if 'copper' in base_material:
-            base_material = base_material.replace('waxed_', '')
-            if self._texture_exists(base_material, texture_dir):
-                return base_material
+        if 'copper' in texture_name:
+            texture_name = texture_name.replace('waxed_', '')
+            if self._texture_exists(texture_name, texture_dir):
+                return texture_name
 
         for texture_exception in texture_exceptions:
-            if base_material == texture_exception['from']:
-                base_material = texture_exception['to']
-                if self._texture_exists(base_material, texture_dir):
-                    return base_material
+            if texture_name == texture_exception['from']:
+                texture_name = texture_exception['to']
+                if self._texture_exists(texture_name, texture_dir):
+                    return texture_name
 
-        return base_material
+        return texture_name
 
     def _texture_exists(self, texture_name: str, texture_dir: str) -> bool:
         return os.path.isfile(f'{texture_dir}/block/{texture_name}.png'
