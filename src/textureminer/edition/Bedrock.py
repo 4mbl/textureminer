@@ -8,7 +8,7 @@ import requests  # type: ignore
 
 from .. import texts
 from ..file import rm_if_exists
-from ..edition.Edition import BlockShape, Edition
+from ..edition.Edition import BlockShape, Edition, TextureOptions
 from ..options import DEFAULTS, EditionType, VersionType
 from ..texts import tabbed_print
 
@@ -126,11 +126,12 @@ class Bedrock(Edition):
     def get_textures(
         self,
         version_or_type: VersionType | str,
-        output_dir=DEFAULTS['OUTPUT_DIR'],
-        scale_factor=DEFAULTS['SCALE_FACTOR'],
-        do_merge=DEFAULTS['DO_MERGE'],
-        do_partials=DEFAULTS['DO_PARTIALS'],
+        output_dir: str = DEFAULTS['OUTPUT_DIR'],
+        options: TextureOptions | None = None,
     ) -> str | None:
+
+        if options is None:
+            options = DEFAULTS['TEXTURE_OPTIONS']
 
 
         if isinstance(version_or_type, str) and not Edition.validate_version(
@@ -154,10 +155,10 @@ class Bedrock(Edition):
                                    f'{output_dir}/bedrock/{version}',
                                    edition=EditionType.BEDROCK)
 
-        if do_partials:
+        if options['DO_PARTIALS']:
             self._create_partial_textures(filtered, version_type)
 
-        Edition.scale_textures(filtered, scale_factor, do_merge)
+        Edition.scale_textures(filtered, options['SCALE_FACTOR'], options['DO_MERGE'])
 
         tabbed_print(texts.CLEARING_TEMP)
         rm_if_exists(DEFAULTS['TEMP_PATH'])

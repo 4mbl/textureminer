@@ -10,7 +10,7 @@ import requests # type: ignore
 
 from textureminer.exception import FileFormatException  # type: ignore
 from .. import texts
-from .Edition import BlockShape, Edition
+from .Edition import BlockShape, Edition, TextureOptions
 from ..file import mk_dir, rm_if_exists
 from ..options import DEFAULTS, EditionType, VersionType
 from ..texts import tabbed_print
@@ -184,9 +184,10 @@ class Java(Edition):
     def get_textures(self,
                      version_or_type: VersionType | str,
                      output_dir: str = DEFAULTS['OUTPUT_DIR'],
-                     scale_factor: int = DEFAULTS['SCALE_FACTOR'],
-                     do_merge: bool = DEFAULTS['DO_MERGE'],
-                     do_partials: bool = DEFAULTS['DO_PARTIALS']) -> str | None:
+                     options: TextureOptions | None = None) -> str | None:
+
+        if options is None:
+            options = DEFAULTS['TEXTURE_OPTIONS']
 
         version: str | None = None
 
@@ -210,7 +211,7 @@ class Java(Edition):
 
         textures = self._extract_textures(f'{extracted}/assets/minecraft/textures')
 
-        if do_partials:
+        if options['DO_PARTIALS']:
             self._create_partial_textures(extracted, textures, version_type)
 
         rmtree(f'{DEFAULTS['TEMP_PATH']}/extracted-files/')
@@ -219,7 +220,7 @@ class Java(Edition):
                                    f'{output_dir}/java/{version}',
                                    edition=EditionType.JAVA)
 
-        Edition.scale_textures(filtered, scale_factor, do_merge)
+        Edition.scale_textures(filtered, options['SCALE_FACTOR'], options['DO_MERGE'])
 
         tabbed_print(texts.CLEARING_TEMP)
         rm_if_exists(DEFAULTS['TEMP_PATH'])

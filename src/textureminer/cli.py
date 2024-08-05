@@ -80,14 +80,14 @@ def cli():
     parser.add_argument(
         '--flatten',
         action='store_true',
-        default=DEFAULTS['DO_MERGE'],
+        default=DEFAULTS['TEXTURE_OPTIONS']['DO_MERGE'],
         help='merge block and item textures into a single directory')
     parser.add_argument('--partials',
                         action='store_true',
-                        default=DEFAULTS['DO_PARTIALS'],
+                        default=DEFAULTS['TEXTURE_OPTIONS']['DO_PARTIALS'],
                         help='create partial textures like stairs and slabs')
     parser.add_argument('--scale',
-                        default=DEFAULTS['SCALE_FACTOR'],
+                        default=DEFAULTS['TEXTURE_OPTIONS']['SCALE_FACTOR'],
                         type=int,
                         help='scale factor for textures',
                         metavar='N')
@@ -136,7 +136,9 @@ def cli():
 
     edition.get_textures(
         version_or_type=update if update else DEFAULTS['VERSION'],
-        scale_factor=args.scale,
         output_dir=args.output,
-        do_merge=args.flatten,
-        do_partials=args.partials)
+        options={
+            'SCALE_FACTOR': args.scale,
+            'DO_MERGE': args.flatten,
+            'DO_PARTIALS': args.partials
+        })

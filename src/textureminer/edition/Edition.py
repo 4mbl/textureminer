@@ -8,7 +8,7 @@ from forfiles import image, file as f  # type: ignore
 
 from .. import texts
 from ..file import mk_dir
-from ..options import DEFAULTS, EditionType, VersionType
+from ..options import DEFAULTS, EditionType, TextureOptions, VersionType
 from ..texts import tabbed_print
 
 REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
@@ -25,16 +25,16 @@ class BlockShape(Enum):
     """
 
     FULL = 'full'
-    """full texture
+    """Full texture
     """
     SLAB = 'slab'
-    """bottom half of the texture
+    """Bottom half of the texture
     """
     STAIR = 'stair'
-    """all corners of the texture except the top right corner
+    """All corners of the texture except the top right corner
     """
     CARPET = 'carpet'
-    """only the bottom row of pixels on the texture
+    """Only the bottom row of pixels on the texture
     """
 
 
@@ -44,9 +44,7 @@ class Edition(ABC):
     def get_textures(self,
                      version_or_type: VersionType | str,
                      output_dir: str = DEFAULTS['OUTPUT_DIR'],
-                     scale_factor: int = DEFAULTS['SCALE_FACTOR'],
-                     do_merge: bool = DEFAULTS['DO_MERGE'],
-                     do_partials: bool = DEFAULTS['DO_PARTIALS']):
+                     options: TextureOptions | None = None):
         """Extract, filter, and scale item and block textures.
 
         Args:
