@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-<!-- ## Unreleased
+## Unreleased
 
 ### Added
+
+* Add `--crop` flag that crops animated textures like magma and prismarine blocks to be same size as other blocks. This functionality was already present but now you can opt-out of it.
+* Add `--partials` flag that creates textures for the following partial blocks: carpets, stairs, and slabs.
+* Add `--replicate` flag that copies textures and renames them to match the block's name. Currently only used for glass panes.
+* Create texture images for waxed copper variants. Currently you cannot turn this on, but a CLI flag might be added in the future.
 
 ### Changed
 
@@ -14,17 +19,17 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 
-### Known Issues -->
+### Known Issues
 
 ## 2.0.2 | 2024-01-24
 
-## Fixed
+### Fixed
 
 * Vulnerability in `"pillow` dependency.
 
 ## 2.0.1 | 2024-01-10
 
-## Fixed
+### Fixed
 
 * Changelog heading for version 2.0.0 was incorrect.
 

@@ -33,31 +33,59 @@ class EditionType(Enum):
     """
 
 
+class TextureOptions(TypedDict):
+    """TypedDict class representing the options for textures.
+    """
+
+    DO_CROP: bool
+    """Whether to crop non-square textures to be square
+    """
+
+    DO_MERGE: bool
+    """Whether to merge block and item textures into a single directory
+    """
+
+    DO_PARTIALS: bool
+    """Whether to create partial textures like stairs and slabs
+    """
+
+    DO_REPLICATE: bool
+    """Whether to copy and rename only texture variant
+    """
+
+    SCALE_FACTOR: int
+    """Factor that will be used to scale the textures
+    """
+
+
 class Options(TypedDict):
     """
     Represents the options for textureminer.
 
     Attributes:
-        DO_MERGE (bool): Whether to merge the block and item textures into a single directory.
         EDITION (EditionType): The type of edition to use.
         OUTPUT_DIR (str): The output directory for the textures.
-        SCALE_FACTOR (int): The scale factor for the textures.
         TEMP_PATH (str): The temporary path for processing.
+        TEXTURE_OPTIONS (TextureOptions): Texture manipulation options.
         VERSION (VersionType): The version to use.
     """
-    DO_MERGE: bool
     EDITION: EditionType
     OUTPUT_DIR: str
-    SCALE_FACTOR: int
     TEMP_PATH: str
+    TEXTURE_OPTIONS: TextureOptions
     VERSION: VersionType
 
 
 DEFAULTS: Options = {
-    'DO_MERGE': False,
     'EDITION': EditionType.JAVA,
     'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textureminer'),
-    'SCALE_FACTOR': 100,
     'TEMP_PATH': f'{tempfile.gettempdir()}/textureminer'.replace('\\', '/'),
     'VERSION': VersionType.ALL,
+    'TEXTURE_OPTIONS': {
+        'DO_CROP': True,
+        'DO_MERGE': False,
+        'DO_PARTIALS': True,
+        'DO_REPLICATE': True,
+        'SCALE_FACTOR': 100,
+    }
 }

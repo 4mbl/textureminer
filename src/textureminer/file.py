@@ -22,7 +22,7 @@ def rm_if_exists(path: str):
         path (str): path of the file or directory that will be removed
     """
     if os.path.exists(path):
-        rmtree(path, onerror=rm_read_only)
+        rmtree(path, onexc=rm_read_only)
 
 
 def mk_dir(path: str, del_prev: bool = False):

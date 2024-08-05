@@ -77,13 +77,28 @@ def cli():
                         metavar='DIR',
                         default=DEFAULTS['OUTPUT_DIR'],
                         help='path of output directory')
+    parser.add_argument('--crop',
+                        action='store_true',
+                        default=DEFAULTS['TEXTURE_OPTIONS']['DO_CROP'],
+                        help='crop non-square textures to be square')
     parser.add_argument(
         '--flatten',
         action='store_true',
-        default=DEFAULTS['DO_MERGE'],
+        default=DEFAULTS['TEXTURE_OPTIONS']['DO_MERGE'],
         help='merge block and item textures into a single directory')
+    parser.add_argument('--partials',
+                        action='store_true',
+                        default=DEFAULTS['TEXTURE_OPTIONS']['DO_PARTIALS'],
+                        help='create partial textures like stairs and slabs')
+    parser.add_argument(
+        '--replicate',
+        action='store_true',
+        default=DEFAULTS['TEXTURE_OPTIONS']['DO_REPLICATE'],
+        help=
+        'copy and rename only texture variant, for example "glass_pane_top" to "glass_pane"'
+    )
     parser.add_argument('--scale',
-                        default=DEFAULTS['SCALE_FACTOR'],
+                        default=DEFAULTS['TEXTURE_OPTIONS']['SCALE_FACTOR'],
                         type=int,
                         help='scale factor for textures',
                         metavar='N')
@@ -132,6 +147,11 @@ def cli():
 
     edition.get_textures(
         version_or_type=update if update else DEFAULTS['VERSION'],
-        scale_factor=args.scale,
         output_dir=args.output,
-        do_merge=args.flatten)
+        options={
+            'DO_CROP': args.crop,
+            'DO_MERGE': args.flatten,
+            'DO_PARTIALS': args.partials,
+            'DO_REPLICATE': args.replicate,
+            'SCALE_FACTOR': args.scale,
+        })
