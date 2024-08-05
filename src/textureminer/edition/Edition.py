@@ -150,25 +150,6 @@ class Edition(ABC):
             re.match(REGEX_JAVA_RC, version))
 
     @staticmethod
-    def merge_dirs(input_dir: str, output_dir: str):
-        """Merges block and item textures to a single directory.
-        Item textures are given priority when there are conflicts.
-
-        Args:
-            input_dir (str): directory in which there are subdirectories 'block' and 'item'
-            output_dir (str): directory in which the files will be merged into
-        """
-
-        block_folder = f'{input_dir}/blocks'
-        item_folder = f'{input_dir}/items'
-
-        tabbed_print(texts.TEXTURES_MERGING)
-        copytree(block_folder, output_dir, dirs_exist_ok=True)
-        rmtree(block_folder)
-        copytree(item_folder, output_dir, dirs_exist_ok=True)
-        rmtree(item_folder)
-
-    @staticmethod
     def filter_unwanted(input_dir: str,
                         output_dir: str,
                         edition: EditionType = EditionType.JAVA) -> str:
@@ -326,3 +307,22 @@ class Edition(ABC):
                 image.scale(image_path, scale_factor, scale_factor)
 
         return path
+
+    @staticmethod
+    def merge_dirs(input_dir: str, output_dir: str):
+        """Merges block and item textures to a single directory.
+        Item textures are given priority when there are conflicts.
+
+        Args:
+            input_dir (str): directory in which there are subdirectories 'block' and 'item'
+            output_dir (str): directory in which the files will be merged into
+        """
+
+        block_folder = f'{input_dir}/blocks'
+        item_folder = f'{input_dir}/items'
+
+        tabbed_print(texts.TEXTURES_MERGING)
+        copytree(block_folder, output_dir, dirs_exist_ok=True)
+        rmtree(block_folder)
+        copytree(item_folder, output_dir, dirs_exist_ok=True)
+        rmtree(item_folder)

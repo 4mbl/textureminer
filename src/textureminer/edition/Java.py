@@ -8,7 +8,7 @@ from zipfile import ZipFile
 import urllib.request
 import requests  # type: ignore
 
-from textureminer.exception import FileFormatException  # type: ignore
+from textureminer.exceptions import FileFormatException  # type: ignore
 from .. import texts
 from .Edition import BlockShape, Edition, TextureOptions
 from ..file import mk_dir, rm_if_exists
@@ -78,6 +78,61 @@ class Java(Edition):
     def __init__(self):
         self.VERSION_MANIFEST: dict | None = None
 
+    def get_textures(self,
+                     version_or_type: VersionType | str,
+                     output_dir: str = DEFAULTS['OUTPUT_DIR'],
+                     options: TextureOptions | None = None) -> str | None:
+
+        if options is None:
+            options = DEFAULTS['TEXTURE_OPTIONS']
+
+        version: str | None = None
+
+        if isinstance(version_or_type, VersionType):
+            version = self.get_latest_version(version_or_type)
+        elif isinstance(version_or_type, str) and Edition.validate_version(
+                version_or_type, edition=EditionType.JAVA):
+            version = version_or_type
+        else:
+            tabbed_print(
+                texts.ERROR_VERSION_INVALID.format(version=version_or_type))
+            return None
+
+        tabbed_print(texts.VERSION_USING_X.format(version=version))
+        assets = self._download_client_jar(
+            version, DEFAULTS['TEMP_PATH'] + '/version-jars')
+
+        extracted = self._extract_jar(
+            assets, DEFAULTS['TEMP_PATH'] + '/extracted-files')
+        rmtree(DEFAULTS['TEMP_PATH'] + '/version-jars/')
+
+        textures_path = DEFAULTS['TEMP_PATH'] + '/extracted-textures/textures'
+        if os.path.isdir(textures_path):
+            rmtree(textures_path)
+        copytree(extracted + '/assets/minecraft/textures', textures_path)
+
+        if options['DO_PARTIALS']:
+            self._create_partial_textures(extracted, textures_path)
+
+        rm_if_exists(DEFAULTS['TEMP_PATH'] + '/extracted-files/')
+
+        filtered = Edition.filter_unwanted(textures_path,
+                                           output_dir + '/java/' + version,
+                                           edition=EditionType.JAVA)
+
+        if options['DO_REPLICATE']:
+            Edition.replicate_textures(filtered, self.REPLICATE_MAP)
+
+        Edition.scale_textures(filtered, options['SCALE_FACTOR'],
+                               options['DO_MERGE'], options['DO_CROP'])
+
+        tabbed_print(texts.CLEARING_TEMP)
+        rm_if_exists(DEFAULTS['TEMP_PATH'])
+
+        output_dir = os.path.abspath(filtered).replace('\\', '/')
+        print(texts.COMPLETED.format(output_dir=output_dir))
+        return output_dir
+
     def get_version_type(self, version: str) -> VersionType | None:
         if Edition.validate_version(version=version,
                                     version_type=VersionType.STABLE,
@@ -88,6 +143,18 @@ class Java(Edition):
                                     edition=EditionType.JAVA):
             return VersionType.EXPERIMENTAL
         return None
+
+    def get_latest_version(self, version_type: VersionType) -> str:
+        tabbed_print(
+            texts.VERSION_LATEST_FINDING.format(
+                version_type=version_type.value))
+
+        version_id = VersionManifestIdentifiers.STABLE.value if version_type == VersionType.STABLE else VersionManifestIdentifiers.EXPERIMENTAL.value
+        latest_version = self._get_version_manifest()['latest'][version_id]
+        tabbed_print(
+            texts.VERSION_LATEST_IS.format(version_type=version_type.value,
+                                           latest_version="" + latest_version))
+        return latest_version
 
     def _get_version_manifest(self) -> dict:
         """
@@ -102,18 +169,6 @@ class Java(Edition):
                                                  timeout=10).json()
 
         return self.VERSION_MANIFEST
-
-    def get_latest_version(self, version_type: VersionType) -> str:
-        tabbed_print(
-            texts.VERSION_LATEST_FINDING.format(
-                version_type=version_type.value))
-
-        version_id = VersionManifestIdentifiers.STABLE.value if version_type == VersionType.STABLE else VersionManifestIdentifiers.EXPERIMENTAL.value
-        latest_version = self._get_version_manifest()['latest'][version_id]
-        tabbed_print(
-            texts.VERSION_LATEST_IS.format(version_type=version_type.value,
-                                           latest_version="" + latest_version))
-        return latest_version
 
     def _download_client_jar(self, version: str, download_dir: str) -> str:
         """
@@ -164,122 +219,61 @@ class Java(Edition):
 
         return output_dir
 
-    def _extract_textures(self, input_path: str, output_path: str) -> str:
-        """
-        Extracts textures from a .jar file.
+    def _create_partial_textures(self, extracted_dir: str, texture_dir: str):
+        tabbed_print(texts.CREATING_PARTIALS)
 
-        Args:
-            input_path (str): The path of the .jar file.
-            output_path (str, optional): The path of the output directory.
+        recipe_dir = DEFAULTS['TEMP_PATH'] + '/extracted-textures/recipes'
+        if os.path.isdir(recipe_dir):
+            rmtree(recipe_dir)
+        copytree(f'{extracted_dir}/data/minecraft/recipe', recipe_dir)
 
-        Returns:
-            str: The path of the output directory.
-        """
+        texture_dict = self._get_texture_dict(recipe_dir, texture_dir)
 
-        if os.path.isdir(output_path):
-            rmtree(output_path)
+        for texture_name, base_texture in texture_dict.items():
+            if 'slab' in texture_name:
+                shape = BlockShape.SLAB
+            elif 'stairs' in texture_name:
+                shape = BlockShape.STAIR
+            elif 'carpet' in texture_name:
+                shape = BlockShape.CARPET
+            else:
+                continue
 
-        copytree(input_path, output_path)
+            in_path = f'{texture_dir}/block/{base_texture}.png'
+            out_path = f'{texture_dir}/block/{texture_name}.png'
+            Edition.crop_texture(in_path, shape, out_path)
 
-        return output_path
+    def _get_texture_dict(self, recipe_dir: str,
+                          texture_dir: str) -> Dict[str, Any]:
+        texture_dict = {}
+        for root, _dirs, files in os.walk(recipe_dir):
+            for file in files:
+                product = file.replace('.json', '')
 
-    def _extract_recipes(self, input_path: str, output_path: str) -> str:
-        """
-        Extracts recipes from a .jar file.
+                # skip duplicate recipes
+                if 'from_' in product:
+                    continue
 
-        Args:
-            input_path (str): The path of the .jar file.
-            output_path (str, optional): The path of the output directory.
+                # skip re-dyed carpets
+                if 'dye_' in product and '_carpet' in product:
+                    continue
 
-        Returns:
-            str: The path of the output directory.
-        """
+                if not self._is_allowed_partial(product, self.ALLOWED_PARTIALS):
+                    continue
 
-        if os.path.isdir(output_path):
-            rmtree(output_path)
+                base_material = self._get_base_material_from_recipe(
+                    f'{root}/{file}', texture_dir)
 
-        copytree(input_path, output_path)
+                if base_material is None:
+                    raise FileFormatException(
+                        f'Could not find base material for {product}')
+                texture_dict[product] = base_material
 
-        return output_path
-
-    def get_textures(self,
-                     version_or_type: VersionType | str,
-                     output_dir: str = DEFAULTS['OUTPUT_DIR'],
-                     options: TextureOptions | None = None) -> str | None:
-
-        if options is None:
-            options = DEFAULTS['TEXTURE_OPTIONS']
-
-        version: str | None = None
-
-        if isinstance(version_or_type, VersionType):
-            version = self.get_latest_version(version_or_type)
-        elif isinstance(version_or_type, str) and Edition.validate_version(
-                version_or_type, edition=EditionType.JAVA):
-            version = version_or_type
-        else:
-            tabbed_print(
-                texts.ERROR_VERSION_INVALID.format(version=version_or_type))
-            return None
-
-        tabbed_print(texts.VERSION_USING_X.format(version=version))
-        assets = self._download_client_jar(
-            version, DEFAULTS['TEMP_PATH'] + '/version-jars')
-
-        extracted = self._extract_jar(
-            assets, DEFAULTS['TEMP_PATH'] + '/extracted-files')
-        rmtree(DEFAULTS['TEMP_PATH'] + '/version-jars/')
-
-        textures = self._extract_textures(
-            extracted + '/assets/minecraft/textures',
-            DEFAULTS['TEMP_PATH'] + '/extracted-textures/textures')
-
-        if options['DO_PARTIALS']:
-            self._create_partial_textures(extracted, textures)
-
-        rm_if_exists(DEFAULTS['TEMP_PATH'] + '/extracted-files/')
-
-        filtered = Edition.filter_unwanted(textures,
-                                           output_dir + '/java/' + version,
-                                           edition=EditionType.JAVA)
-
-        if options['DO_REPLICATE']:
-            Edition.replicate_textures(filtered, self.REPLICATE_MAP)
-
-        Edition.scale_textures(filtered, options['SCALE_FACTOR'],
-                               options['DO_MERGE'], options['DO_CROP'])
-
-        tabbed_print(texts.CLEARING_TEMP)
-        rm_if_exists(DEFAULTS['TEMP_PATH'])
-
-        output_dir = os.path.abspath(filtered).replace('\\', '/')
-        print(texts.COMPLETED.format(output_dir=output_dir))
-        return output_dir
+        return texture_dict
 
     def _is_allowed_partial(self, texture_name: str,
                             allowed: List[str]) -> bool:
         return any(partial in texture_name for partial in allowed)
-
-    def _texture_exists(self, texture_name: str, texture_dir: str) -> bool:
-        return os.path.isfile(f'{texture_dir}/block/{texture_name}.png'
-                             ) if texture_name is not None else False
-
-    def _handle_texture_exceptions(self, base_material: str,
-                                   texture_exceptions: List[Dict[str, str]],
-                                   texture_dir: str) -> str | None:
-        # waxed copper blocks use same texture as the base variant
-        if 'copper' in base_material:
-            base_material = base_material.replace('waxed_', '')
-            if self._texture_exists(base_material, texture_dir):
-                return base_material
-
-        for texture_exception in texture_exceptions:
-            if base_material == texture_exception['from']:
-                base_material = texture_exception['to']
-                if self._texture_exists(base_material, texture_dir):
-                    return base_material
-
-        return base_material
 
     def _get_base_material_from_recipe(self, recipe_file_path: str,
                                        texture_dir: str) -> str | None:
@@ -320,51 +314,24 @@ class Java(Edition):
 
         return None
 
-    def _get_texture_dict(self, recipe_dir: str,
-                          texture_dir: str) -> Dict[str, Any]:
-        texture_dict = {}
-        for root, _dirs, files in os.walk(recipe_dir):
-            for file in files:
-                product = file.replace('.json', '')
+    def _handle_texture_exceptions(self, base_material: str,
+                                   texture_exceptions: List[Dict[str, str]],
+                                   texture_dir: str) -> str | None:
 
-                # skip duplicate recipes
-                if 'from_' in product:
-                    continue
+        # waxed copper blocks use same texture as the base variant
+        if 'copper' in base_material:
+            base_material = base_material.replace('waxed_', '')
+            if self._texture_exists(base_material, texture_dir):
+                return base_material
 
-                # skip re-dyed carpets
-                if 'dye_' in product and '_carpet' in product:
-                    continue
+        for texture_exception in texture_exceptions:
+            if base_material == texture_exception['from']:
+                base_material = texture_exception['to']
+                if self._texture_exists(base_material, texture_dir):
+                    return base_material
 
-                if not self._is_allowed_partial(product, self.ALLOWED_PARTIALS):
-                    continue
+        return base_material
 
-                base_material = self._get_base_material_from_recipe(
-                    f'{root}/{file}', texture_dir)
-
-                if base_material is None:
-                    raise FileFormatException(
-                        f'Could not find base material for {product}')
-                texture_dict[product] = base_material
-
-        return texture_dict
-
-    def _create_partial_textures(self, extracted_dir: str, texture_dir: str):
-        tabbed_print(texts.CREATING_PARTIALS)
-        recipe_dir = self._extract_recipes(
-            f'{extracted_dir}/data/minecraft/recipe',
-            DEFAULTS['TEMP_PATH'] + '/extracted-textures/recipes')
-        texture_dict = self._get_texture_dict(recipe_dir, texture_dir)
-
-        for texture_name, base_texture in texture_dict.items():
-            if 'slab' in texture_name:
-                shape = BlockShape.SLAB
-            elif 'stairs' in texture_name:
-                shape = BlockShape.STAIR
-            elif 'carpet' in texture_name:
-                shape = BlockShape.CARPET
-            else:
-                continue
-
-            in_path = f'{texture_dir}/block/{base_texture}.png'
-            out_path = f'{texture_dir}/block/{texture_name}.png'
-            Edition.crop_texture(in_path, shape, out_path)
+    def _texture_exists(self, texture_name: str, texture_dir: str) -> bool:
+        return os.path.isfile(f'{texture_dir}/block/{texture_name}.png'
+                             ) if texture_name is not None else False

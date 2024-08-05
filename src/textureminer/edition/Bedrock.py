@@ -47,6 +47,53 @@ class Bedrock(Edition):
     def __init__(self):
         self.repo_dir: str = ''
 
+    def get_textures(
+        self,
+        version_or_type: VersionType | str,
+        output_dir: str = DEFAULTS['OUTPUT_DIR'],
+        options: TextureOptions | None = None,
+    ) -> str | None:
+
+        if options is None:
+            options = DEFAULTS['TEXTURE_OPTIONS']
+
+        if isinstance(version_or_type, str) and not Edition.validate_version(
+                version_or_type, edition=EditionType.BEDROCK):
+            tabbed_print(
+                texts.ERROR_VERSION_INVALID.format(version=version_or_type))
+            return None
+
+        version_type = version_or_type if isinstance(
+            version_or_type, VersionType) else VersionType.ALL
+        version = None
+        self._clone_repo(DEFAULTS['TEMP_PATH'] + '/bedrock-samples/')
+        if isinstance(version_or_type, str):
+            version = version_or_type
+        else:
+            version = self.get_latest_version(version_type)
+
+        self._change_repo_version(version)
+
+        filtered = Edition.filter_unwanted(self.repo_dir,
+                                           output_dir + '/bedrock/' + version,
+                                           edition=EditionType.BEDROCK)
+
+        if options['DO_PARTIALS']:
+            self._create_partial_textures(filtered, version_type)
+
+        if options['DO_REPLICATE']:
+            Edition.replicate_textures(filtered, self.REPLICATE_MAP)
+
+        Edition.scale_textures(filtered, options['SCALE_FACTOR'],
+                               options['DO_MERGE'])
+
+        tabbed_print(texts.CLEARING_TEMP)
+        rm_if_exists(DEFAULTS['TEMP_PATH'])
+
+        output_dir = os.path.abspath(filtered).replace('\\', '/')
+        print(texts.COMPLETED.format(output_dir=output_dir))
+        return output_dir
+
     def get_version_type(self, version: str) -> VersionType | None:
         if version[0] != 'v':
             version = f'v{version}'
@@ -62,7 +109,7 @@ class Bedrock(Edition):
 
     def get_latest_version(self, version_type: VersionType) -> str:
 
-        self._update_tags()
+        subprocess.run('git fetch --tags', check=False, cwd=self.repo_dir)
 
         out = subprocess.run('git tag --list',
                              check=False,
@@ -120,11 +167,6 @@ class Bedrock(Edition):
                 texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode,
                                                   error_msg=err.stderr))
 
-    def _update_tags(self):
-        """Updates the tags of the git repository.
-        """
-        subprocess.run('git fetch --tags', check=False, cwd=self.repo_dir)
-
     def _change_repo_version(self, version: str, fetch_tags: bool = True):
         """Changes the version of the repository.
 
@@ -133,7 +175,7 @@ class Bedrock(Edition):
             fetch_tags (bool, optional): whether to fetch tags from the repository. Defaults to True.
         """
         if fetch_tags:
-            self._update_tags()
+            subprocess.run('git fetch --tags', check=False, cwd=self.repo_dir)
         try:
             subprocess.run(f'git checkout tags/v{version}',
                            check=False,
@@ -144,53 +186,6 @@ class Bedrock(Edition):
             print(
                 texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode,
                                                   error_msg=err.stderr))
-
-    def get_textures(
-        self,
-        version_or_type: VersionType | str,
-        output_dir: str = DEFAULTS['OUTPUT_DIR'],
-        options: TextureOptions | None = None,
-    ) -> str | None:
-
-        if options is None:
-            options = DEFAULTS['TEXTURE_OPTIONS']
-
-        if isinstance(version_or_type, str) and not Edition.validate_version(
-                version_or_type, edition=EditionType.BEDROCK):
-            tabbed_print(
-                texts.ERROR_VERSION_INVALID.format(version=version_or_type))
-            return None
-
-        version_type = version_or_type if isinstance(
-            version_or_type, VersionType) else VersionType.ALL
-        version = None
-        self._clone_repo(DEFAULTS['TEMP_PATH'] + '/bedrock-samples/')
-        if isinstance(version_or_type, str):
-            version = version_or_type
-        else:
-            version = self.get_latest_version(version_type)
-
-        self._change_repo_version(version)
-
-        filtered = Edition.filter_unwanted(self.repo_dir,
-                                           output_dir + '/bedrock/' + version,
-                                           edition=EditionType.BEDROCK)
-
-        if options['DO_PARTIALS']:
-            self._create_partial_textures(filtered, version_type)
-
-        if options['DO_REPLICATE']:
-            Edition.replicate_textures(filtered, self.REPLICATE_MAP)
-
-        Edition.scale_textures(filtered, options['SCALE_FACTOR'],
-                               options['DO_MERGE'])
-
-        tabbed_print(texts.CLEARING_TEMP)
-        rm_if_exists(DEFAULTS['TEMP_PATH'])
-
-        output_dir = os.path.abspath(filtered).replace('\\', '/')
-        print(texts.COMPLETED.format(output_dir=output_dir))
-        return output_dir
 
     def _create_partial_textures(self, texture_dir: str,
                                  version_type: VersionType):
@@ -251,6 +246,20 @@ class Bedrock(Edition):
         self._blocks = data
         return data
 
+    def _identifier_to_filename(self, identifier: str,
+                                version_type: VersionType) -> str:
+        if isinstance(identifier, dict):
+            if 'side' in identifier:
+                identifier = identifier['side']
+
+        data = self._get_terrain_texture_json(version_type=version_type)
+        textures = data["texture_data"][identifier]["textures"]
+
+        if isinstance(textures, list):
+            return textures[0].replace('textures/blocks/', '')
+
+        return textures.replace('textures/blocks/', '')
+
     def _get_terrain_texture_json(self,
                                   version_type: VersionType) -> Dict[str, Any]:
         """Fetches the texture dictionary from the repository.
@@ -276,17 +285,3 @@ class Bedrock(Edition):
 
         self._terrain_texture = data
         return data
-
-    def _identifier_to_filename(self, identifier: str,
-                                version_type: VersionType) -> str:
-        if isinstance(identifier, dict):
-            if 'side' in identifier:
-                identifier = identifier['side']
-
-        data = self._get_terrain_texture_json(version_type=version_type)
-        textures = data["texture_data"][identifier]["textures"]
-
-        if isinstance(textures, list):
-            return textures[0].replace('textures/blocks/', '')
-
-        return textures.replace('textures/blocks/', '')
