@@ -135,9 +135,6 @@ class Bedrock(Edition):
                     edition=EditionType.BEDROCK):
                 break
 
-        tabbed_print(
-            texts.VERSION_LATEST_IS.format(version_type=version_type.value,
-                                           latest_version=str(tag)))
         return tag
 
     def _clone_repo(self, clone_dir: str, repo_url: str = REPO_URL):

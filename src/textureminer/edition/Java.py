@@ -142,12 +142,8 @@ class Java(Edition):
         tabbed_print(
             texts.VERSION_LATEST_FINDING.format(
                 version_type=version_type.value))
-
         version_id = VersionManifestIdentifiers.STABLE.value if version_type == VersionType.STABLE else VersionManifestIdentifiers.EXPERIMENTAL.value
         latest_version = self._get_version_manifest()['latest'][version_id]
-        tabbed_print(
-            texts.VERSION_LATEST_IS.format(version_type=version_type.value,
-                                           latest_version="" + latest_version))
         return latest_version
 
     def _get_version_manifest(self) -> dict:
