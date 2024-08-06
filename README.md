@@ -14,27 +14,15 @@ A Python package that allows you to extract and scale Minecraft's item and block
 
 ### Prerequisites
 
+**Only Windows is supported at the moment.**
+
 Install Git if you plan on using the Bedrock edition.
 
 You can install Git using your system's package manager, or by downloading the [installer](https://git-scm.com/download/) from the official website.
 
-* Linux
-
-  ```sh
-  sudo apt install git
-  ```
-
-* MacOS
-
-  ```sh
-    brew install git
-    ```
-
-* Windows
-
-    ```sh
-    winget install Git.Git
-    ```
+```sh
+winget install Git.Git
+```
 
 Install Python 3.11 or higher.
 
@@ -42,25 +30,16 @@ Install Python 3.11 or higher.
 
 Install/update the [pip](https://pip.pypa.io/en/stable/) package manager.
 
-  ```sh
-  python3 -m pip install --upgrade pip
-  ```
+```sh
+python3 -m pip install --upgrade pip
+```
 
 It's also recommended to use a [virtual environment](https://docs.python.org/3/library/venv.html).
 
-* Linux / MacOS
-
-    ```bash
-    python3 -m venv my-venv
-    source my-venv/bin/activate
-    ```
-
-* Windows
-
-    ```bash
-    python3 -m venv my-venv
-    my-venv/Scripts/activate
-    ```
+```bash
+python3 -m venv my-venv
+my-venv/Scripts/activate
+```
 
 ### Installation
 
