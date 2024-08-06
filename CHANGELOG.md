@@ -21,6 +21,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 * Fixed inconsistent cleanup of temporary directories.
+* Fixed duplicate logging messages.
 
 ### Removed
 
