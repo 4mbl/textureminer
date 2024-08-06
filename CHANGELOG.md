@@ -16,8 +16,11 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 * Upgraded dependencies to latest versions.
+* Each `Edition` instance now has its own temporary directory. This allows multiple `Edition` classes to be used simultaneously.
 
 ### Fixed
+
+* Fixed inconsistent cleanup of temporary directories.
 
 ### Removed
 
