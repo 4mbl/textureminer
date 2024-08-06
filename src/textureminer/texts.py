@@ -30,7 +30,6 @@ TEXTURES_REPLICATING = "Replicating textures..."
 TEXTURES_RESISING_AMOUNT_IN_DIR = "Resizing {texture_amount} {dir_name} textures..."
 TEXTURES_RESIZING_AMOUNT = "Resizing {texture_amount} textures..."
 VERSION_LATEST_FINDING = "Finding latest version from {version_type} releases channel..."
-VERSION_LATEST_IS = "Latest version from {version_type} releases channel is {latest_version}."
 VERSION_USING_X = "Using {version} version."
 
 
