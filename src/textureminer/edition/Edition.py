@@ -3,11 +3,12 @@ from enum import Enum
 import os
 import re
 from shutil import copytree, rmtree, copyfile
+from uuid import uuid4
 from PIL import Image as pil_image  # type: ignore
 from forfiles import image, file as f  # type: ignore
 
 from .. import texts
-from ..file import mk_dir
+from ..file import mk_dir, rm_if_exists
 from ..options import DEFAULTS, EditionType, TextureOptions, VersionType
 from ..texts import tabbed_print
 
@@ -44,6 +45,27 @@ class BlockShape(Enum):
 class Edition(ABC):
     """Base class for Minecraft editions.
     """
+
+    def __init__(self):
+        self.cleanup_stack = []
+        self.id = uuid4()
+        self.temp_dir = DEFAULTS['TEMP_PATH'] + '/' + self.id.__str__()
+
+        if os.path.isdir(self.temp_dir):
+            rmtree(self.temp_dir)
+        mk_dir(self.temp_dir)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.cleanup()
+
+    def cleanup(self):
+        """Cleans up temporary files.
+        """
+        tabbed_print(texts.CLEARING_TEMP)
+        rm_if_exists(self.temp_dir)
 
     @abstractmethod
     def get_textures(self,

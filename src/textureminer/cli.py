@@ -142,16 +142,24 @@ def cli():
     tabbed_print(
         texts.EDITION_USING_X.format(edition=edition_type.value.capitalize()))
 
-    edition: Edition = Bedrock(
-    ) if edition_type == EditionType.BEDROCK else Java()
+    output_path = None
+    with Bedrock() if edition_type == EditionType.BEDROCK else Java(
+    ) as edition:
+        try:
+            output_path = edition.get_textures(
+                version_or_type=update if update else DEFAULTS['VERSION'],
+                output_dir=args.output,
+                options={
+                    'DO_CROP': args.crop,
+                    'DO_MERGE': args.flatten,
+                    'DO_PARTIALS': args.partials,
+                    'DO_REPLICATE': args.replicate,
+                    'SCALE_FACTOR': args.scale,
+                })
 
-    edition.get_textures(
-        version_or_type=update if update else DEFAULTS['VERSION'],
-        output_dir=args.output,
-        options={
-            'DO_CROP': args.crop,
-            'DO_MERGE': args.flatten,
-            'DO_PARTIALS': args.partials,
-            'DO_REPLICATE': args.replicate,
-            'SCALE_FACTOR': args.scale,
-        })
+        except Exception as e:  # pylint: disable=broad-except
+            edition.cleanup()
+            raise e
+
+    if output_path:
+        print(texts.COMPLETED.format(output_dir=output_path))
