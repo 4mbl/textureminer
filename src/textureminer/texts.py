@@ -13,7 +13,7 @@ TITLE = style(r"""
               fg=Fg.CYAN)
 STYLED_TAB = style(f"{' '*4}* ", fg=Fg.CYAN)
 
-COMPLETED = style("Completed. You can find the textures on:\n{output_dir}\n",
+COMPLETED = style("\nCompleted. You can find the textures on:\n{output_dir}\n",
                   fg=Fg.GREEN)
 CLEARING_TEMP = "Clearing temporary files..."
 CREATING_PARTIALS = "Creating partial textures..."

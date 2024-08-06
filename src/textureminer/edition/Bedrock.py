@@ -46,7 +46,8 @@ class Bedrock(Edition):
     terrain_texture_cache: dict[str, Any] | None = None
 
     def __init__(self):
-        self.repo_dir: str = ''
+        self.repo_dir: str | None = None
+        super().__init__()
 
     @override
     def get_textures(
@@ -68,7 +69,10 @@ class Bedrock(Edition):
         version_type = version_or_type if isinstance(
             version_or_type, VersionType) else VersionType.ALL
         version = None
-        self._clone_repo(DEFAULTS['TEMP_PATH'] + '/bedrock-samples/')
+
+        self.repo_dir = self.temp_dir + '/bedrock-samples/'
+        self._clone_repo(self.repo_dir)
+
         if isinstance(version_or_type, str):
             version = version_or_type
         else:
@@ -89,11 +93,7 @@ class Bedrock(Edition):
         Edition.scale_textures(filtered, options['SCALE_FACTOR'],
                                options['DO_MERGE'])
 
-        tabbed_print(texts.CLEARING_TEMP)
-        rm_if_exists(DEFAULTS['TEMP_PATH'])
-
         output_dir = os.path.abspath(filtered).replace('\\', '/')
-        print(texts.COMPLETED.format(output_dir=output_dir))
         return output_dir
 
     @override
@@ -112,6 +112,9 @@ class Bedrock(Edition):
 
     @override
     def get_latest_version(self, version_type: VersionType) -> str:
+        if self.repo_dir is None:
+            raise OSError(
+                'Repository not found. Please clone the repository first.')
 
         subprocess.run('git fetch --tags', check=False, cwd=self.repo_dir)
 

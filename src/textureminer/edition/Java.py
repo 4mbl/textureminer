@@ -1,7 +1,7 @@
 from enum import Enum
 import json
 import os
-from shutil import copytree, rmtree
+from shutil import copytree
 import sys
 from typing import override
 from zipfile import ZipFile
@@ -11,7 +11,7 @@ import requests  # type: ignore
 from textureminer.exceptions import FileFormatException  # type: ignore
 from .. import texts
 from .Edition import BlockShape, Edition, TextureOptions
-from ..file import mk_dir, rm_if_exists
+from ..file import mk_dir
 from ..options import DEFAULTS, EditionType, VersionType
 from ..texts import tabbed_print
 
@@ -78,9 +78,6 @@ class Java(Edition):
 
     version_manifest_cache: dict | None = None
 
-    def __init__(self):
-        pass
-
     @override
     def get_textures(self,
                      version_or_type: VersionType | str,
@@ -103,22 +100,17 @@ class Java(Edition):
             return None
 
         tabbed_print(texts.VERSION_USING_X.format(version=version))
-        assets = self._download_client_jar(
-            version, DEFAULTS['TEMP_PATH'] + '/version-jars')
+        assets = self._download_client_jar(version,
+                                           self.temp_dir + '/version-jars')
 
-        extracted = self._extract_jar(
-            assets, DEFAULTS['TEMP_PATH'] + '/extracted-files')
-        rmtree(DEFAULTS['TEMP_PATH'] + '/version-jars/')
+        extracted = self._extract_jar(assets,
+                                      self.temp_dir + '/extracted-files')
 
-        textures_path = DEFAULTS['TEMP_PATH'] + '/extracted-textures/textures'
-        if os.path.isdir(textures_path):
-            rmtree(textures_path)
+        textures_path = self.temp_dir + '/extracted-textures/textures'
         copytree(extracted + '/assets/minecraft/textures', textures_path)
 
         if options['DO_PARTIALS']:
             self._create_partial_textures(extracted, textures_path)
-
-        rm_if_exists(DEFAULTS['TEMP_PATH'] + '/extracted-files/')
 
         filtered = Edition.filter_unwanted(textures_path,
                                            output_dir + '/java/' + version,
@@ -130,12 +122,8 @@ class Java(Edition):
         Edition.scale_textures(filtered, options['SCALE_FACTOR'],
                                options['DO_MERGE'], options['DO_CROP'])
 
-        tabbed_print(texts.CLEARING_TEMP)
-        rm_if_exists(DEFAULTS['TEMP_PATH'])
-
-        output_dir = os.path.abspath(filtered).replace('\\', '/')
-        print(texts.COMPLETED.format(output_dir=output_dir))
-        return output_dir
+        output_path = os.path.abspath(filtered).replace('\\', '/')
+        return output_path
 
     @override
     def get_version_type(self, version: str) -> VersionType | None:
@@ -228,9 +216,7 @@ class Java(Edition):
     def _create_partial_textures(self, extracted_dir: str, texture_dir: str):
         tabbed_print(texts.CREATING_PARTIALS)
 
-        recipe_dir = DEFAULTS['TEMP_PATH'] + '/extracted-textures/recipes'
-        if os.path.isdir(recipe_dir):
-            rmtree(recipe_dir)
+        recipe_dir = self.temp_dir + '/extracted-textures/recipes'
         copytree(f'{extracted_dir}/data/minecraft/recipe', recipe_dir)
 
         texture_dict = self._get_texture_dict(recipe_dir, texture_dir)
