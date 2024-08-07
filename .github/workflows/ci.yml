@@ -6,7 +6,7 @@ on:
     types: [synchronize]
 
 env:
-  PACKAGE_VERSION: '0.0.0'
+  PACKAGE_VERSION: 0.0.0
 
 jobs:
   build:
@@ -34,7 +34,7 @@ jobs:
 
       - name: Set package version
         run: |
-          python -c "import toml; data=toml.load('pyproject.toml'); data['project']['version']=${{env.PACKAGE_VERSION}}; toml.dump(data, open('pyproject.toml', 'w'))"
+          python -c "import toml; data=toml.load('pyproject.toml'); data['project']['version']='${{env.PACKAGE_VERSION}}'; toml.dump(data, open('pyproject.toml', 'w'))"
 
       - name: Build package
         run: |
