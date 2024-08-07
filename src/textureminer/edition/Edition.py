@@ -1,16 +1,23 @@
-from abc import ABC, abstractmethod
-from enum import Enum
+"""Types and a base class for Minecraft editions."""  # noqa: N999
+
 import os
 import re
-from shutil import copytree, rmtree, copyfile
+from abc import ABC, abstractmethod
+from enum import Enum
+from pathlib import Path
+from shutil import copyfile, copytree, rmtree
+from types import TracebackType
+from typing import Self
 from uuid import uuid4
-from PIL import Image as pil_image  # type: ignore
-from forfiles import image, file as f  # type: ignore
 
-from .. import texts
-from ..file import mk_dir, rm_if_exists
-from ..options import DEFAULTS, EditionType, TextureOptions, VersionType
-from ..texts import tabbed_print
+from forfiles import file as f  # type: ignore[import]
+from forfiles import image
+from PIL import Image as Pil_Image
+
+from textureminer import texts
+from textureminer.file import mk_dir, rm_if_exists
+from textureminer.options import DEFAULTS, EditionType, TextureOptions, VersionType
+from textureminer.texts import tabbed_print
 
 REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
 REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
@@ -22,8 +29,7 @@ REGEX_JAVA_RELEASE = r'^[0-9]\.[0-9]+\.?[0-9]+?$'
 
 
 class BlockShape(Enum):
-    """Enum class representing different block shapes
-    """
+    """Enum class representing different block shapes."""
 
     SQUARE = 'square'
     """Square texture
@@ -43,90 +49,111 @@ class BlockShape(Enum):
 
 
 class Edition(ABC):
-    """Base class for Minecraft editions.
-    """
+    """Base class for Minecraft editions."""
 
-    def __init__(self):
-        self.cleanup_stack = []
+    def __init__(self) -> None:
+        """Initialize the Edition."""
         self.id = uuid4()
         self.temp_dir = DEFAULTS['TEMP_PATH'] + '/' + self.id.__str__()
 
-        if os.path.isdir(self.temp_dir):
+        if Path(self.temp_dir).is_dir():
             rmtree(self.temp_dir)
         mk_dir(self.temp_dir)
 
-    def __enter__(self):
+    def __enter__(self) -> Self:
+        """Enter the context manager."""
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> None:
+        """Exit the context manager."""
         self.cleanup()
 
-    def cleanup(self):
-        """Cleans up temporary files.
-        """
+    def cleanup(self) -> None:
+        """Clean up temporary files."""
         tabbed_print(texts.CLEARING_TEMP)
         rm_if_exists(self.temp_dir)
 
     @abstractmethod
-    def get_textures(self,
-                     version_or_type: VersionType | str,
-                     output_dir: str = DEFAULTS['OUTPUT_DIR'],
-                     options: TextureOptions | None = None) -> str | None:
+    def get_textures(
+        self,
+        version_or_type: VersionType | str,
+        output_dir: str = DEFAULTS['OUTPUT_DIR'],
+        options: TextureOptions | None = None,
+    ) -> str | None:
         """Extract, filter, and scale item and block textures.
 
         Args:
+        ----
             version_or_type (str): a Minecraft version type, or a version string.
             output_dir (str, optional): directory that the final textures will go
             options (TextureOptions | None, optional): options for the textures
 
         Returns:
+        -------
             string | None: path of the final textures or None if invalid input
+
         """
 
     @abstractmethod
     def get_version_type(self, version: str) -> VersionType | None:
-        """Gets the type of a version using regex.
+        """Get the type of a version using regex.
 
         Args:
+        ----
             version (str): version to get the type of
 
         Returns:
+        -------
             VersionType | None: type of version or None if invalid input
+
         """
 
     @abstractmethod
     def get_latest_version(self, version_type: VersionType) -> str:
-        """Gets the latest version of a certain type.
+        """Get the latest version of a certain type.
 
         Args:
+        ----
             version_type (VersionType): type of version to get
 
         Returns:
+        -------
             str: latest version as a string
+
         """
 
     @staticmethod
-    def validate_version(version: str,
-                         version_type: VersionType | None = None,
-                         edition: EditionType | None = None) -> bool:
-        """Validates a version string based on the version type using regex.
+    def validate_version(  # noqa: C901, PLR0911
+        version: str,
+        version_type: VersionType | None = None,
+        edition: EditionType | None = None,
+    ) -> bool:
+        """Validate a version string based on the version type using regex.
 
         Args:
+        ----
             version (str): version to validate
-            version_type (VersionType | None, optional): type of version, defaults to None, which will validate any version
-            edition (EditionType | None, optional): type of edition, defaults to None, which will validate any version
+            version_type (VersionType | None, optional): type of version to validate
+            edition (EditionType | None, optional): type of edition to validate
 
         Returns:
+        -------
             bool: whether the version is valid
-        """
 
+        """
         if edition == EditionType.BEDROCK:
             if version[0] != 'v':
                 version = f'v{version}'
             if version_type is None:
                 return bool(
-                    re.match(REGEX_BEDROCK_RELEASE, version) or
-                    re.match(REGEX_BEDROCK_PREVIEW, version))
+                    re.match(REGEX_BEDROCK_RELEASE, version)
+                    or re.match(REGEX_BEDROCK_PREVIEW, version),
+                )
             if version_type == VersionType.STABLE:
                 return bool(re.match(REGEX_BEDROCK_RELEASE, version))
             if version_type == VersionType.EXPERIMENTAL:
@@ -135,24 +162,28 @@ class Edition(ABC):
         if edition == EditionType.JAVA:
             if version_type is None:
                 return bool(
-                    re.match(REGEX_JAVA_RELEASE, version) or
-                    re.match(REGEX_JAVA_SNAPSHOT, version) or
-                    re.match(REGEX_JAVA_PRE, version) or
-                    re.match(REGEX_JAVA_RC, version))
+                    re.match(REGEX_JAVA_RELEASE, version)
+                    or re.match(REGEX_JAVA_SNAPSHOT, version)
+                    or re.match(REGEX_JAVA_PRE, version)
+                    or re.match(REGEX_JAVA_RC, version),
+                )
             if version_type == VersionType.STABLE:
                 return bool(re.match(REGEX_JAVA_RELEASE, version))
             if version_type == VersionType.EXPERIMENTAL:
                 return bool(
-                    re.match(REGEX_JAVA_SNAPSHOT, version) or
-                    re.match(REGEX_JAVA_PRE, version) or
-                    re.match(REGEX_JAVA_RC, version))
+                    re.match(REGEX_JAVA_SNAPSHOT, version)
+                    or re.match(REGEX_JAVA_PRE, version)
+                    or re.match(REGEX_JAVA_RC, version),
+                )
 
-        is_valid = re.match(REGEX_BEDROCK_PREVIEW, version) or re.match(
-            REGEX_BEDROCK_RELEASE, version) or re.match(
-                REGEX_JAVA_RELEASE, version) or re.match(
-                    REGEX_JAVA_SNAPSHOT, version) or re.match(
-                        REGEX_JAVA_PRE, version) or re.match(
-                            REGEX_JAVA_RC, version)
+        is_valid = (
+            re.match(REGEX_BEDROCK_PREVIEW, version)
+            or re.match(REGEX_BEDROCK_RELEASE, version)
+            or re.match(REGEX_JAVA_RELEASE, version)
+            or re.match(REGEX_JAVA_SNAPSHOT, version)
+            or re.match(REGEX_JAVA_PRE, version)
+            or re.match(REGEX_JAVA_RC, version)
+        )
 
         if is_valid:
             return True
@@ -161,29 +192,41 @@ class Edition(ABC):
             version = f'v{version}'
 
         return bool(
-            re.match(REGEX_BEDROCK_PREVIEW, version) or
-            re.match(REGEX_BEDROCK_RELEASE, version) or
-            re.match(REGEX_JAVA_RELEASE, version) or
-            re.match(REGEX_JAVA_SNAPSHOT, version) or
-            re.match(REGEX_JAVA_PRE, version) or
-            re.match(REGEX_JAVA_RC, version))
+            re.match(REGEX_BEDROCK_PREVIEW, version)
+            or re.match(REGEX_BEDROCK_RELEASE, version)
+            or re.match(REGEX_JAVA_RELEASE, version)
+            or re.match(REGEX_JAVA_SNAPSHOT, version)
+            or re.match(REGEX_JAVA_PRE, version)
+            or re.match(REGEX_JAVA_RC, version),
+        )
 
     @staticmethod
-    def filter_unwanted(input_dir: str,
-                        output_dir: str,
-                        edition: EditionType = EditionType.JAVA) -> str:
-        """Removes files that are not item or block textures.
+    def filter_unwanted(
+        input_dir: str,
+        output_dir: str,
+        edition: EditionType = EditionType.JAVA,
+    ) -> str:
+        """Remove files that are not item or block textures.
 
         Args:
-            input_path (str): directory where the input files are
-            output_path (str): directory where accepted files will end up
+        ----
+            input_dir (str): directory where the input files are
+            output_dir (str): directory where accepted files will end up
             edition (EditionType, optional): type of edition
-        """
 
+        """
         mk_dir(output_dir, del_prev=True)
 
-        blocks_input = f'{input_dir}/block' if edition.value == EditionType.JAVA.value else f'{input_dir}/resource_pack/textures/blocks'
-        items_input = f'{input_dir}/item' if edition.value == EditionType.JAVA.value else f'{input_dir}/resource_pack/textures/items'
+        blocks_input = (
+            f'{input_dir}/block'
+            if edition.value == EditionType.JAVA.value
+            else f'{input_dir}/resource_pack/textures/blocks'
+        )
+        items_input = (
+            f'{input_dir}/item'
+            if edition.value == EditionType.JAVA.value
+            else f'{input_dir}/resource_pack/textures/items'
+        )
 
         blocks_output = f'{output_dir}/blocks'
         items_output = f'{output_dir}/items'
@@ -197,17 +240,20 @@ class Edition(ABC):
         return output_dir
 
     @staticmethod
-    def crop_texture(image_path: str,
-                     crop_shape: BlockShape,
-                     output_path: str | None = None):
-        """Crops a texture to a specific shape.
+    def crop_texture(
+        image_path: str,
+        crop_shape: BlockShape,
+        output_path: str | None = None,
+    ) -> None:
+        """Crop a texture to a specific shape.
 
         Args:
+        ----
             image_path (str): path of the texture to crop
             crop_shape (BlockShape): shape to crop the texture to
             output_path (str, optional): path to save the cropped texture to
-        """
 
+        """
         if output_path is None:
             output_path = image_path
 
@@ -215,46 +261,47 @@ class Edition(ABC):
 
         match crop_shape:
             case BlockShape.SQUARE:
-                pil_image.open(image_path).crop(
-                    (0, 0, 16, 16)).save(output_path)
+                Pil_Image.open(image_path).crop((0, 0, 16, 16)).save(output_path)
 
             case BlockShape.SLAB:
-                img = pil_image.open(image_path).convert("RGBA")
+                img = Pil_Image.open(image_path).convert('RGBA')
                 img.paste(transparent_color, (0, 0, 16, 8))
                 img.save(output_path)
 
             case BlockShape.STAIR:
-                img = pil_image.open(image_path).convert("RGBA")
+                img = Pil_Image.open(image_path).convert('RGBA')
                 img.paste(transparent_color, (8, 0, 16, 8))
                 img.save(output_path)
 
             case BlockShape.CARPET:
-                img = pil_image.open(image_path).convert("RGBA")
+                img = Pil_Image.open(image_path).convert('RGBA')
                 img.paste(transparent_color, (0, 0, 16, 15))
                 img.save(output_path)
 
             case BlockShape.GLASS_PANE:
-                img = pil_image.open(image_path).convert("RGBA")
+                img = Pil_Image.open(image_path).convert('RGBA')
                 img.paste(transparent_color, (0, 0, 7, 16))
                 img.paste(transparent_color, (9, 0, 16, 16))
                 img.save(output_path)
 
             case _:
-                raise ValueError(f'Unknown block shape {crop_shape}')
+                unknown_block_shape_msg = f'Unknown block shape {crop_shape}'
+                raise ValueError(unknown_block_shape_msg)
 
     @staticmethod
-    def replicate_textures(asset_dir: str, replication_rules: dict[str,
-                                                                   str]) -> int:
-        """Replicates textures in a directory
+    def replicate_textures(asset_dir: str, replication_rules: dict[str, str]) -> int:
+        """Replicate textures in a directory.
 
         Args:
+        ----
             asset_dir (str): path to the directory containing the textures
             replication_rules (dict): dictionary containing the replication rules
 
         Returns:
+        -------
             int: number of textures replicated
-        """
 
+        """
         tabbed_print(texts.TEXTURES_REPLICATING)
 
         count = 0
@@ -263,36 +310,41 @@ class Edition(ABC):
             for fil in files:
                 file_name = fil.replace('.png', '')
                 if file_name in originals:
-                    original_path = os.path.normpath(
-                        f"{os.path.abspath(subdir)}/{fil}")
-                    replicated_path = os.path.normpath(
-                        f"{os.path.abspath(subdir)}/{replication_rules[file_name]}.png"
+                    original_path = Path(subdir + '/' + fil).resolve().as_posix()
+                    replicated_path = (
+                        Path(subdir + '/' + replication_rules[file_name] + '.png')
+                        .resolve()
+                        .as_posix()
                     )
+
                     copyfile(original_path, replicated_path)
-                    Edition.crop_texture(replicated_path, BlockShape.GLASS_PANE,
-                                         replicated_path)
+                    Edition.crop_texture(replicated_path, BlockShape.GLASS_PANE, replicated_path)
                     count += 1
 
         return count
 
     @staticmethod
     def scale_textures(
-            path: str,
-            scale_factor: int = DEFAULTS['TEXTURE_OPTIONS']['SCALE_FACTOR'],
-            do_merge: bool = DEFAULTS['TEXTURE_OPTIONS']['DO_MERGE'],
-            do_crop: bool = DEFAULTS['TEXTURE_OPTIONS']['DO_CROP']) -> str:
-        """Scales textures within a directory by a factor
+        path: str,
+        scale_factor: int = DEFAULTS['TEXTURE_OPTIONS']['SCALE_FACTOR'],
+        *,
+        do_merge: bool = DEFAULTS['TEXTURE_OPTIONS']['DO_MERGE'],
+        do_crop: bool = DEFAULTS['TEXTURE_OPTIONS']['DO_CROP'],
+    ) -> str:
+        """Scales textures within a directory by a factor.
 
         Args:
+        ----
             path (str): path of the textures that will be scaled
             scale_factor (int, optional): factor that the textures will be scaled by
-            do_merge (bool, optional): whether to merge block and item texture files into a single directory
-            do_crop (bool, optional): whether to crop non-square textures to be square
+            do_merge (bool, optional): merge block and item texture files into a single directory
+            do_crop (bool, optional): crop non-square textures to be square
 
         Returns:
+        -------
             string: path of the scaled textures
-        """
 
+        """
         if do_merge:
             Edition.merge_dirs(path, path)
         tabbed_print(texts.TEXTURES_FILTERING)
@@ -301,42 +353,40 @@ class Edition(ABC):
             return path
 
         for subdir, _, files in os.walk(path):
-            f.filter(f'{os.path.abspath(subdir)}', ['.png'])
+            f.filter(f'{Path(subdir).resolve().as_posix()}', ['.png'])
 
             if len(files) == 0:
                 continue
 
             if do_merge:
-                tabbed_print(
-                    texts.TEXTURES_RESIZING_AMOUNT.format(
-                        texture_amount=len(files)))
+                tabbed_print(texts.TEXTURES_RESIZING_AMOUNT.format(texture_amount=len(files)))
             else:
                 tabbed_print(
                     texts.TEXTURES_RESISING_AMOUNT_IN_DIR.format(
                         texture_amount=len(files),
-                        dir_name=os.path.basename(subdir)))
+                        dir_name=Path(subdir).name,
+                    ),
+                )
 
             for fil in files:
-                image_path = os.path.normpath(
-                    f"{os.path.abspath(subdir)}/{fil}")
+                image_path = Path(subdir + '/' + fil).resolve().as_posix()
                 if do_crop:
-                    Edition.crop_texture(image_path, BlockShape.SQUARE,
-                                         image_path)
+                    Edition.crop_texture(image_path, BlockShape.SQUARE, image_path)
 
                 image.scale(image_path, scale_factor, scale_factor)
 
         return path
 
     @staticmethod
-    def merge_dirs(input_dir: str, output_dir: str):
-        """Merges block and item textures to a single directory.
-        Item textures are given priority when there are conflicts.
+    def merge_dirs(input_dir: str, output_dir: str) -> None:
+        """Merge block and item textures to a single directory. Item textures are given priority.
 
         Args:
+        ----
             input_dir (str): directory in which there are subdirectories 'block' and 'item'
             output_dir (str): directory in which the files will be merged into
-        """
 
+        """
         block_folder = f'{input_dir}/blocks'
         item_folder = f'{input_dir}/items'
 
