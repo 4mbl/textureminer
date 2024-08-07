@@ -1,14 +1,16 @@
-from enum import Enum
+"""Options for the program."""
+
 import os
 import tempfile
+from enum import Enum
+from pathlib import Path
 from typing import TypedDict
 
-HOME_DIR = os.path.expanduser('~').replace('\\', '/')
+HOME_DIR = Path('~').expanduser().as_posix()
 
 
 class VersionType(Enum):
-    """Enum class representing different types of versions for Minecraft
-    """
+    """Enum class representing different types of versions for Minecraft."""
 
     EXPERIMENTAL = 'experimental'
     """snapshot, pre-release, release candidate, or preview
@@ -22,8 +24,7 @@ class VersionType(Enum):
 
 
 class EditionType(Enum):
-    """Enum class representing different editions of Minecraft
-    """
+    """Enum class representing different editions of Minecraft."""
 
     BEDROCK = 'bedrock'
     """Bedrock Edition
@@ -34,8 +35,7 @@ class EditionType(Enum):
 
 
 class TextureOptions(TypedDict):
-    """TypedDict class representing the options for textures.
-    """
+    """TypedDict class representing the options for textures."""
 
     DO_CROP: bool
     """Whether to crop non-square textures to be square
@@ -59,16 +59,18 @@ class TextureOptions(TypedDict):
 
 
 class Options(TypedDict):
-    """
-    Represents the options for textureminer.
+    """Represents the options for textureminer.
 
-    Attributes:
+    Attributes
+    ----------
         EDITION (EditionType): The type of edition to use.
         OUTPUT_DIR (str): The output directory for the textures.
         TEMP_PATH (str): The temporary path for processing.
         TEXTURE_OPTIONS (TextureOptions): Texture manipulation options.
         VERSION (VersionType): The version to use.
+
     """
+
     EDITION: EditionType
     OUTPUT_DIR: str
     TEMP_PATH: str
@@ -87,5 +89,7 @@ DEFAULTS: Options = {
         'DO_PARTIALS': True,
         'DO_REPLICATE': True,
         'SCALE_FACTOR': 100,
-    }
+    },
 }
+
+__all__ = ['DEFAULTS', 'EditionType', 'Options', 'TextureOptions', 'VersionType']

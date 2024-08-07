@@ -12,11 +12,13 @@ All notable changes to this project will be documented in this file.
 * Add `--partials` flag that creates textures for the following partial blocks: carpets, stairs, and slabs.
 * Add `--replicate` flag that copies textures and renames them to match the block's name. Currently only used for glass panes.
 * Create texture images for waxed copper variants. Currently you cannot turn this on, but a CLI flag might be added in the future.
+* Created CI workflow to run linting and formatting checks on pull requests as will as confirming that the package builds and installs correctly.
 
 ### Changed
 
 * Upgraded dependencies to latest versions.
 * Each `Edition` instance now has its own temporary directory. This allows multiple `Edition` classes to be used simultaneously.
+* Migrated to [ruff](https://github.com/astral-sh/ruff) for linting and formatting.
 
 ### Fixed
 
