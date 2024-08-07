@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file.
 
 * Upgraded dependencies to latest versions.
 * Each `Edition` instance now has its own temporary directory. This allows multiple `Edition` classes to be used simultaneously.
+* Migrated to [ruff](https://github.com/astral-sh/ruff) for linting and formatting.
 
 ### Fixed
 
