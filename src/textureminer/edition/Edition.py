@@ -11,7 +11,7 @@ from typing import Self
 from uuid import uuid4
 
 from forfiles import file as f  # type: ignore[import]
-from forfiles import image
+from forfiles import image  # type: ignore[import]
 from PIL import Image as Pil_Image
 
 from textureminer import texts
