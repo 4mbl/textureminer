@@ -1,6 +1,6 @@
 # [textureminer](https://4mbl.link/gh/textureminer)
 
-A Python package that allows you to extract and scale Minecraft's item and block textures automatically.
+A Python package that allows you to extract and scale Minecraft's item and block textures easily.
 
 ## Table of Contents
 
@@ -16,9 +16,12 @@ A Python package that allows you to extract and scale Minecraft's item and block
 
 **Only Windows is supported at the moment.**
 
-Install Git if you plan on using the Bedrock edition.
+You need to have Git installed if you plan on using the Bedrock edition.
 
-You can install Git using your system's package manager, or by downloading the [installer](https://git-scm.com/download/) from the official website.
+Git can be installed using your system's package manager, or by downloading the [installer](https://git-scm.com/download/) from the official website.
+
+Install if you plan on using the Bedrock edition.
+Either download the [installer](https://git-scm.com/download/) from the official website or use a package manager like [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/#install-winget).
 
 ```sh
 winget install Git.Git

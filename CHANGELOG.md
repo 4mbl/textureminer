@@ -4,7 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## Unreleased
+<!-- ## Unreleased
+
+### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+### Known Issues -->
+
+## 3.0.0 | 2024-08-07
 
 ### Added
 
@@ -24,10 +36,6 @@ All notable changes to this project will be documented in this file.
 
 * Fixed inconsistent cleanup of temporary directories.
 * Fixed duplicate logging messages.
-
-### Removed
-
-### Known Issues
 
 ## 2.0.2 | 2024-01-24
 

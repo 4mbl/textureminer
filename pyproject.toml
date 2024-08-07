@@ -4,9 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "textureminer"
-version = "2.0.2"
+version = "3.0.0"
 authors = [{ name = "4MBL" }]
-description = "Script that allows you to extract and scale Minecraft's item and block textures."
+description = "A Python package that allows you to extract and scale Minecraft's item and block textures easily."
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.12"
