@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 
 * Change stained glass pane names to be consistent with Minecraft IDs.
 * Add missing stained glass panes.
+* Fix animated textures not getting cropped when scaling factor is set to 1.
 
 ### Removed
 
