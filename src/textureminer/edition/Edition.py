@@ -43,6 +43,9 @@ class BlockShape(Enum):
     CARPET = 'carpet'
     """Only the bottom row of pixels on the texture
     """
+    SNOW = 'snow'
+    """Only two bottom rows of pixels on the texture
+    """
     GLASS_PANE = 'glass_pane'
     """Only the middle column of pixels on the texture
     """
@@ -276,6 +279,11 @@ class Edition(ABC):
             case BlockShape.CARPET:
                 img = Pil_Image.open(image_path).convert('RGBA')
                 img.paste(transparent_color, (0, 0, 16, 15))
+                img.save(output_path)
+
+            case BlockShape.SNOW:
+                img = Pil_Image.open(image_path).convert('RGBA')
+                img.paste(transparent_color, (0, 0, 16, 14))
                 img.save(output_path)
 
             case BlockShape.GLASS_PANE:

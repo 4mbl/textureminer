@@ -46,6 +46,10 @@ class Bedrock(Edition):
         'glass_pane_top_brown': 'brown_glass_pane',
     }
 
+    OVERWRITE_TEXTURES: ClassVar[dict[str, str]] = {
+        'snow': 'snow_block',
+    }
+
     blocks_cache: dict[str, Any] | None = None
     terrain_texture_cache: dict[str, Any] | None = None
 
@@ -231,13 +235,20 @@ class Bedrock(Edition):
                 texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode, error_msg=err.stderr),
             )
 
-    def _create_partial_textures(self, texture_dir: str, version_type: VersionType) -> None:
-        """Create partial textures for the Bedrock Edition.
+    def _create_partial_textures(
+        self,
+        texture_dir: str,
+        version_type: VersionType,
+        *,
+        prevent_overwrite: bool = True,
+    ) -> None:
+        """Create partial textures like stairs and slabs for the Bedrock Edition.
 
         Args:
         ----
             texture_dir (str): directory where the textures are
             version_type (VersionType): type of version to create partials for
+            prevent_overwrite (bool, optional): whether to copy textures to prevent overwrite
 
         """
         unused_textures: list[str] = ['carpet']
@@ -248,6 +259,16 @@ class Bedrock(Edition):
         for texture_name in texture_dict:
             if texture_name in unused_textures:
                 continue
+
+            if (
+                texture_name in self.OVERWRITE_TEXTURES
+                and texture_name == texture_dict[texture_name]['textures']
+                and prevent_overwrite
+            ):
+                copyfile(
+                    f'{texture_dir}/blocks/{texture_name}.png',
+                    f'{texture_dir}/blocks/{self.OVERWRITE_TEXTURES[texture_name]}.png',
+                )
 
             if 'slab' in texture_name and 'double_slab' not in texture_name:
                 identifier = texture_dict[texture_name]['textures']
@@ -263,7 +284,7 @@ class Bedrock(Edition):
                 in_path = f'{texture_dir}/blocks/{base_texture}.png'
                 out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.STAIR, out_path)
-            elif 'carpet' in texture_name and 'moss' not in texture_name:
+            elif 'carpet' in texture_name:
                 if 'moss' in texture_name:
                     base_texture = 'moss_block'
                 else:
@@ -275,6 +296,13 @@ class Bedrock(Edition):
                 in_path = f'{texture_dir}/blocks/{base_texture}.png'
                 out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.CARPET, out_path)
+
+            elif texture_name == 'snow':
+                base_texture = 'snow'
+                sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
+                in_path = f'{texture_dir}/blocks/{base_texture}.png'
+                out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
+                Edition.crop_texture(in_path, BlockShape.SNOW, out_path)
 
             # waxed copper blocks use same texture as the base variant
             elif 'copper' in texture_name and 'waxed' in texture_name:
