@@ -357,9 +357,6 @@ class Edition(ABC):
             Edition.merge_dirs(path, path)
         tabbed_print(texts.TEXTURES_FILTERING)
 
-        if scale_factor == 1:
-            return path
-
         for subdir, _, files in os.walk(path):
             f.filter(f'{Path(subdir).resolve().as_posix()}', ['.png'])
 
@@ -381,7 +378,8 @@ class Edition(ABC):
                 if do_crop:
                     Edition.crop_texture(image_path, BlockShape.SQUARE, image_path)
 
-                image.scale(image_path, scale_factor, scale_factor)
+                if scale_factor != 1:
+                    image.scale(image_path, scale_factor, scale_factor)
 
         return path
 
