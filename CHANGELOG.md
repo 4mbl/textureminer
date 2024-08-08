@@ -3,24 +3,29 @@
 All notable changes to this project will be documented in this file.
 
 ---
-
-## Unreleased
+<!-- ## Unreleased
 
 ### Added
-
-* Support for snow layers.
 
 ### Changed
 
 ### Fixed
 
-* Change stained glass pane names to be consistent with Minecraft IDs.
-* Add missing stained glass panes.
-* Fix animated textures not getting cropped when scaling factor is set to 1.
-
 ### Removed
 
-### Known Issues
+### Known Issues -->
+
+## 3.1.0 | 2024-08-08
+
+### Added
+
+* Support for snow layers.
+
+### Fixed
+
+* Fix stained glass pane names to be consistent with Minecraft IDs.
+* Add missing stained glass panes.
+* Fix animated textures not getting cropped when scaling factor is set to 1.
 
 ## 3.0.0 | 2024-08-07
 
