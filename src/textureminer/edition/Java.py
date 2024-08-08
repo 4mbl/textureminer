@@ -6,7 +6,7 @@ import os
 import sys
 from enum import Enum
 from pathlib import Path
-from shutil import copytree
+from shutil import copyfile, copytree
 from typing import ClassVar, override
 from urllib.request import urlretrieve
 from zipfile import ZipFile
@@ -46,7 +46,8 @@ class Java(Edition):
     VERSION_MANIFEST_URL: ClassVar[str] = (
         'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
     )
-    ALLOWED_PARTIALS: ClassVar[list[str]] = ['_slab', '_stairs', '_carpet']
+    ALLOWED_PARTIAL_SUFFIXES: ClassVar[list[str]] = ['_slab', '_stairs', '_carpet']
+    ALLOWED_PARTIAL_LITERALS: ClassVar[list[str]] = ['snow']
 
     TEXTURE_EXCEPTIONS: ClassVar[list[dict[str, str]]] = [
         {'from': 'smooth_quartz', 'to': 'quartz_block_bottom'},
@@ -70,6 +71,10 @@ class Java(Edition):
         'pink_stained_glass_pane_top': 'pink_glass_pane',
         'black_stained_glass_pane_top': 'black_glass_pane',
         'brown_stained_glass_pane_top': 'brown_glass_pane',
+    }
+
+    OVERWRITE_TEXTURES: ClassVar[dict[str, str]] = {
+        'snow': 'snow_block',
     }
 
     version_manifest_cache: dict | None = None
@@ -223,7 +228,22 @@ class Java(Edition):
 
         return output_dir
 
-    def _create_partial_textures(self, extracted_dir: str, texture_dir: str) -> None:
+    def _create_partial_textures(
+        self,
+        extracted_dir: str,
+        texture_dir: str,
+        *,
+        prevent_overwrite: bool = True,
+    ) -> None:
+        """Create partial textures like stairs and slabs for the Java Edition.
+
+        Args:
+        ----
+            extracted_dir (str): directory where the extracted files are
+            texture_dir (str): directory where the textures are
+            prevent_overwrite (bool, optional): whether to copy textures to prevent overwrite
+
+        """
         tabbed_print(texts.CREATING_PARTIALS)
 
         recipe_dir = self.temp_dir + '/extracted-textures/recipes'
@@ -232,12 +252,24 @@ class Java(Edition):
         texture_dict = self._get_texture_dict(recipe_dir, texture_dir)
 
         for texture_name, base_texture in texture_dict.items():
+            if (
+                texture_name == base_texture
+                and prevent_overwrite
+                and texture_name in self.OVERWRITE_TEXTURES
+            ):
+                copyfile(
+                    f'{texture_dir}/block/{texture_name}.png',
+                    f'{texture_dir}/block/{self.OVERWRITE_TEXTURES[texture_name]}.png',
+                )
+
             if 'slab' in texture_name:
                 shape = BlockShape.SLAB
             elif 'stairs' in texture_name:
                 shape = BlockShape.STAIR
             elif 'carpet' in texture_name:
                 shape = BlockShape.CARPET
+            elif texture_name == 'snow':
+                shape = BlockShape.SNOW
             else:
                 continue
 
@@ -275,7 +307,9 @@ class Java(Edition):
                 if 'dye_' in product and '_carpet' in product:
                     continue
 
-                if not self._is_allowed_partial(product, self.ALLOWED_PARTIALS):
+                if not any(
+                    partial in product for partial in self.ALLOWED_PARTIAL_SUFFIXES
+                ) and not any(literal == product for literal in self.ALLOWED_PARTIAL_LITERALS):
                     continue
 
                 base_material = self._get_base_material_from_recipe(f'{root}/{file}', texture_dir)
@@ -283,24 +317,10 @@ class Java(Edition):
                 if base_material is None:
                     not_found_msg = f'Could not find base material for {product}'
                     raise FileFormatError(not_found_msg)
+
                 texture_dict[product] = base_material
 
         return texture_dict
-
-    def _is_allowed_partial(self, texture_name: str, allowed: list[str]) -> bool:
-        """Check if a texture name is within a allowed list.
-
-        Args:
-        ----
-            texture_name (str): texture name to check
-            allowed (list[str]): list of allowed texture names
-
-        Returns:
-        -------
-            bool: True if the texture name is in the allowed list, False otherwise
-
-        """
-        return any(partial in texture_name for partial in allowed)
 
     def _get_base_material_from_recipe(self, recipe_file_path: str, texture_dir: str) -> str | None:
         """Get the base material from a recipe file.
@@ -382,6 +402,9 @@ class Java(Edition):
             texture_name = texture_name.replace('waxed_', '')
             if self._texture_exists(texture_name, texture_dir):
                 return texture_name
+
+        if texture_name == 'snow_block':
+            return 'snow'
 
         for texture_exception in texture_exceptions:
             if texture_name == texture_exception['from']:
