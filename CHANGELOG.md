@@ -4,17 +4,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-<!-- ## Unreleased
+## Unreleased
 
 ### Added
+
+* Support for snow layers.
 
 ### Changed
 
 ### Fixed
 
+* Change stained glass pane names to be consistent with Minecraft IDs.
+* Add missing stained glass panes.
+
 ### Removed
 
-### Known Issues -->
+### Known Issues
 
 ## 3.0.0 | 2024-08-07
 
@@ -41,7 +46,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-* Vulnerability in `"pillow` dependency.
+* Vulnerability in `pillow` dependency.
 
 ## 2.0.1 | 2024-01-10
 
