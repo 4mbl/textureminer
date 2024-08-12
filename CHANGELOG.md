@@ -3,17 +3,20 @@
 All notable changes to this project will be documented in this file.
 
 ---
-<!-- ## Unreleased
+
+## Unreleased
 
 ### Added
 
 ### Changed
 
+* `--version` now gets the version dynamically from the package metadata.
+
 ### Fixed
 
 ### Removed
 
-### Known Issues -->
+### Known Issues
 
 ## 3.1.0 | 2024-08-08
 

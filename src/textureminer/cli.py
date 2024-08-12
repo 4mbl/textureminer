@@ -2,9 +2,9 @@
 
 import argparse
 from enum import Enum
+from importlib import metadata
 
 from . import texts
-from ._metadata import __version__
 from .edition import Bedrock, Edition, Java
 from .options import DEFAULTS, EditionType, VersionType
 from .texts import tabbed_print
@@ -118,7 +118,7 @@ def cli() -> None:
         '-v',
         '--version',
         action='version',
-        version='%(prog)s ' + __version__,
+        version='%(prog)s ' + metadata.version('textureminer'),
         help='show textureminer version',
     )
 
