@@ -7,7 +7,7 @@ import sys
 from enum import Enum
 from pathlib import Path
 from shutil import copyfile, copytree
-from typing import ClassVar, override
+from typing import Any, ClassVar, override
 from urllib.request import urlretrieve
 from zipfile import ZipFile
 
@@ -315,7 +315,14 @@ class Java(Edition):
                 ) and not any(literal == product for literal in self.ALLOWED_PARTIAL_LITERALS):
                     continue
 
-                base_material = self._get_base_material_from_recipe(f'{root}/{file}', texture_dir)
+                try:
+                    base_material = self._get_base_material_from_recipe(
+                        f'{root}/{file}',
+                        texture_dir,
+                    )
+                except FileFormatError:
+                    unknown_recipe_msg = f'Unknown recipe file format: {f'{root}/{file}'}'
+                    raise FileFormatError(unknown_recipe_msg) from None
 
                 if base_material is None:
                     not_found_msg = f'Could not find base material for {product}'
@@ -354,15 +361,16 @@ class Java(Edition):
                         if i >= len(materials):
                             unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
                             raise FileFormatError(unknown_recipe_msg)
-                        base_material = materials[i]['item']
+                        base_material = self._handle_recipe_incredient_format(materials[i])
                     else:
-                        base_material = materials['item']
-                        continue_loop = False
+                        base_material = self._handle_recipe_incredient_format(materials)
                 elif 'ingredients' in recipe_data:
                     if i >= len(materials):
                         unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
                         raise FileFormatError(unknown_recipe_msg)
-                    base_material = recipe_data['ingredients'][i]['item']
+                    base_material = self._handle_recipe_incredient_format(
+                        recipe_data['ingredients'][i],
+                    )
                 else:
                     unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
                     raise FileFormatError(unknown_recipe_msg)
@@ -381,12 +389,38 @@ class Java(Edition):
 
         return None
 
+    def _handle_recipe_incredient_format(self, materials: dict[str, str] | str | Any) -> str:  # noqa: ANN401
+        """Handle recipe format changes between Minecraft Java versions.
+
+        Args:
+        ----
+            materials (dict[str, str] | str | Any): Incredient data for a recipe
+
+        Raises:
+        ------
+            FileFormatError: if the recipe format is unknown
+
+        Returns:
+        -------
+            str: name of the material used in the recipe
+
+        """
+        # pre 24w33a / 1.21.2 recipe format
+        if isinstance(materials, dict):
+            return materials['item']
+        # post 24w33a / 1.21.2 recipe format
+        # https://4mbl.link/textureminer/refs/recipe-format/24w33a
+        if isinstance(materials, str):
+            return materials
+        unknown_recipe_msg = 'Unknown recipe file format.'
+        raise FileFormatError(unknown_recipe_msg)
+
     def _handle_texture_exceptions(
         self,
         texture_name: str,
         texture_exceptions: list[dict[str, str]],
         texture_dir: str,
-    ) -> str | None:
+    ) -> str:
         """Handle texture exceptions.
 
         Args:
@@ -397,7 +431,7 @@ class Java(Edition):
 
         Returns:
         -------
-            str | None: texture name or None if not found
+            str: texture name
 
         """
         # waxed copper blocks use same texture as the base variant

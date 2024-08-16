@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+* Fixed a crash when using Java 24w33a or later.
+
 ### Removed
 
 ### Known Issues
