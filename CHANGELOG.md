@@ -4,9 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## Unreleased
+<!-- ## Unreleased
 
 ### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+### Known Issues -->
+
+## 3.1.1 | 2024-08-16
 
 ### Changed
 
@@ -15,10 +25,6 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 * Fixed a crash when using Java 24w33a or later.
-
-### Removed
-
-### Known Issues
 
 ## 3.1.0 | 2024-08-08
 
