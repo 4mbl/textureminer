@@ -174,10 +174,32 @@ class Java(Edition):
 
     @staticmethod
     def is_snapshot(version: str) -> bool:
+        """Check if the version is a snapshot version.
+
+        Args:
+        ----
+            version (str): version to check
+
+        Returns:
+        -------
+            bool: True if version is a snapshot version, False otherwise
+
+        """
         return bool(re.match(REGEX_JAVA_SNAPSHOT, version))
 
     @staticmethod
     def parse_snapshot(version: str) -> tuple[int, int, int]:
+        """Parse a snapshot version into its components.
+
+        Args:
+        ----
+            version (str): version to parse
+
+        Returns:
+        -------
+            tuple[int, int, int]: year, week, build number, e.g. (24, 12, 0) for 24w12a
+
+        """
         year = int(version.split('w')[0])
         week = int(version.split('w')[1][:-1])
         build_letter = version.split('w')[1][-1]
@@ -186,30 +208,104 @@ class Java(Edition):
 
     @staticmethod
     def is_pre(version: str) -> bool:
+        """Check if the version is a pre-release version.
+
+        Args:
+        ----
+            version (str): version to check
+
+        Returns:
+        -------
+            bool: True if version is a pre-release version, False otherwise
+
+        """
         return bool(re.match(REGEX_JAVA_PRE, version))
 
     @staticmethod
-    def parse_pre(version: str) -> tuple[int, int]:
+    def parse_pre(version: str) -> tuple[int, int, int]:
+        """Parse a pre-release version into its components.
+
+        Args:
+        ----
+            version (str): version to parse
+
+        Returns:
+        -------
+            tuple[int, int, int]: major, minor, build number, e.g. (21, 0, 1) for 1.21.0-pre1
+
+        """
         update, build = version.split('-pre')
-        major = update.split('.')[-1]
-        return int(major), int(build)
+
+        parts = update.split('.')
+        if len(parts) == 3:  # noqa: PLR2004
+            return int(parts[1]), int(parts[2]), int(build)
+
+        return int(parts[1]), 0, int(build)
 
     @staticmethod
     def is_rc(version: str) -> bool:
+        """Check if the version is a release candidate version.
+
+        Args:
+        ----
+            version (str): version to check
+
+        Returns:
+        -------
+            bool: True if version is a release candidate version, False otherwise
+
+        """
         return bool(re.match(REGEX_JAVA_RC, version))
 
     @staticmethod
-    def parse_rc(version: str) -> tuple[int, int]:
+    def parse_rc(version: str) -> tuple[int, int, int]:
+        """Parse a release candidate version into its components.
+
+        Args:
+        ----
+            version (str): version to parse
+
+        Returns:
+        -------
+            tuple[int, int, int]: major, minor, build number, e.g. (21, 0, 1) for 1.21.0-rc1
+
+        """
         update, build = version.split('-rc')
-        major = update.split('.')[-1]
-        return int(major), int(build)
+
+        parts = update.split('.')
+        if len(parts) == 3:  # noqa: PLR2004
+            return int(parts[1]), int(parts[2]), int(build)
+
+        return int(parts[1]), 0, int(build)
 
     @staticmethod
     def is_stable(version: str) -> bool:
+        """Check if the version is a stable version.
+
+        Args:
+        ----
+            version (str): version to check
+
+        Returns:
+        -------
+            bool: True if version is a stable version, False otherwise
+
+        """
         return bool(re.match(REGEX_JAVA_RELEASE, version))
 
     @staticmethod
     def parse_stable(version: str) -> tuple[int, int]:
+        """Parse a stable version into its components.
+
+        Args:
+        ----
+            version (str): version to parse
+
+        Returns:
+        -------
+            tuple[int, int]: major, minor, e.g. (21, 0) for 1.21
+
+        """
         parts = version.split('.')
 
         if len(parts) == 3:  # noqa: PLR2004
@@ -241,7 +337,6 @@ class Java(Edition):
             bool: True if version is after or equal to a version of the same type, False otherwise
 
         """
-
         if stable and not Java.is_stable(stable):
             raise ValueError(texts.ERROR_VERSION_INVALID.format(version=stable))
         if snapshot and not Java.is_snapshot(snapshot):
@@ -270,19 +365,23 @@ class Java(Edition):
             return self_build >= other_build
 
         if pre and Java.is_pre(version):
-            self_major, self_build = Java.parse_pre(version)
-            other_major, other_build = Java.parse_pre(pre)
+            self_major, self_minor, self_build = Java.parse_pre(version)
+            other_major, other_minor, other_build = Java.parse_pre(pre)
 
             if self_major != other_major:
                 return self_major > other_major
+            if self_minor != other_minor:
+                return self_minor > other_minor
             return self_build >= other_build
 
         if rc and Java.is_rc(version):
-            self_major, self_build = Java.parse_rc(version)
-            other_major, other_build = Java.parse_rc(rc)
+            self_major, self_minor, self_build = Java.parse_rc(version)
+            other_major, other_minor, other_build = Java.parse_rc(rc)
 
             if self_major != other_major:
                 return self_major > other_major
+            if self_minor != other_minor:
+                return self_minor > other_minor
             return self_build >= other_build
 
         return False
@@ -385,7 +484,6 @@ class Java(Edition):
             pre='1.21-pre1',
             rc='1.21-rc1',
         ):
-            print('is after 1.21')
             recipe_data_dir = f'{extracted_dir}/data/minecraft/recipe'
         else:
             recipe_data_dir = f'{extracted_dir}/data/minecraft/recipes'
