@@ -4,9 +4,12 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-<!-- ## Unreleased
+## Unreleased
 
 ### Added
+
+* Tests that run on GitHub Actions.
+* Package typings when installing with `pip`.
 
 ### Changed
 
@@ -14,7 +17,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 
-### Known Issues -->
+### Known Issues
 
 ## 3.1.1 | 2024-08-16
 
