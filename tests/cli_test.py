@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from textureminer import cli  # type: ignore
+from textureminer import cli
 
 
 def test_version(capsys: pytest.CaptureFixture) -> None:

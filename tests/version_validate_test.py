@@ -1,4 +1,4 @@
-from textureminer import Edition, EditionType, VersionType  # type: ignore
+from textureminer import Edition, EditionType, VersionType
 
 
 def test_validate_bedrock_valid() -> None:

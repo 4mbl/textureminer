@@ -1,4 +1,4 @@
-from textureminer import Java  # type: ignore
+from textureminer import Java
 
 
 def test_parse_snapshot() -> None:

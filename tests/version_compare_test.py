@@ -1,4 +1,4 @@
-from textureminer import Java  # type: ignore
+from textureminer import Java
 
 
 def test_version_comparison_stable_equal() -> None:
