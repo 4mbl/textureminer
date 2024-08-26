@@ -42,5 +42,9 @@ jobs:
 
       - name: Install package
         run: |
-          pip uninstall textureminer -y
           pip install ./dist/textureminer-${{ env.PACKAGE_VERSION }}-py3-none-any.whl
+
+      - name: Test package
+        run: |
+          pip install .[test]
+          pytest
