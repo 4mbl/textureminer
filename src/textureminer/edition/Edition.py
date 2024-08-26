@@ -25,7 +25,7 @@ REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
 REGEX_JAVA_SNAPSHOT = r'^[0-9]{2}w[0-9]{2}[a-z]$'
 REGEX_JAVA_PRE = r'^[0-9]\.[0-9]+\.?[0-9]+-pre[0-9]?$'
 REGEX_JAVA_RC = r'^[0-9]\.[0-9]+\.?[0-9]+-rc[0-9]?$'
-REGEX_JAVA_RELEASE = r'^[0-9]\.[0-9]+\.?[0-9]+?$'
+REGEX_JAVA_RELEASE = r'^[0-9]\.[0-9]+(\.[0-9]+)?$'
 
 
 class BlockShape(Enum):

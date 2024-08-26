@@ -3,7 +3,8 @@
 
 import json
 import os
-import sys
+import re
+import string
 from enum import Enum
 from pathlib import Path
 from shutil import copyfile, copytree
@@ -19,7 +20,15 @@ from textureminer.file import mk_dir
 from textureminer.options import DEFAULTS, EditionType, VersionType
 from textureminer.texts import tabbed_print
 
-from .Edition import BlockShape, Edition, TextureOptions
+from .Edition import (
+    REGEX_JAVA_PRE,
+    REGEX_JAVA_RC,
+    REGEX_JAVA_RELEASE,
+    REGEX_JAVA_SNAPSHOT,
+    BlockShape,
+    Edition,
+    TextureOptions,
+)
 
 
 class VersionManifestIdentifiers(Enum):
@@ -82,6 +91,8 @@ class Java(Edition):
 
     version_manifest_cache: dict | None = None
 
+    _LETTER_TO_NUMBER = {letter: index for index, letter in enumerate(string.ascii_lowercase)}
+
     @override
     def get_textures(
         self,
@@ -102,8 +113,9 @@ class Java(Edition):
         ):
             version = version_or_type
         else:
-            tabbed_print(texts.ERROR_VERSION_INVALID.format(version=version_or_type))
-            return None
+            raise ValueError(texts.ERROR_VERSION_INVALID.format(version=version_or_type))
+
+        self.version = version
 
         tabbed_print(texts.VERSION_USING_X.format(version=version))
         assets = self._download_client_jar(version, self.temp_dir + '/version-jars')
@@ -160,6 +172,121 @@ class Java(Edition):
         )
         return self._get_version_manifest()['latest'][version_id]
 
+    @staticmethod
+    def is_snapshot(version: str) -> bool:
+        return bool(re.match(REGEX_JAVA_SNAPSHOT, version))
+
+    @staticmethod
+    def parse_snapshot(version: str) -> tuple[int, int, int]:
+        year = int(version.split('w')[0])
+        week = int(version.split('w')[1][:-1])
+        build_letter = version.split('w')[1][-1]
+
+        return year, week, Java._LETTER_TO_NUMBER[build_letter]
+
+    @staticmethod
+    def is_pre(version: str) -> bool:
+        return bool(re.match(REGEX_JAVA_PRE, version))
+
+    @staticmethod
+    def parse_pre(version: str) -> tuple[int, int]:
+        update, build = version.split('-pre')
+        major = update.split('.')[-1]
+        return int(major), int(build)
+
+    @staticmethod
+    def is_rc(version: str) -> bool:
+        return bool(re.match(REGEX_JAVA_RC, version))
+
+    @staticmethod
+    def parse_rc(version: str) -> tuple[int, int]:
+        update, build = version.split('-rc')
+        major = update.split('.')[-1]
+        return int(major), int(build)
+
+    @staticmethod
+    def is_stable(version: str) -> bool:
+        return bool(re.match(REGEX_JAVA_RELEASE, version))
+
+    @staticmethod
+    def parse_stable(version: str) -> tuple[int, int]:
+        parts = version.split('.')
+
+        if len(parts) == 3:  # noqa: PLR2004
+            return int(parts[1]), int(parts[2])
+
+        return int(parts[1]), 0
+
+    @staticmethod
+    def is_version_after(
+        version: str,
+        stable: str,
+        snapshot: str | None = None,
+        pre: str | None = None,
+        rc: str | None = None,
+    ) -> bool:
+        """Check if the version of the edition is after another version (inclusive).
+
+        Args:
+        ----
+            version (str): version to check
+            stable (str): stable version to check against
+            snapshot (str | None, optional): snapshot version to check against
+            pre (str | None, optional): pre release version to check against
+            rc (str | None, optional): release candidate version to check against
+
+
+        Returns:
+        -------
+            bool: True if version is after or equal to a version of the same type, False otherwise
+
+        """
+
+        if stable and not Java.is_stable(stable):
+            raise ValueError(texts.ERROR_VERSION_INVALID.format(version=stable))
+        if snapshot and not Java.is_snapshot(snapshot):
+            raise ValueError(texts.ERROR_VERSION_INVALID.format(version=snapshot))
+        if pre and not Java.is_pre(pre):
+            raise ValueError(texts.ERROR_VERSION_INVALID.format(version=pre))
+        if rc and not Java.is_rc(rc):
+            raise ValueError(texts.ERROR_VERSION_INVALID.format(version=rc))
+
+        if stable and Java.is_stable(version):
+            self_major, self_minor = Java.parse_stable(version)
+            other_major, other_minor = Java.parse_stable(stable)
+
+            if self_major != other_major:
+                return self_major > other_major
+            return self_minor >= other_minor
+
+        if snapshot and Java.is_snapshot(version):
+            year, week, self_build = Java.parse_snapshot(version)
+            other_year, other_week, other_build = Java.parse_snapshot(snapshot)
+
+            if year != other_year:
+                return year > other_year
+            if week != other_week:
+                return week > other_week
+            return self_build >= other_build
+
+        if pre and Java.is_pre(version):
+            self_major, self_build = Java.parse_pre(version)
+            other_major, other_build = Java.parse_pre(pre)
+
+            if self_major != other_major:
+                return self_major > other_major
+            return self_build >= other_build
+
+        if rc and Java.is_rc(version):
+            self_major, self_build = Java.parse_rc(version)
+            other_major, other_build = Java.parse_rc(rc)
+
+            if self_major != other_major:
+                return self_major > other_major
+            return self_build >= other_build
+
+        return False
+
     def _get_version_manifest(self) -> dict:
         """Fetch the version manifest from Mojang. Caches the result.
 
@@ -194,7 +321,8 @@ class Java(Edition):
 
         if url is None:
             tabbed_print(texts.ERROR_VERSION_INVALID.format(version=version))
-            sys.exit(2)
+            error_msg = 'Invalid version.'
+            raise ValueError(error_msg)
 
         resp_json = requests.get(url, timeout=10).json()
         client_jar_url = resp_json['downloads']['client']['url']
@@ -249,8 +377,21 @@ class Java(Edition):
         """
         tabbed_print(texts.CREATING_PARTIALS)
 
+        # https://4mbl.link/textureminer/refs/recipe-directory/24w21a
+        if Java.is_version_after(
+            self.version,
+            '1.21',
+            snapshot='24w21a',
+            pre='1.21-pre1',
+            rc='1.21-rc1',
+        ):
+            print('is after 1.21')
+            recipe_data_dir = f'{extracted_dir}/data/minecraft/recipe'
+        else:
+            recipe_data_dir = f'{extracted_dir}/data/minecraft/recipes'
+
         recipe_dir = self.temp_dir + '/extracted-textures/recipes'
-        copytree(f'{extracted_dir}/data/minecraft/recipe', recipe_dir)
+        copytree(recipe_data_dir, recipe_dir)
 
         texture_dict = self._get_texture_dict(recipe_dir, texture_dir)
 
