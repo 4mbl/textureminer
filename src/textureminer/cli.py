@@ -1,11 +1,14 @@
 """Command line interface functionality."""
 
 import argparse
+import sys
 from enum import Enum
 from importlib import metadata
 
 from . import texts
-from .edition import Bedrock, Edition, Java
+from .edition.Bedrock import Bedrock
+from .edition.Edition import Edition
+from .edition.Java import Java
 from .options import DEFAULTS, EditionType, VersionType
 from .texts import tabbed_print
 
@@ -49,113 +52,118 @@ def get_edition_from_version(version: str) -> EditionType | None:
     return None
 
 
-def cli() -> None:
-    """CLI entrypoint for textureminer."""
-    parser = argparse.ArgumentParser(
-        prog='textureminer',
-        description='extract and scale minecraft textures',
-    )
-    parser.add_argument(
-        'update',
-        default=DEFAULTS['VERSION'],
-        nargs='?',
-        help='version or type of version to use, e.g. "1.17.1", "stable", or "experimental"',
-    )
+def cli(argv: list[str] | None = None) -> None:
+    """CLI entrypoint for textureminer.
 
-    edition_group = parser.add_mutually_exclusive_group()
-    edition_group.add_argument(
-        '-j',
-        '--java',
-        action='store_true',
-        help='use java edition',
-    )
-    edition_group.add_argument(
-        '-b',
-        '--bedrock',
-        action='store_true',
-        help='use bedrock edition',
-    )
+    Args:
+    ----
+        argv (list[str] | None, optional): command line arguments, uses sys.argv if None
 
-    parser.add_argument(
-        '-o',
-        '--output',
-        metavar='DIR',
-        default=DEFAULTS['OUTPUT_DIR'],
-        help='path of output directory',
-    )
-    parser.add_argument(
-        '--crop',
-        action='store_true',
-        default=DEFAULTS['TEXTURE_OPTIONS']['DO_CROP'],
-        help='crop non-square textures to be square',
-    )
-    parser.add_argument(
-        '--flatten',
-        action='store_true',
-        default=DEFAULTS['TEXTURE_OPTIONS']['DO_MERGE'],
-        help='merge block and item textures into a single directory',
-    )
-    parser.add_argument(
-        '--partials',
-        action='store_true',
-        default=DEFAULTS['TEXTURE_OPTIONS']['DO_PARTIALS'],
-        help='create partial textures like stairs and slabs',
-    )
-    parser.add_argument(
-        '--replicate',
-        action='store_true',
-        default=DEFAULTS['TEXTURE_OPTIONS']['DO_REPLICATE'],
-        help='copy and rename only texture variant, for example "glass_pane_top" to "glass_pane"',
-    )
-    parser.add_argument(
-        '--scale',
-        default=DEFAULTS['TEXTURE_OPTIONS']['SCALE_FACTOR'],
-        type=int,
-        help='scale factor for textures',
-        metavar='N',
-    )
-    parser.add_argument(
-        '-v',
-        '--version',
-        action='version',
-        version='%(prog)s ' + metadata.version('textureminer'),
-        help='show textureminer version',
-    )
+    """
+    try:
+        parser = argparse.ArgumentParser(
+            prog='textureminer',
+            description='extract and scale minecraft textures',
+        )
+        parser.add_argument(
+            'update',
+            default=DEFAULTS['VERSION'],
+            nargs='?',
+            help='version or type of version to use, e.g. "1.17.1", "stable", or "experimental"',
+        )
 
-    args = parser.parse_args()
+        edition_group = parser.add_mutually_exclusive_group()
+        edition_group.add_argument(
+            '-j',
+            '--java',
+            action='store_true',
+            help='use java edition',
+        )
+        edition_group.add_argument(
+            '-b',
+            '--bedrock',
+            action='store_true',
+            help='use bedrock edition',
+        )
 
-    print(texts.TITLE)  # noqa: T201
+        parser.add_argument(
+            '-o',
+            '--output',
+            metavar='DIR',
+            default=DEFAULTS['OUTPUT_DIR'],
+            help='path of output directory',
+        )
+        parser.add_argument(
+            '--crop',
+            action='store_true',
+            default=DEFAULTS['TEXTURE_OPTIONS']['DO_CROP'],
+            help='crop non-square textures to be square',
+        )
+        parser.add_argument(
+            '--flatten',
+            action='store_true',
+            default=DEFAULTS['TEXTURE_OPTIONS']['DO_MERGE'],
+            help='merge block and item textures into a single directory',
+        )
+        parser.add_argument(
+            '--partials',
+            action='store_true',
+            default=DEFAULTS['TEXTURE_OPTIONS']['DO_PARTIALS'],
+            help='create partial textures like stairs and slabs',
+        )
+        parser.add_argument(
+            '--replicate',
+            action='store_true',
+            default=DEFAULTS['TEXTURE_OPTIONS']['DO_REPLICATE'],
+            help='copy and rename only texture variant, e.g. "glass_pane_top" to "glass_pane"',
+        )
+        parser.add_argument(
+            '--scale',
+            default=DEFAULTS['TEXTURE_OPTIONS']['SCALE_FACTOR'],
+            type=int,
+            help='scale factor for textures',
+            metavar='N',
+        )
+        parser.add_argument(
+            '-v',
+            '--version',
+            action='version',
+            version='%(prog)s ' + metadata.version('textureminer'),
+            help='show textureminer version',
+        )
 
-    edition_type: EditionType | None = None
-    update: str | VersionType | None = None
+        args = parser.parse_args(argv)
 
-    if args.update == DEFAULTS['VERSION']:
-        update = DEFAULTS['VERSION']
-    elif args.update == UpdateOption.STABLE.value:
-        update = VersionType.STABLE
-    elif args.update in (
-        UpdateOption.EXPERIMENTAL.value,
-        UpdateOption.EXPERIMENTAL_SHORT.value,
-    ) or args.update in (UpdateOption.SNAPSHOT.value, UpdateOption.PREVIEW.value):
-        update = VersionType.EXPERIMENTAL
-    else:
-        update = args.update
+        print(texts.TITLE)  # noqa: T201
 
-    if args.bedrock or args.update == UpdateOption.PREVIEW.value:
-        edition_type = EditionType.BEDROCK
-    elif args.java or args.update == UpdateOption.SNAPSHOT.value:
-        edition_type = EditionType.JAVA
-    elif args.update and args.update not in VersionType:
-        edition_type = get_edition_from_version(args.update)
+        edition_type: EditionType | None = None
+        update: str | VersionType | None = None
 
-    if edition_type is None:
-        edition_type = DEFAULTS['EDITION']
+        if args.update == DEFAULTS['VERSION']:
+            update = DEFAULTS['VERSION']
+        elif args.update == UpdateOption.STABLE.value:
+            update = VersionType.STABLE
+        elif args.update in (
+            UpdateOption.EXPERIMENTAL.value,
+            UpdateOption.EXPERIMENTAL_SHORT.value,
+        ) or args.update in (UpdateOption.SNAPSHOT.value, UpdateOption.PREVIEW.value):
+            update = VersionType.EXPERIMENTAL
+        else:
+            update = args.update
 
-    tabbed_print(texts.EDITION_USING_X.format(edition=edition_type.value.capitalize()))
+        if args.bedrock or args.update == UpdateOption.PREVIEW.value:
+            edition_type = EditionType.BEDROCK
+        elif args.java or args.update == UpdateOption.SNAPSHOT.value:
+            edition_type = EditionType.JAVA
+        elif args.update and args.update not in VersionType:
+            edition_type = get_edition_from_version(args.update)
 
-    output_path = None
-    with Bedrock() if edition_type == EditionType.BEDROCK else Java() as edition:
-        try:
+        if edition_type is None:
+            edition_type = DEFAULTS['EDITION']
+
+        tabbed_print(texts.EDITION_USING_X.format(edition=edition_type.value.capitalize()))
+
+        with Bedrock() if edition_type == EditionType.BEDROCK else Java() as edition:
             output_path = edition.get_textures(
                 version_or_type=update if update else DEFAULTS['VERSION'],
                 output_dir=args.output,
@@ -168,9 +176,9 @@ def cli() -> None:
                 },
             )
 
-        except Exception:
-            edition.cleanup()
-            raise
+    except Exception as e:  # noqa: BLE001
+        print('Error: ' + str(e), file=sys.stderr)  # noqa: T201
+        raise SystemExit(1, str(e)) from None
 
-    if output_path:
-        print(texts.COMPLETED.format(output_dir=output_path))  # noqa: T201
+    print(texts.COMPLETED.format(output_dir=output_path))  # noqa: T201
+    raise SystemExit(0)

@@ -4,11 +4,9 @@ build-backend = "hatchling.build"
 
 [project]
 name = "textureminer"
-version = "3.1.1"
-authors = [{ name = "4MBL" }]
+version = "0.0.0"
 description = "A Python package that allows you to extract and scale Minecraft's item and block textures easily."
 readme = "README.md"
-license = { file = "LICENSE" }
 requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -23,26 +21,35 @@ dependencies = [
     "toml>=0.10.2, <0.10.3",
 ]
 keywords = ["minecraft", "cli"]
+[[project.authors]]
+name = "4MBL"
+
+[project.license]
+file = "LICENSE"
 
 [project.scripts]
 textureminer = "textureminer.cli:cli"
 
 [project.urls]
-"Homepage" = "https://github.com/4mbl/textureminer"
+Homepage = "https://github.com/4mbl/textureminer"
 "Bug Tracker" = "https://github.com/4mbl/textureminer/issues"
 "Source Code" = "https://github.com/4mbl/textureminer"
-"Changelog" = "https://github.com/4mbl/textureminer/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/4mbl/textureminer/blob/main/CHANGELOG.md"
 
 [tool.ruff]
 line-length = 100
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["D203", "D213", "ISC001"]
-
-[tool.ruff.lint.flake8-quotes]
-inline-quotes = "single"
+ignore = ["D203", "D213", "ISC001", "COM812"]
+exclude = ["tests"]
 
 [tool.ruff.format]
 quote-style = "single"
 indent-style = "space"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"

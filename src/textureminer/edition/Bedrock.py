@@ -75,8 +75,7 @@ class Bedrock(Edition):
             version_or_type,
             edition=EditionType.BEDROCK,
         ):
-            tabbed_print(texts.ERROR_VERSION_INVALID.format(version=version_or_type))
-            return None
+            raise ValueError(texts.ERROR_VERSION_INVALID.format(version=version_or_type))
 
         version_type = (
             version_or_type if isinstance(version_or_type, VersionType) else VersionType.ALL
@@ -90,6 +89,9 @@ class Bedrock(Edition):
             version = version_or_type
         else:
             version = self.get_latest_version(version_type)
+
+        self.version = version
+        tabbed_print(texts.VERSION_USING_X.format(version=version))
 
         self._change_repo_version(version)
 
@@ -220,7 +222,7 @@ class Bedrock(Edition):
         if fetch_tags:
             subprocess.run('git fetch --tags', check=False, cwd=self.repo_dir)  # noqa: S603, S607
         try:
-            version_regex = re.compile(r'^v\d+\.\d+\.\d+(\.\d+-preview)?$')
+            version_regex = re.compile(r'^v\d+\.\d+\.\d+(\.\d+)?(-preview)?$')
             if not version_regex.match(version):
                 invalid_version_msg = (
                     f'Invalid version. The version should follow the regex {version_regex.pattern}.'
@@ -237,8 +239,9 @@ class Bedrock(Edition):
             print(  # noqa: T201
                 texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode, error_msg=err.stderr),
             )
+            raise
 
-    def _create_partial_textures(
+    def _create_partial_textures(  # noqa: C901, PLR0915
         self,
         texture_dir: str,
         version_type: VersionType,
