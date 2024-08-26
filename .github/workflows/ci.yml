@@ -29,8 +29,8 @@ jobs:
       - name: Lint and format
         run: |
           pip install ruff
-          ruff check .
-          ruff format --check .
+          ruff check --config pyproject.toml .
+          ruff format --config pyproject.toml --check .
 
       - name: Install dependencies
         run: |
