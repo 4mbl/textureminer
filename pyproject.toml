@@ -1,5 +1,5 @@
 [build-system]
-requires = [ "hatchling",]
+requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
@@ -8,9 +8,19 @@ version = "0.0.0"
 description = "A Python package that allows you to extract and scale Minecraft's item and block textures easily."
 readme = "README.md"
 requires-python = ">=3.12"
-classifiers = [ "Programming Language :: Python :: 3", "License :: OSI Approved :: MIT License", "Operating System :: OS Independent",]
-dependencies = [ "forfiles>=4.0.0, <4.1.0", "fortext>=0.0.11, <0.0.12", "pillow>=10.4.0, <10.5.0", "requests>=2.32.0, <2.33.0", "toml>=0.10.2, <0.10.3",]
-keywords = [ "minecraft", "cli",]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "forfiles>=4.0.0, <4.1.0",
+    "fortext>=0.0.11, <0.0.12",
+    "pillow>=10.4.0, <10.5.0",
+    "requests>=2.32.0, <2.33.0",
+    "toml>=0.10.2, <0.10.3",
+]
+keywords = ["minecraft", "cli"]
 [[project.authors]]
 name = "4MBL"
 
@@ -18,7 +28,7 @@ name = "4MBL"
 file = "LICENSE"
 
 [project.optional-dependencies]
-test = [ "pytest>=8.3.0, <8.4.0",]
+test = ["pytest>=8.3.0, <8.4.0"]
 
 [project.scripts]
 textureminer = "textureminer.cli:cli"
@@ -31,18 +41,18 @@ Changelog = "https://github.com/4mbl/textureminer/blob/main/CHANGELOG.md"
 
 [tool.ruff]
 line-length = 100
-exclude = ["tests"]
 
 [tool.ruff.lint]
-select = [ "ALL",]
-ignore = [ "D203", "D213", "ISC001",]
+select = ["ALL"]
+ignore = ["D203", "D213", "ISC001"]
+exclude = ["tests"]
 
 [tool.ruff.format]
 quote-style = "single"
 indent-style = "space"
 
 [tool.pytest.ini_options]
-pythonpath = [ "src",]
+pythonpath = ["src"]
 
 [tool.ruff.lint.flake8-quotes]
 inline-quotes = "single"
