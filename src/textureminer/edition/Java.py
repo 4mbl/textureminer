@@ -231,7 +231,7 @@ class Java(Edition):
 
         Returns:
         -------
-            tuple[int, int, int]: major, minor, build number, e.g. (21, 0, 1) for 1.21.0-pre1
+            tuple[int, int, int]: major, minor, build number, e.g. (21, 0, 1) for 1.21-pre1
 
         """
         update, build = version.split('-pre')
@@ -267,7 +267,7 @@ class Java(Edition):
 
         Returns:
         -------
-            tuple[int, int, int]: major, minor, build number, e.g. (21, 0, 1) for 1.21.0-rc1
+            tuple[int, int, int]: major, minor, build number, e.g. (21, 0, 1) for 1.21-rc1
 
         """
         update, build = version.split('-rc')

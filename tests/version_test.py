@@ -19,6 +19,30 @@ def test_parse_snapshot() -> None:
     assert parsed == (22, 14, 2)
 
 
+def test_parse_pre() -> None:
+    parsed = Java.parse_pre('1.21-pre1')
+    assert parsed == (21, 0, 1)
+    parsed = Java.parse_pre('1.21-pre2')
+    assert parsed == (21, 0, 2)
+
+    parsed = Java.parse_pre('1.21.1-pre1')
+    assert parsed == (21, 1, 1)
+    parsed = Java.parse_pre('1.21.1-pre2')
+    assert parsed == (21, 1, 2)
+
+
+def test_parse_rc() -> None:
+    parsed = Java.parse_rc('1.21-rc1')
+    assert parsed == (21, 0, 1)
+    parsed = Java.parse_rc('1.21-rc2')
+    assert parsed == (21, 0, 2)
+
+    parsed = Java.parse_rc('1.21.1-rc1')
+    assert parsed == (21, 1, 1)
+    parsed = Java.parse_rc('1.21.1-rc2')
+    assert parsed == (21, 1, 2)
+
+
 
 def test_parse_stable() -> None:
     parsed = Java.parse_stable('1.21')
