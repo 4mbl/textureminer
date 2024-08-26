@@ -57,7 +57,7 @@ def test_java_invalid_version(capsys: pytest.CaptureFixture) -> None:
 
 def test_java_valid_version(capsys: pytest.CaptureFixture) -> None:
     with pytest.raises(SystemExit) as excinfo:
-        cli(['--java', '1.21'])
+        cli(['--java', '1.21', '--scale', '1'])
     assert excinfo.value.code == 0
     out, err = capsys.readouterr()
     assert err.startswith('Error: Invalid version') == False
@@ -65,7 +65,7 @@ def test_java_valid_version(capsys: pytest.CaptureFixture) -> None:
 
 def test_bedrock_valid_version(capsys: pytest.CaptureFixture) -> None:
     with pytest.raises(SystemExit) as excinfo:
-        cli(['--bedrock', 'v1.20.0.1'])
+        cli(['--bedrock', 'v1.20.0.1', '--scale', '1'])
     assert excinfo.value.code == 0
     out, err = capsys.readouterr()
     assert err.startswith('Error: Invalid version') == False
