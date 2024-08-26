@@ -14,4 +14,3 @@ def test_version_comparison_stable_different() -> None:
 
     assert not Java.is_version_after('1.20', stable='1.21')
     assert not Java.is_version_after('1.21', stable='1.21.1')
-
