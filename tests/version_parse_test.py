@@ -1,48 +1,55 @@
+import pytest
+
 from textureminer import Java
 
 
-def test_parse_snapshot() -> None:
-    parsed = Java.parse_snapshot('24w34a')
-    assert parsed == (24, 34, 0)
-    parsed = Java.parse_snapshot('24w34b')
-    assert parsed == (24, 34, 1)
-    parsed = Java.parse_snapshot('24w34c')
-    assert parsed == (24, 34, 2)
-
-    parsed = Java.parse_snapshot('22w14a')
-    assert parsed == (22, 14, 0)
-    parsed = Java.parse_snapshot('22w14b')
-    assert parsed == (22, 14, 1)
-    parsed = Java.parse_snapshot('22w14c')
-    assert parsed == (22, 14, 2)
-
-
-def test_parse_pre() -> None:
-    parsed = Java.parse_pre('1.21-pre1')
-    assert parsed == (21, 0, 1)
-    parsed = Java.parse_pre('1.21-pre2')
-    assert parsed == (21, 0, 2)
-
-    parsed = Java.parse_pre('1.21.1-pre1')
-    assert parsed == (21, 1, 1)
-    parsed = Java.parse_pre('1.21.1-pre2')
-    assert parsed == (21, 1, 2)
+@pytest.mark.parametrize(
+    'snapshot, expected',
+    [
+        ('24w34a', (24, 34, 0)),
+        ('24w34b', (24, 34, 1)),
+        ('24w34c', (24, 34, 2)),
+        ('22w14a', (22, 14, 0)),
+        ('22w14b', (22, 14, 1)),
+        ('22w14c', (22, 14, 2)),
+    ],
+)
+def test_parse_snapshot(snapshot: str, expected: tuple) -> None:
+    assert Java.parse_snapshot(snapshot) == expected
 
 
-def test_parse_rc() -> None:
-    parsed = Java.parse_rc('1.21-rc1')
-    assert parsed == (21, 0, 1)
-    parsed = Java.parse_rc('1.21-rc2')
-    assert parsed == (21, 0, 2)
+@pytest.mark.parametrize(
+    'pre, expected',
+    [
+        ('1.21-pre1', (21, 0, 1)),
+        ('1.21-pre2', (21, 0, 2)),
+        ('1.21.1-pre1', (21, 1, 1)),
+        ('1.21.1-pre2', (21, 1, 2)),
+    ],
+)
+def test_parse_pre(pre: str, expected: tuple) -> None:
+    assert Java.parse_pre(pre) == expected
 
-    parsed = Java.parse_rc('1.21.1-rc1')
-    assert parsed == (21, 1, 1)
-    parsed = Java.parse_rc('1.21.1-rc2')
-    assert parsed == (21, 1, 2)
+
+@pytest.mark.parametrize(
+    'rc, expected',
+    [
+        ('1.21-rc1', (21, 0, 1)),
+        ('1.21-rc2', (21, 0, 2)),
+        ('1.21.1-rc1', (21, 1, 1)),
+        ('1.21.1-rc2', (21, 1, 2)),
+    ],
+)
+def test_parse_rc(rc: str, expected: tuple) -> None:
+    assert Java.parse_rc(rc) == expected
 
 
-def test_parse_stable() -> None:
-    parsed = Java.parse_stable('1.21')
-    assert parsed == (21, 0)
-    parsed = Java.parse_stable('1.21.1')
-    assert parsed == (21, 1)
+@pytest.mark.parametrize(
+    'stable, expected',
+    [
+        ('1.21', (21, 0)),
+        ('1.21.1', (21, 1)),
+    ],
+)
+def test_parse_stable(stable: str, expected: tuple) -> None:
+    assert Java.parse_stable(stable) == expected
