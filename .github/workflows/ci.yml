@@ -44,7 +44,7 @@ jobs:
 
       - name: Install package
         run: |
-          pip install ./dist/textureminer-${{ env.PACKAGE_VERSION }}-py3-none-any.whl
+          pip install ./dist/textureminer-${{ env.PACKAGE_VERSION }}-py3-none-any.whl --force-reinstall
 
       - name: Run package
         run: |
