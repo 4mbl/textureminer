@@ -8,6 +8,10 @@ env:
   PACKAGE_VERSION: 0.0.0
   PYTHON_VERSION: 3.12
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: windows-latest
