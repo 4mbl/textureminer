@@ -1,6 +1,4 @@
-import pytest
-
-from textureminer.edition.Java import Java  # type: ignore
+from textureminer import Java  # type: ignore
 
 
 def test_parse_snapshot() -> None:
