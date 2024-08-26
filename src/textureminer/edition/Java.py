@@ -91,7 +91,9 @@ class Java(Edition):
 
     version_manifest_cache: dict | None = None
 
-    _LETTER_TO_NUMBER = {letter: index for index, letter in enumerate(string.ascii_lowercase)}
+    _LETTER_TO_NUMBER: ClassVar[dict[str, int]] = {
+        letter: index for index, letter in enumerate(string.ascii_lowercase)
+    }
 
     @override
     def get_textures(
@@ -314,7 +316,7 @@ class Java(Edition):
         return int(parts[1]), 0
 
     @staticmethod
-    def is_version_after(
+    def is_version_after(  # noqa: C901, PLR0911, PLR0912
         version: str,
         stable: str,
         snapshot: str | None = None,
