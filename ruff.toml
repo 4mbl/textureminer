@@ -1,2 +1,0 @@
-# ifnore test files for linting
-exclude = ["tests"]
