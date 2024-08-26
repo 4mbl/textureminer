@@ -6,7 +6,9 @@ from enum import Enum
 from importlib import metadata
 
 from . import texts
-from .edition import Bedrock, Edition, Java
+from .edition.Bedrock import Bedrock
+from .edition.Edition import Edition
+from .edition.Java import Java
 from .options import DEFAULTS, EditionType, VersionType
 from .texts import tabbed_print
 
