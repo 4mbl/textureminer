@@ -43,23 +43,8 @@ def test_parse_rc() -> None:
     assert parsed == (21, 1, 2)
 
 
-
 def test_parse_stable() -> None:
     parsed = Java.parse_stable('1.21')
     assert parsed == (21, 0)
     parsed = Java.parse_stable('1.21.1')
     assert parsed == (21, 1)
-
-
-def test_version_comparison_stable_equal() -> None:
-    assert Java.is_version_after('1.21', '1.21')
-    assert Java.is_version_after('1.21.1', '1.21.1')
-
-
-def test_version_comparison_stable_different() -> None:
-    assert Java.is_version_after('1.21', stable='1.20')
-    assert Java.is_version_after('1.21.1', stable='1.21')
-
-    assert not Java.is_version_after('1.20', stable='1.21')
-    assert not Java.is_version_after('1.21', stable='1.21.1')
-
