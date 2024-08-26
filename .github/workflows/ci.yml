@@ -48,5 +48,5 @@ jobs:
 
       - name: Run package
         run: |
-          textureminer --help
           textureminer --version
+          textureminer --help
