@@ -34,7 +34,7 @@ jobs:
       - name: Run tox
         run: |
           pip install tox tox-gh-actions
-          tox
+          tox -p auto
 
       - name: Build package
         run: |
