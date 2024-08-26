@@ -27,9 +27,6 @@ name = "4MBL"
 [project.license]
 file = "LICENSE"
 
-[project.optional-dependencies]
-test = ["pytest>=8.3.0, <8.4.0"]
-
 [project.scripts]
 textureminer = "textureminer.cli:cli"
 
@@ -44,7 +41,7 @@ line-length = 100
 
 [tool.ruff.lint]
 select = ["ALL"]
-ignore = ["D203", "D213", "ISC001"]
+ignore = ["D203", "D213", "ISC001", "COM812"]
 exclude = ["tests"]
 
 [tool.ruff.format]
