@@ -10,8 +10,8 @@ from types import TracebackType
 from typing import Self
 from uuid import uuid4
 
-from forfiles import file as f  # type: ignore[import]
-from forfiles import image  # type: ignore[import]
+from forfiles import file as f
+from forfiles import image
 from PIL import Image as Pil_Image
 
 from textureminer import texts
@@ -237,8 +237,8 @@ class Edition(ABC):
         copytree(blocks_input, blocks_output)
         copytree(items_input, items_output)
 
-        f.filter(blocks_output, ['.png'])
-        f.filter(items_output, ['.png'])
+        f.filter_type(blocks_output, ['.png'])
+        f.filter_type(items_output, ['.png'])
 
         return output_dir
 
@@ -358,7 +358,7 @@ class Edition(ABC):
         tabbed_print(texts.TEXTURES_FILTERING)
 
         for subdir, _, files in os.walk(path):
-            f.filter(f'{Path(subdir).resolve().as_posix()}', ['.png'])
+            f.filter_type(f'{Path(subdir).resolve().as_posix()}', ['.png'])
 
             if len(files) == 0:
                 continue

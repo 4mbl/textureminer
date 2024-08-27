@@ -14,8 +14,8 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "forfiles>=4.0.0, <4.1.0",
-    "fortext>=0.0.11, <0.0.12",
+    "forfiles>=4.1.1, <4.2.0",
+    "fortext>=0.0.11, <0.0.13",
     "pillow>=10.4.0, <10.5.0",
     "requests>=2.32.0, <2.33.0",
     "toml>=0.10.2, <0.10.3",
