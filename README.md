@@ -27,7 +27,7 @@ Either download the [installer](https://git-scm.com/download/) from the official
 winget install Git.Git
 ```
 
-Install Python 3.12 or higher.
+Install Python, the latest version is recommended.
 
 <https://www.python.org/downloads/>
 
@@ -35,13 +35,6 @@ Install/update the [pip](https://pip.pypa.io/en/stable/) package manager.
 
 ```sh
 python3 -m pip install --upgrade pip
-```
-
-It's also recommended to use a [virtual environment](https://docs.python.org/3/library/venv.html).
-
-```sh
-python3 -m venv my-venv
-my-venv/Scripts/activate
 ```
 
 ### Installation
