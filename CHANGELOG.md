@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 * Support for Linux.
 * Tests that run on GitHub Actions.
 * Package typings when installing with `pip`.
+* Centralized logging, `--verbose` and `--silent` flags.
 
 ### Changed
 
