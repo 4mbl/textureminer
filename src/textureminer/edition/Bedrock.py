@@ -1,12 +1,13 @@
-# noqa: N999
+# noqa: N999, RUF100
 """Provides a class representing the Bedrock edition of Minecraft."""
 
 import json
+import platform
 import re
 import subprocess
 from pathlib import Path
 from shutil import copyfile
-from typing import Any, ClassVar, override
+from typing import Any, ClassVar, Literal, override
 
 import requests  # type: ignore[import]
 
@@ -56,10 +57,18 @@ class Bedrock(Edition):
     blocks_cache: dict[str, Any] | None = None
     terrain_texture_cache: dict[str, Any] | None = None
 
+    _git_executable: Literal['git', '/usr/bin/git']
+
     def __init__(self) -> None:
         """Initialize the Bedrock Edition."""
-        self.repo_dir: str | None = None
         super().__init__()
+
+        if platform.system() == 'Linux':
+            self._git_executable = '/usr/bin/git'
+        else:
+            self._git_executable = 'git'
+
+        self.repo_dir = self.temp_dir + '/bedrock-samples/'
 
     @override
     def get_textures(
@@ -82,7 +91,6 @@ class Bedrock(Edition):
         )
         version = None
 
-        self.repo_dir = self.temp_dir + '/bedrock-samples/'
         self._clone_repo(self.repo_dir)
 
         if isinstance(version_or_type, str):
@@ -140,9 +148,14 @@ class Bedrock(Edition):
             repo_not_found_msg = 'Repository not found. Please clone the repository first.'
             raise OSError(repo_not_found_msg)
 
-        subprocess.run('git fetch --tags', check=False, cwd=self.repo_dir)  # noqa: S603, S607
+        subprocess.run([self._git_executable, 'fetch', '--tags'], check=False, cwd=self.repo_dir)  # noqa: S603
 
-        out = subprocess.run('git tag --list', check=False, cwd=self.repo_dir, capture_output=True)  # noqa: S603, S607
+        out = subprocess.run(  # noqa: S603
+            [self._git_executable, 'tag', '--list'],
+            check=False,
+            cwd=self.repo_dir,
+            capture_output=True,
+        )
 
         tags = out.stdout.decode('utf-8').splitlines()
 
@@ -173,8 +186,38 @@ class Bedrock(Edition):
 
         rm_if_exists(self.repo_dir)
 
-        command_1 = f'git clone --filter=blob:none --sparse {repo_url} {self.repo_dir}'
-        command_2 = 'git config core.sparsecheckout true && echo "resource_pack" >> .git/info/sparse-checkout && git sparse-checkout init --cone && git sparse-checkout set resource_pack'  # noqa: E501
+        command_1 = [
+            self._git_executable,
+            'clone',
+            '--filter=blob:none',
+            '--sparse',
+            repo_url,
+            self.repo_dir,
+        ]
+        command_2 = [
+            self._git_executable,
+            'config',
+            'core.sparsecheckout',
+            'true',
+        ]
+        command_3 = [
+            'echo',
+            'resource_pack',
+            '>>',
+            '.git/info/sparse-checkout',
+        ]
+        command_4 = [
+            self._git_executable,
+            'sparse-checkout',
+            'init',
+            '--cone',
+        ]
+        command_5 = [
+            self._git_executable,
+            'sparse-checkout',
+            'set',
+            'resource_pack',
+        ]
 
         try:
             if re.match(r'https://github.com/[^/]+/[^/]+(.git)?$', repo_url) is None:
@@ -187,14 +230,15 @@ class Bedrock(Edition):
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.STDOUT,
             )
-            subprocess.run(  # noqa: S602
-                command_2,
-                check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT,
-                cwd=self.repo_dir,
-                shell=True,
-            )
+
+            for command in [command_2, command_3, command_4, command_5]:
+                subprocess.run(  # noqa: S603
+                    command,
+                    check=True,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.STDOUT,
+                    cwd=self.repo_dir,
+                )
 
         except subprocess.CalledProcessError as err:
             print(  # noqa: T201
@@ -220,7 +264,12 @@ class Bedrock(Edition):
             )
             raise OSError(repo_dir_not_found_msg)
         if fetch_tags:
-            subprocess.run('git fetch --tags', check=False, cwd=self.repo_dir)  # noqa: S603, S607
+            subprocess.run(  # noqa: S603
+                [self._git_executable, 'fetch', '--tags'],
+                check=False,
+                cwd=self.repo_dir,
+            )
+
         try:
             version_regex = re.compile(r'^v\d+\.\d+\.\d+(\.\d+)?(-preview)?$')
             if not version_regex.match(version):
@@ -229,7 +278,7 @@ class Bedrock(Edition):
                 )
                 raise ValueError(invalid_version_msg)
             subprocess.run(  # noqa: S603
-                f'git checkout tags/v{version}',
+                [self._git_executable, 'checkout', f'tags/v{version}'],
                 check=False,
                 cwd=self.repo_dir,
                 stdout=subprocess.DEVNULL,
