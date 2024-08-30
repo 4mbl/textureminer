@@ -2,6 +2,7 @@
 """Provides a class representing the Bedrock edition of Minecraft."""
 
 import json
+import logging
 import platform
 import re
 import subprocess
@@ -15,7 +16,6 @@ from textureminer import texts
 from textureminer.edition.Edition import BlockShape, Edition, TextureOptions
 from textureminer.file import rm_if_exists
 from textureminer.options import DEFAULTS, EditionType, VersionType
-from textureminer.texts import tabbed_print
 
 
 class Bedrock(Edition):
@@ -99,7 +99,7 @@ class Bedrock(Edition):
             version = self.get_latest_version(version_type)
 
         self.version = version
-        tabbed_print(texts.VERSION_USING_X.format(version=version))
+        logging.getLogger('main').info(texts.VERSION_USING_X.format(version=version))
 
         self._change_repo_version(version)
 
@@ -180,7 +180,7 @@ class Bedrock(Edition):
             repo_url (str): URL of the repo to clone
 
         """
-        tabbed_print(texts.FILES_DOWNLOADING)
+        logging.getLogger('main').info(texts.FILES_DOWNLOADING)
 
         self.repo_dir = clone_dir
 
@@ -241,7 +241,7 @@ class Bedrock(Edition):
                 )
 
         except subprocess.CalledProcessError as err:
-            print(  # noqa: T201
+            logging.getLogger('main').exception(
                 texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode, error_msg=err.stderr),
             )
 
@@ -285,7 +285,7 @@ class Bedrock(Edition):
                 stderr=subprocess.STDOUT,
             )
         except subprocess.CalledProcessError as err:
-            print(  # noqa: T201
+            logging.getLogger('main').exception(
                 texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode, error_msg=err.stderr),
             )
             raise
@@ -308,7 +308,7 @@ class Bedrock(Edition):
         """
         unused_textures: list[str] = ['carpet']
 
-        tabbed_print(texts.CREATING_PARTIALS)
+        logging.getLogger('main').info(texts.CREATING_PARTIALS)
         texture_dict = self._get_blocks_json(version_type=version_type)
 
         for texture_name in texture_dict:

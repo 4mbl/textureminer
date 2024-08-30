@@ -2,6 +2,7 @@
 """Provides a class representing the Java edition of Minecraft."""
 
 import json
+import logging
 import os
 import re
 import string
@@ -18,7 +19,6 @@ from textureminer import texts
 from textureminer.exceptions import FileFormatError
 from textureminer.file import mk_dir
 from textureminer.options import DEFAULTS, EditionType, VersionType
-from textureminer.texts import tabbed_print
 
 from .Edition import (
     REGEX_JAVA_PRE,
@@ -119,7 +119,7 @@ class Java(Edition):
 
         self.version = version
 
-        tabbed_print(texts.VERSION_USING_X.format(version=version))
+        logging.getLogger('main').info(texts.VERSION_USING_X.format(version=version))
         assets = self._download_client_jar(version, self.temp_dir + '/version-jars')
 
         extracted = self._extract_jar(assets, self.temp_dir + '/extracted-files')
@@ -166,7 +166,9 @@ class Java(Edition):
 
     @override
     def get_latest_version(self, version_type: VersionType) -> str:
-        tabbed_print(texts.VERSION_LATEST_FINDING.format(version_type=version_type.value))
+        logging.getLogger('main').info(
+            texts.VERSION_LATEST_FINDING.format(version_type=version_type.value)
+        )
         version_id = (
             VersionManifestIdentifiers.STABLE.value
             if version_type == VersionType.STABLE
@@ -421,7 +423,7 @@ class Java(Edition):
                 break
 
         if url is None:
-            tabbed_print(texts.ERROR_VERSION_INVALID.format(version=version))
+            logging.getLogger('main').info(texts.ERROR_VERSION_INVALID.format(version=version))
             error_msg = 'Invalid version.'
             raise ValueError(error_msg)
 
@@ -432,7 +434,7 @@ class Java(Edition):
             raise TypeError(client_jar_url_msg)
 
         mk_dir(download_dir)
-        tabbed_print(texts.FILES_DOWNLOADING)
+        logging.getLogger('main').info(texts.FILES_DOWNLOADING)
 
         if not client_jar_url.startswith(('http:', 'https:')):
             invalid_url_format_msg = 'URL must start with "http:" or "https:".'
@@ -455,7 +457,7 @@ class Java(Edition):
         """
         with ZipFile(jar_path, 'r') as zip_object:
             file_amount = len(zip_object.namelist())
-            tabbed_print(texts.FILES_EXTRACTING_N.format(file_amount=file_amount))
+            logging.getLogger('main').info(texts.FILES_EXTRACTING_N.format(file_amount=file_amount))
             zip_object.extractall(output_dir)
 
         return output_dir
@@ -476,7 +478,7 @@ class Java(Edition):
             prevent_overwrite (bool, optional): whether to copy textures to prevent overwrite
 
         """
-        tabbed_print(texts.CREATING_PARTIALS)
+        logging.getLogger('main').info(texts.CREATING_PARTIALS)
 
         # https://4mbl.link/textureminer/refs/recipe-directory/24w21a
         if Java.is_version_after(

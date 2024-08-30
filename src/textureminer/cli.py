@@ -1,16 +1,20 @@
 """Command line interface functionality."""
 
 import argparse
-import sys
+import logging
+import os
 from enum import Enum
 from importlib import metadata
+
+from fortext import Fg, style
+
+from textureminer.logger import CustomLogger, get_logger
 
 from . import texts
 from .edition.Bedrock import Bedrock
 from .edition.Edition import Edition
 from .edition.Java import Java
 from .options import DEFAULTS, EditionType, VersionType
-from .texts import tabbed_print
 
 
 class UpdateOption(Enum):
@@ -52,7 +56,7 @@ def get_edition_from_version(version: str) -> EditionType | None:
     return None
 
 
-def cli(argv: list[str] | None = None) -> None:
+def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0915
     """CLI entrypoint for textureminer.
 
     Args:
@@ -124,6 +128,9 @@ def cli(argv: list[str] | None = None) -> None:
             help='scale factor for textures',
             metavar='N',
         )
+        parser.add_argument('--no-color', action='store_true', help='disable color output')
+        parser.add_argument('--silent', action='store_true', help='silence output')
+        parser.add_argument('--verbose', action='store_true', help='enable verbose output')
         parser.add_argument(
             '-v',
             '--version',
@@ -134,7 +141,17 @@ def cli(argv: list[str] | None = None) -> None:
 
         args = parser.parse_args(argv)
 
-        print(texts.TITLE)  # noqa: T201
+        if args.no_color:
+            os.environ['NO_COLOR'] = '1'
+
+        color_disabled = args.no_color or os.getenv('NO_COLOR') == '1'
+
+        logger: CustomLogger = get_logger(
+            'main',
+            level=logging.DEBUG if args.verbose else logging.ERROR if args.silent else logging.INFO,
+        )  # type: ignore[assignment]
+
+        logger.info(style(texts.TITLE, fg=Fg.CYAN) if not color_disabled else texts.TITLE)
 
         edition_type: EditionType | None = None
         update: str | VersionType | None = None
@@ -161,7 +178,7 @@ def cli(argv: list[str] | None = None) -> None:
         if edition_type is None:
             edition_type = DEFAULTS['EDITION']
 
-        tabbed_print(texts.EDITION_USING_X.format(edition=edition_type.value.capitalize()))
+        logger.info(texts.EDITION_USING_X.format(edition=edition_type.value.capitalize()))
 
         with Bedrock() if edition_type == EditionType.BEDROCK else Java() as edition:
             output_path = edition.get_textures(
@@ -176,9 +193,14 @@ def cli(argv: list[str] | None = None) -> None:
                 },
             )
 
-    except Exception as e:  # noqa: BLE001
-        print('Error: ' + str(e), file=sys.stderr)  # noqa: T201
+    except Exception as e:
+        logger.exception(
+            f'Error: {e}',  # noqa: G004, TRY401
+        )
         raise SystemExit(1, str(e)) from None
 
-    print(texts.COMPLETED.format(output_dir=output_path))  # noqa: T201
+    if not color_disabled:
+        logger.info(style(texts.COMPLETED.format(output_dir=output_path), fg=Fg.GREEN))
+    else:
+        logger.info(texts.COMPLETED.format(output_dir=output_path))
     raise SystemExit(0)
