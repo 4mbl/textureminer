@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
+* Support for Linux.
 * Tests that run on GitHub Actions.
 * Package typings when installing with `pip`.
 
