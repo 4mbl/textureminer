@@ -75,6 +75,7 @@ class Options(TypedDict):
     TEXTURE_OPTIONS: TextureOptions
     VERSION: VersionType
 
+
 HOME_DIR = Path('~').expanduser().as_posix()
 
 DEFAULTS: Options = {
