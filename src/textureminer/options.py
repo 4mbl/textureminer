@@ -6,8 +6,6 @@ from enum import Enum
 from pathlib import Path
 from typing import TypedDict
 
-HOME_DIR = Path('~').expanduser().as_posix()
-
 
 class VersionType(Enum):
     """Enum class representing different types of versions for Minecraft."""
@@ -78,9 +76,11 @@ class Options(TypedDict):
     VERSION: VersionType
 
 
+HOME_DIR = Path('~').expanduser().as_posix()
+
 DEFAULTS: Options = {
     'EDITION': EditionType.JAVA,
-    'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/Downloads/textureminer'),
+    'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/textureminer'),
     'TEMP_PATH': f'{tempfile.gettempdir()}/textureminer'.replace('\\', '/'),
     'VERSION': VersionType.ALL,
     'TEXTURE_OPTIONS': {
