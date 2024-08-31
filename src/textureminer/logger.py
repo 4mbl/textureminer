@@ -63,6 +63,32 @@ class CustomLogger(logging.Logger):
         self.log(logging.CRITICAL, msg, *args, **kwargs)
 
 
+class CustomFormatter(logging.Formatter):
+    """Custom formatter for textureminer."""
+
+    @override
+    def __init__(
+        self,
+        fmt: str | None = None,
+        datefmt: str | None = None,
+        style: Any = '%',
+        validate: bool = True,
+        *,
+        level: int | None = None,
+        defaults: Any | None = None,
+    ) -> None:
+        super().__init__(
+            fmt=fmt, datefmt=datefmt, style=style, validate=validate, defaults=defaults
+        )
+        self.level = level
+
+    @override
+    def format(self, record: logging.LogRecord) -> str:
+        if self.level == logging.DEBUG:
+            return f'{record.relativeCreated:07.0f} {record.msg}'
+        return record.msg
+
+
 def get_logger(name: str | None = None, *, level: int = logging.INFO) -> logging.Logger:
     """Get a logger with ColorFormatter.
 
@@ -78,12 +104,9 @@ def get_logger(name: str | None = None, *, level: int = logging.INFO) -> logging
     """
     logging.setLoggerClass(CustomLogger)
     logger: logging.Logger = logging.getLogger(name)
-    logger.setLevel(level)
     handler: logging.StreamHandler = logging.StreamHandler()
-    formatter = logging.Formatter(
-        fmt='%(relativeCreated)s\t %(message)s' if level == logging.DEBUG else '%(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-    )
+    formatter = CustomFormatter(level=level)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+    logger.setLevel(level)
     return logger
