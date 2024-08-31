@@ -119,8 +119,8 @@ class Java(Edition):
 
         self.version = version
 
-        logging.getLogger('main').info(texts.VERSION_USING_X.format(version=version))
         assets = self._download_client_jar(version, self.temp_dir + '/version-jars')
+        logging.getLogger('main').info(texts.VERSION_USING_X.format(version=version))
 
         extracted = self._extract_jar(assets, self.temp_dir + '/extracted-files')
 
@@ -423,8 +423,7 @@ class Java(Edition):
                 break
 
         if url is None:
-            logging.getLogger('main').info(texts.ERROR_VERSION_INVALID.format(version=version))
-            error_msg = 'Invalid version.'
+            error_msg = texts.ERROR_VERSION_INVALID.format(version=version)
             raise ValueError(error_msg)
 
         resp_json = requests.get(url, timeout=10).json()
