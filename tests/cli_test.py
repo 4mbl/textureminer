@@ -1,3 +1,4 @@
+import os
 import re
 
 import pytest
@@ -5,7 +6,14 @@ import pytest
 from textureminer import cli
 
 
-def test_version(capsys: pytest.CaptureFixture) -> None:
+@pytest.fixture
+def disable_color():
+    os.environ['NO_COLOR'] = '1'
+    yield
+    del os.environ['NO_COLOR']
+
+
+def test_version(capsys: pytest.CaptureFixture, disable_color) -> None:
     with pytest.raises(SystemExit) as excinfo:
         cli(['--version'])
     assert excinfo.value.code == 0
@@ -21,7 +29,7 @@ def test_version(capsys: pytest.CaptureFixture) -> None:
     assert err == ''
 
 
-def test_help(capsys: pytest.CaptureFixture) -> None:
+def test_help(capsys: pytest.CaptureFixture, disable_color) -> None:
     with pytest.raises(SystemExit) as excinfo:
         cli(['--help'])
     assert excinfo.value.code == 0
@@ -33,39 +41,37 @@ def test_help(capsys: pytest.CaptureFixture) -> None:
         cli(['-h'])
     assert excinfo.value.code == 0
     out, err = capsys.readouterr()
-    assert err == ''
     assert out.startswith('usage: textureminer')
+    assert err == ''
 
 
-def test_bedrock_invalid_version(capsys: pytest.CaptureFixture) -> None:
+def test_bedrock_invalid_version(capsys: pytest.CaptureFixture, disable_color) -> None:
     with pytest.raises(SystemExit) as excinfo:
         cli(['--bedrock', '1.99'])
     assert excinfo.value.code != 0
     out, err = capsys.readouterr()
-    assert out != ''
-    assert err.startswith('Error: Invalid version')
+    assert 'Invalid version' in err
 
 
-def test_java_invalid_version(capsys: pytest.CaptureFixture) -> None:
+def test_java_invalid_version(capsys: pytest.CaptureFixture, disable_color) -> None:
     with pytest.raises(SystemExit) as excinfo:
         cli(['--java', '1.99'])
     assert excinfo.value.code != 0
     out, err = capsys.readouterr()
-    assert out != ''
-    assert err.startswith('Error: Invalid version')
+    assert 'Invalid version' in err
 
 
-def test_java_valid_version(capsys: pytest.CaptureFixture) -> None:
+def test_java_valid_version(capsys: pytest.CaptureFixture, disable_color) -> None:
     with pytest.raises(SystemExit) as excinfo:
         cli(['--java', '1.21', '--scale', '1'])
     assert excinfo.value.code == 0
     out, err = capsys.readouterr()
-    assert err.startswith('Error: Invalid version') == False
+    assert 'Invalid version' not in err
 
 
-def test_bedrock_valid_version(capsys: pytest.CaptureFixture) -> None:
+def test_bedrock_valid_version(capsys: pytest.CaptureFixture, disable_color) -> None:
     with pytest.raises(SystemExit) as excinfo:
         cli(['--bedrock', 'v1.20.0.1', '--scale', '1'])
     assert excinfo.value.code == 0
     out, err = capsys.readouterr()
-    assert err.startswith('Error: Invalid version') == False
+    assert 'Invalid version' not in err
