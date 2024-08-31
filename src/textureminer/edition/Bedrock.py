@@ -67,6 +67,7 @@ class Bedrock(Edition):
             self._git_executable = '/usr/bin/git'
         else:
             self._git_executable = 'git'
+        logging.getLogger('main').debug('Git executable: {git}'.format(git=self._git_executable))  # noqa: G001, UP032
 
         self.repo_dir = self.temp_dir + '/bedrock-samples/'
 
@@ -79,6 +80,7 @@ class Bedrock(Edition):
     ) -> str | None:
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
+        logging.getLogger('main').debug('Texture options: {options}'.format(options=options))  # noqa: G001, UP032
 
         if isinstance(version_or_type, str) and not Edition.validate_version(
             version_or_type,
@@ -224,6 +226,9 @@ class Bedrock(Edition):
                 invalid_repo_msg = f'Invalid repository URL: {repo_url}'
                 raise OSError(invalid_repo_msg)
 
+            logging.getLogger('main').debug(
+                'Running `{command}`'.format(command=' '.join(command_1))  # noqa: G001
+            )
             subprocess.run(  # noqa: S603
                 command_1,
                 check=True,
@@ -231,9 +236,15 @@ class Bedrock(Edition):
                 stderr=subprocess.STDOUT,
             )
 
-            for command in [command_2, command_3, command_4, command_5]:
+            for cmd in [command_2, command_3, command_4, command_5]:
+                logging.getLogger('main').debug(
+                    'Running `{command}` on {cwd}'.format(  # noqa: G001
+                        command=' '.join(cmd),
+                        cwd=self.repo_dir,
+                    )
+                )
                 subprocess.run(  # noqa: S603
-                    command,
+                    cmd,
                     check=True,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.STDOUT,
@@ -264,8 +275,15 @@ class Bedrock(Edition):
             )
             raise OSError(repo_dir_not_found_msg)
         if fetch_tags:
+            command = [self._git_executable, 'fetch', '--tags']
+            logging.getLogger('main').debug(
+                'Running `{command}` on {cwd}'.format(  # noqa: G001, UP032
+                    command=command,
+                    cwd=self.repo_dir,
+                )
+            )
             subprocess.run(  # noqa: S603
-                [self._git_executable, 'fetch', '--tags'],
+                command,
                 check=False,
                 cwd=self.repo_dir,
             )
@@ -277,8 +295,16 @@ class Bedrock(Edition):
                     f'Invalid version. The version should follow the regex {version_regex.pattern}.'
                 )
                 raise ValueError(invalid_version_msg)
+
+            command = [self._git_executable, 'checkout', f'tags/v{version}']
+            logging.getLogger('main').debug(
+                'Running `{command}` on {cwd}'.format(  # noqa: G001, UP032
+                    command=command,
+                    cwd=self.repo_dir,
+                )
+            )
             subprocess.run(  # noqa: S603
-                [self._git_executable, 'checkout', f'tags/v{version}'],
+                command,
                 check=False,
                 cwd=self.repo_dir,
                 stdout=subprocess.DEVNULL,
@@ -316,9 +342,9 @@ class Bedrock(Edition):
                 continue
 
             if (
-                texture_name in self.OVERWRITE_TEXTURES
+                prevent_overwrite
+                and texture_name in self.OVERWRITE_TEXTURES
                 and texture_name == texture_dict[texture_name]['textures']
-                and prevent_overwrite
             ):
                 copyfile(
                     f'{texture_dir}/blocks/{texture_name}.png',
@@ -401,10 +427,11 @@ class Bedrock(Edition):
 
         branch = 'main' if version_type == VersionType.STABLE else 'preview'
 
-        file = requests.get(
-            f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/blocks.json',
-            timeout=10,
+        url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/blocks.json'
+        logging.getLogger('main').debug(
+            'Fetching blocks.json from {url}'.format(url=url)  # noqa: G001, UP032
         )
+        file = requests.get(url, timeout=10)
 
         data = file.json()
 
@@ -452,10 +479,11 @@ class Bedrock(Edition):
 
         branch = 'main' if version_type == VersionType.STABLE else 'preview'
 
-        file = requests.get(
-            f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/textures/terrain_texture.json',
-            timeout=10,
+        url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/textures/terrain_texture.json'
+        logging.getLogger('main').debug(
+            'Fetching terrain_texture.json from {url}'.format(url=url)  # noqa: G001, UP032
         )
+        file = requests.get(url, timeout=10)
         text = file.text
 
         json_text = ''

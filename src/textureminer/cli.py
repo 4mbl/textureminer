@@ -14,7 +14,7 @@ from . import texts
 from .edition.Bedrock import Bedrock
 from .edition.Edition import Edition
 from .edition.Java import Java
-from .options import DEFAULTS, EditionType, VersionType
+from .options import DEFAULTS, EditionType, TextureOptions, VersionType
 
 
 class UpdateOption(Enum):
@@ -56,7 +56,7 @@ def get_edition_from_version(version: str) -> EditionType | None:
     return None
 
 
-def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0915
+def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
     """CLI entrypoint for textureminer.
 
     Args:
@@ -142,6 +142,7 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0915
         args = parser.parse_args(argv)
 
         if args.no_color:
+            logging.getLogger('main').debug('Disabling color output')  # noqa: G001, UP032
             os.environ['NO_COLOR'] = '1'
 
         color_disabled = args.no_color or os.getenv('NO_COLOR') == '1'
@@ -150,6 +151,8 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0915
             'main',
             level=logging.DEBUG if args.verbose else logging.ERROR if args.silent else logging.INFO,
         )  # type: ignore[assignment]
+
+        logger.debug('Arguments: {args}'.format(args=args))  # noqa: G001, UP032
 
         logger.info(style(texts.TITLE, fg=Fg.CYAN) if not color_disabled else texts.TITLE)
 
@@ -180,17 +183,25 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0915
 
         logger.info(texts.EDITION_USING_X.format(edition=edition_type.value.capitalize()))
 
+        texture_options: TextureOptions = {
+            'DO_CROP': args.crop,
+            'DO_MERGE': args.flatten,
+            'DO_PARTIALS': args.partials,
+            'DO_REPLICATE': args.replicate,
+            'SCALE_FACTOR': args.scale,
+        }
+
         with Bedrock() if edition_type == EditionType.BEDROCK else Java() as edition:
+            logger.debug(
+                'Getting textures for {edition} with options: {options}'.format(  # noqa: G001, UP032
+                    edition=edition_type.value.capitalize(), options=texture_options
+                )
+            )
+            logger.debug('Edition is identifier is: {id}'.format(id=edition.id))  # noqa: G001, UP032
             output_path = edition.get_textures(
                 version_or_type=update if update else DEFAULTS['VERSION'],
                 output_dir=args.output,
-                options={
-                    'DO_CROP': args.crop,
-                    'DO_MERGE': args.flatten,
-                    'DO_PARTIALS': args.partials,
-                    'DO_REPLICATE': args.replicate,
-                    'SCALE_FACTOR': args.scale,
-                },
+                options=texture_options,
             )
 
     except Exception as e:
@@ -200,7 +211,12 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0915
         raise SystemExit(1, str(e)) from None
 
     if not color_disabled:
-        logger.info(style(texts.COMPLETED.format(output_dir=output_path), fg=Fg.GREEN))
+        logger.info(style(texts.COMPLETED, fg=Fg.GREEN))
+        if output_path is not None:
+            logger.info(style(output_path, fg=Fg.GREEN))
     else:
         logger.info(texts.COMPLETED.format(output_dir=output_path))
+        if output_path is not None:
+            logger.info(output_path)
+
     raise SystemExit(0)

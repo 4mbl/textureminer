@@ -58,6 +58,7 @@ class Edition(ABC):
         """Initialize the Edition."""
         self.id = uuid4()
         self.temp_dir = DEFAULTS['TEMP_PATH'] + '/' + self.id.__str__()
+        logging.getLogger('main').debug('Temp directory: {temp}'.format(temp=self.temp_dir))  # noqa: G001, UP032
 
         if Path(self.temp_dir).is_dir():
             rmtree(self.temp_dir)
@@ -78,7 +79,7 @@ class Edition(ABC):
 
     def cleanup(self) -> None:
         """Clean up temporary files."""
-        logging.getLogger('main').info(texts.CLEARING_TEMP)
+        logging.getLogger('main').debug(texts.CLEARING_TEMP)
         rm_if_exists(self.temp_dir)
 
     @abstractmethod
@@ -234,9 +235,23 @@ class Edition(ABC):
         blocks_output = f'{output_dir}/blocks'
         items_output = f'{output_dir}/items'
 
+        logging.getLogger('main').debug(
+            'Copying textures from {input} to {output}'.format(  # noqa: G001, UP032
+                input=blocks_input,
+                output=blocks_output,
+            )
+        )
         copytree(blocks_input, blocks_output)
+
+        logging.getLogger('main').debug(
+            'Copying textures from {input} to {output}'.format(  # noqa: G001, UP032
+                input=items_input,
+                output=items_output,
+            )
+        )
         copytree(items_input, items_output)
 
+        logging.getLogger('main').debug('Filtering textures out non .png files')
         f.filter_type(blocks_output, ['.png'])
         f.filter_type(items_output, ['.png'])
 
@@ -355,8 +370,8 @@ class Edition(ABC):
         """
         if do_merge:
             Edition.merge_dirs(path, path)
-        logging.getLogger('main').info(texts.TEXTURES_FILTERING)
 
+        logging.getLogger('main').info(texts.TEXTURES_FILTERING)
         for subdir, _, files in os.walk(path):
             f.filter_type(f'{Path(subdir).resolve().as_posix()}', ['.png'])
 

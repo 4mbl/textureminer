@@ -12,7 +12,7 @@ TITLE = r"""
 """
 
 
-COMPLETED = 'Completed. You can find the textures on:\n{output_dir}\n'
+COMPLETED = 'Completed. You can find the textures on:'
 CLEARING_TEMP = 'Clearing temporary files...'
 CREATING_PARTIALS = 'Creating partial textures...'
 EDITION_USING_X = 'Using {edition} Edition.'

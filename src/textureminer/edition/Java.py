@@ -104,6 +104,7 @@ class Java(Edition):
     ) -> str | None:
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
+        logging.getLogger('main').debug('Texture options: {options}'.format(options=options))  # noqa: G001, UP032
 
         version: str | None = None
 
@@ -399,6 +400,9 @@ class Java(Edition):
 
         """
         if Java.version_manifest_cache is None:
+            logging.getLogger('main').debug(
+                'Fetching version manifest from {url}'.format(url=Java.VERSION_MANIFEST_URL)  # noqa: G001, UP032
+            )
             Java.version_manifest_cache = requests.get(Java.VERSION_MANIFEST_URL, timeout=10).json()
 
         return Java.version_manifest_cache
