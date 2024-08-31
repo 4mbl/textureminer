@@ -48,7 +48,8 @@ class TextureOptions(TypedDict):
     """
 
     DO_REPLICATE: bool
-    """Whether to copy and rename only texture variant
+    """Whether to copy and rename only texture variant to match the block name.
+    For example "glass_pane_top" to "glass_pane".
     """
 
     SCALE_FACTOR: int
@@ -81,14 +82,14 @@ HOME_DIR = Path('~').expanduser().as_posix()
 DEFAULTS: Options = {
     'EDITION': EditionType.JAVA,
     'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/textureminer'),
-    'TEMP_PATH': f'{tempfile.gettempdir()}/textureminer'.replace('\\', '/'),
+    'TEMP_PATH': Path(tempfile.gettempdir()).joinpath('textureminer').as_posix(),
     'VERSION': VersionType.ALL,
     'TEXTURE_OPTIONS': {
         'DO_CROP': True,
         'DO_MERGE': False,
         'DO_PARTIALS': True,
         'DO_REPLICATE': True,
-        'SCALE_FACTOR': 100,
+        'SCALE_FACTOR': 1,
     },
 }
 
