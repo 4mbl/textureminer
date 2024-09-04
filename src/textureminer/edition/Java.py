@@ -460,7 +460,9 @@ class Java(Edition):
         """
         with ZipFile(jar_path, 'r') as zip_object:
             file_amount = len(zip_object.namelist())
-            logging.getLogger(__name__).info(texts.FILES_EXTRACTING_N.format(file_amount=file_amount))
+            logging.getLogger(__name__).info(
+                texts.FILES_EXTRACTING_N.format(file_amount=file_amount)
+            )
             zip_object.extractall(output_dir)
 
         return output_dir
