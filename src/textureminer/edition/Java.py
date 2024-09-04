@@ -104,7 +104,7 @@ class Java(Edition):
     ) -> str | None:
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
-        logging.getLogger('main').debug('Texture options: {options}'.format(options=options))  # noqa: G001, UP032
+        logging.getLogger(__name__).debug('Texture options: {options}'.format(options=options))  # noqa: G001, UP032
 
         version: str | None = None
 
@@ -121,7 +121,7 @@ class Java(Edition):
         self.version = version
 
         assets = self._download_client_jar(version, self.temp_dir + '/version-jars')
-        logging.getLogger('main').info(texts.VERSION_USING_X.format(version=version))
+        logging.getLogger(__name__).info(texts.VERSION_USING_X.format(version=version))
 
         extracted = self._extract_jar(assets, self.temp_dir + '/extracted-files')
 
@@ -167,7 +167,7 @@ class Java(Edition):
 
     @override
     def get_latest_version(self, version_type: VersionType) -> str:
-        logging.getLogger('main').info(
+        logging.getLogger(__name__).info(
             texts.VERSION_LATEST_FINDING.format(version_type=version_type.value)
         )
         version_id = (
@@ -400,7 +400,7 @@ class Java(Edition):
 
         """
         if Java.version_manifest_cache is None:
-            logging.getLogger('main').debug(
+            logging.getLogger(__name__).debug(
                 'Fetching version manifest from {url}'.format(url=Java.VERSION_MANIFEST_URL)  # noqa: G001, UP032
             )
             Java.version_manifest_cache = requests.get(Java.VERSION_MANIFEST_URL, timeout=10).json()
@@ -437,7 +437,7 @@ class Java(Edition):
             raise TypeError(client_jar_url_msg)
 
         mk_dir(download_dir)
-        logging.getLogger('main').info(texts.FILES_DOWNLOADING)
+        logging.getLogger(__name__).info(texts.FILES_DOWNLOADING)
 
         if not client_jar_url.startswith(('http:', 'https:')):
             invalid_url_format_msg = 'URL must start with "http:" or "https:".'
@@ -460,7 +460,7 @@ class Java(Edition):
         """
         with ZipFile(jar_path, 'r') as zip_object:
             file_amount = len(zip_object.namelist())
-            logging.getLogger('main').info(texts.FILES_EXTRACTING_N.format(file_amount=file_amount))
+            logging.getLogger(__name__).info(texts.FILES_EXTRACTING_N.format(file_amount=file_amount))
             zip_object.extractall(output_dir)
 
         return output_dir
@@ -481,7 +481,7 @@ class Java(Edition):
             prevent_overwrite (bool, optional): whether to copy textures to prevent overwrite
 
         """
-        logging.getLogger('main').info(texts.CREATING_PARTIALS)
+        logging.getLogger(__name__).info(texts.CREATING_PARTIALS)
 
         # https://4mbl.link/textureminer/refs/recipe-directory/24w21a
         if Java.is_version_after(

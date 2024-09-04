@@ -58,7 +58,7 @@ class Edition(ABC):
         """Initialize the Edition."""
         self.id = uuid4()
         self.temp_dir = DEFAULTS['TEMP_PATH'] + '/' + self.id.__str__()
-        logging.getLogger('main').debug('Temp directory: {temp}'.format(temp=self.temp_dir))  # noqa: G001, UP032
+        logging.getLogger(__name__).debug('Temp directory: {temp}'.format(temp=self.temp_dir))  # noqa: G001, UP032
 
         if Path(self.temp_dir).is_dir():
             rmtree(self.temp_dir)
@@ -79,7 +79,7 @@ class Edition(ABC):
 
     def cleanup(self) -> None:
         """Clean up temporary files."""
-        logging.getLogger('main').debug(texts.CLEARING_TEMP)
+        logging.getLogger(__name__).debug(texts.CLEARING_TEMP)
         rm_if_exists(self.temp_dir)
 
     @abstractmethod
@@ -235,7 +235,7 @@ class Edition(ABC):
         blocks_output = f'{output_dir}/blocks'
         items_output = f'{output_dir}/items'
 
-        logging.getLogger('main').debug(
+        logging.getLogger(__name__).debug(
             'Copying textures from {input} to {output}'.format(  # noqa: G001, UP032
                 input=blocks_input,
                 output=blocks_output,
@@ -243,7 +243,7 @@ class Edition(ABC):
         )
         copytree(blocks_input, blocks_output)
 
-        logging.getLogger('main').debug(
+        logging.getLogger(__name__).debug(
             'Copying textures from {input} to {output}'.format(  # noqa: G001, UP032
                 input=items_input,
                 output=items_output,
@@ -251,7 +251,7 @@ class Edition(ABC):
         )
         copytree(items_input, items_output)
 
-        logging.getLogger('main').debug('Filtering textures out non .png files')
+        logging.getLogger(__name__).debug('Filtering textures out non .png files')
         f.filter_type(blocks_output, ['.png'])
         f.filter_type(items_output, ['.png'])
 
@@ -325,7 +325,7 @@ class Edition(ABC):
             int: number of textures replicated
 
         """
-        logging.getLogger('main').info(texts.TEXTURES_REPLICATING)
+        logging.getLogger(__name__).info(texts.TEXTURES_REPLICATING)
 
         count = 0
         originals = list(replication_rules.keys())
@@ -371,7 +371,7 @@ class Edition(ABC):
         if do_merge:
             Edition.merge_dirs(path, path)
 
-        logging.getLogger('main').info(texts.TEXTURES_FILTERING)
+        logging.getLogger(__name__).info(texts.TEXTURES_FILTERING)
         for subdir, _, files in os.walk(path):
             f.filter_type(f'{Path(subdir).resolve().as_posix()}', ['.png'])
 
@@ -379,11 +379,11 @@ class Edition(ABC):
                 continue
 
             if do_merge:
-                logging.getLogger('main').info(
+                logging.getLogger(__name__).info(
                     texts.TEXTURES_RESIZING_AMOUNT.format(texture_amount=len(files))
                 )
             else:
-                logging.getLogger('main').info(
+                logging.getLogger(__name__).info(
                     texts.TEXTURES_RESISING_AMOUNT_IN_DIR.format(
                         texture_amount=len(files),
                         dir_name=Path(subdir).name,
@@ -413,7 +413,7 @@ class Edition(ABC):
         block_folder = f'{input_dir}/blocks'
         item_folder = f'{input_dir}/items'
 
-        logging.getLogger('main').info(texts.TEXTURES_MERGING)
+        logging.getLogger(__name__).info(texts.TEXTURES_MERGING)
         copytree(block_folder, output_dir, dirs_exist_ok=True)
         rmtree(block_folder)
         copytree(item_folder, output_dir, dirs_exist_ok=True)

@@ -142,13 +142,13 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
         args = parser.parse_args(argv)
 
         if args.no_color:
-            logging.getLogger('main').debug('Disabling color output')
+            logging.getLogger(__name__).debug('Disabling color output')
             os.environ['NO_COLOR'] = '1'
 
         color_disabled = args.no_color or os.getenv('NO_COLOR') == '1'
 
         logger: CustomLogger = get_logger(
-            'main',
+            __name__,
             level=logging.DEBUG if args.verbose else logging.ERROR if args.silent else logging.INFO,
         )  # type: ignore[assignment]
 
