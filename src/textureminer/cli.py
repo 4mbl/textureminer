@@ -142,13 +142,13 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
         args = parser.parse_args(argv)
 
         if args.no_color:
-            logging.getLogger(__name__).debug('Disabling color output')
+            logging.getLogger('textureminer').debug('Disabling color output')
             os.environ['NO_COLOR'] = '1'
 
         color_disabled = args.no_color or os.getenv('NO_COLOR') == '1'
 
         logger: CustomLogger = get_logger(
-            __name__,
+            'textureminer',
             level=logging.DEBUG if args.verbose else logging.ERROR if args.silent else logging.INFO,
         )  # type: ignore[assignment]
 
@@ -197,7 +197,6 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
                     edition=edition_type.value.capitalize(), options=texture_options
                 )
             )
-            logger.debug('Edition is identifier is: {id}'.format(id=edition.id))  # noqa: G001, UP032
             output_path = edition.get_textures(
                 version_or_type=update if update else DEFAULTS['VERSION'],
                 output_dir=args.output,

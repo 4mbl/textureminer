@@ -7,8 +7,8 @@ from typing import Any, override
 from fortext import Fg, style
 
 COLOR_MAP: dict[int, Fg] = {
-    logging.DEBUG: Fg.BLUE,
-    logging.INFO: Fg.GREEN,
+    logging.DEBUG: Fg.GRAY,
+    logging.INFO: Fg.CYAN,
     logging.WARNING: Fg.YELLOW,
     logging.ERROR: Fg.RED,
     logging.CRITICAL: Fg.MAGENTA,
