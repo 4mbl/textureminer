@@ -2,6 +2,7 @@
 """Provides a class representing the Bedrock edition of Minecraft."""
 
 import json
+import logging
 import platform
 import re
 import subprocess
@@ -15,7 +16,6 @@ from textureminer import texts
 from textureminer.edition.Edition import BlockShape, Edition, TextureOptions
 from textureminer.file import rm_if_exists
 from textureminer.options import DEFAULTS, EditionType, VersionType
-from textureminer.texts import tabbed_print
 
 
 class Bedrock(Edition):
@@ -59,6 +59,8 @@ class Bedrock(Edition):
 
     _git_executable: Literal['git', '/usr/bin/git']
 
+    repo_dir: str | None = None
+
     def __init__(self) -> None:
         """Initialize the Bedrock Edition."""
         super().__init__()
@@ -67,8 +69,9 @@ class Bedrock(Edition):
             self._git_executable = '/usr/bin/git'
         else:
             self._git_executable = 'git'
-
-        self.repo_dir = self.temp_dir + '/bedrock-samples/'
+        logging.getLogger('textureminer').debug(
+            'Git executable: {git}'.format(git=self._git_executable)  # noqa: G001, UP032
+        )
 
     @override
     def get_textures(
@@ -79,6 +82,9 @@ class Bedrock(Edition):
     ) -> str | None:
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
+        logging.getLogger('textureminer').debug(
+            'Texture options: {options}'.format(options=options)  # noqa: G001, UP032
+        )
 
         if isinstance(version_or_type, str) and not Edition.validate_version(
             version_or_type,
@@ -91,7 +97,8 @@ class Bedrock(Edition):
         )
         version = None
 
-        self._clone_repo(self.repo_dir)
+        repo_dir = self.temp_dir + '/bedrock-samples/'
+        self._clone_repo(repo_dir)
 
         if isinstance(version_or_type, str):
             version = version_or_type
@@ -99,12 +106,12 @@ class Bedrock(Edition):
             version = self.get_latest_version(version_type)
 
         self.version = version
-        tabbed_print(texts.VERSION_USING_X.format(version=version))
+        logging.getLogger('textureminer').info(texts.VERSION_USING_X.format(version=version))
 
         self._change_repo_version(version)
 
         filtered = Edition.filter_unwanted(
-            self.repo_dir,
+            repo_dir,
             output_dir + '/bedrock/' + version,
             edition=EditionType.BEDROCK,
         )
@@ -148,14 +155,20 @@ class Bedrock(Edition):
             repo_not_found_msg = 'Repository not found. Please clone the repository first.'
             raise OSError(repo_not_found_msg)
 
-        subprocess.run([self._git_executable, 'fetch', '--tags'], check=False, cwd=self.repo_dir)  # noqa: S603
+        self._run_git_command(
+            [self._git_executable, 'fetch', '--tags'],
+            check=False,
+        )
 
-        out = subprocess.run(  # noqa: S603
+        out = self._run_git_command(
             [self._git_executable, 'tag', '--list'],
             check=False,
-            cwd=self.repo_dir,
             capture_output=True,
         )
+
+        if not out:
+            err = 'Failed to get tags.'
+            raise ChildProcessError(err)
 
         tags = out.stdout.decode('utf-8').splitlines()
 
@@ -171,6 +184,51 @@ class Bedrock(Edition):
 
         return tag
 
+    def _run_git_command(
+        self,
+        command: list[str],
+        *,
+        cwd: str | None = None,
+        check: bool = False,
+        capture_output: bool = False,
+    ) -> subprocess.CompletedProcess[bytes] | None:
+        """Run a git command.
+
+        Args:
+        ----
+            command (list[str]): command to run
+            cwd (str, optional): directory to run the command in
+            check (bool, optional): whether to check the return code
+            capture_output (bool, optional): whether to capture the output
+
+        """
+        cwd = cwd if cwd is not None else self.repo_dir
+
+        logging.getLogger('textureminer').debug(
+            'Running `{command}` on {cwd}'.format(  # noqa: G001
+                command=' '.join(command),
+                cwd=cwd,
+            )
+        )
+
+        if capture_output:
+            return subprocess.run(  # noqa: S603
+                command,
+                check=check,
+                cwd=cwd,
+                capture_output=True,
+            )
+
+        subprocess.run(  # noqa: S603
+            command,
+            check=check,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+            cwd=cwd,
+        )
+
+        return None
+
     def _clone_repo(self, clone_dir: str, repo_url: str = REPO_URL) -> None:
         """Clone a git repository.
 
@@ -180,68 +238,60 @@ class Bedrock(Edition):
             repo_url (str): URL of the repo to clone
 
         """
-        tabbed_print(texts.FILES_DOWNLOADING)
+        logging.getLogger('textureminer').info(texts.FILES_DOWNLOADING)
 
-        self.repo_dir = clone_dir
-
-        rm_if_exists(self.repo_dir)
-
-        command_1 = [
-            self._git_executable,
-            'clone',
-            '--filter=blob:none',
-            '--sparse',
-            repo_url,
-            self.repo_dir,
-        ]
-        command_2 = [
-            self._git_executable,
-            'config',
-            'core.sparsecheckout',
-            'true',
-        ]
-        command_3 = [
-            'echo',
-            'resource_pack',
-            '>>',
-            '.git/info/sparse-checkout',
-        ]
-        command_4 = [
-            self._git_executable,
-            'sparse-checkout',
-            'init',
-            '--cone',
-        ]
-        command_5 = [
-            self._git_executable,
-            'sparse-checkout',
-            'set',
-            'resource_pack',
-        ]
+        rm_if_exists(clone_dir)
 
         try:
             if re.match(r'https://github.com/[^/]+/[^/]+(.git)?$', repo_url) is None:
                 invalid_repo_msg = f'Invalid repository URL: {repo_url}'
                 raise OSError(invalid_repo_msg)
 
-            subprocess.run(  # noqa: S603
-                command_1,
+            self._run_git_command(
+                [
+                    self._git_executable,
+                    'clone',
+                    '--filter=blob:none',
+                    '--sparse',
+                    repo_url,
+                    clone_dir,
+                ],
                 check=True,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT,
             )
+            self.repo_dir = clone_dir
 
-            for command in [command_2, command_3, command_4, command_5]:
-                subprocess.run(  # noqa: S603
-                    command,
+            command_2 = [
+                self._git_executable,
+                'config',
+                'core.sparsecheckout',
+                'true',
+            ]
+            command_3 = [
+                'echo',
+                'resource_pack',
+                '>>',
+                '.git/info/sparse-checkout',
+            ]
+            command_4 = [
+                self._git_executable,
+                'sparse-checkout',
+                'init',
+                '--cone',
+            ]
+            command_5 = [
+                self._git_executable,
+                'sparse-checkout',
+                'set',
+                'resource_pack',
+            ]
+            for cmd in [command_2, command_3, command_4, command_5]:
+                self._run_git_command(
+                    cmd,
                     check=True,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.STDOUT,
-                    cwd=self.repo_dir,
                 )
 
         except subprocess.CalledProcessError as err:
-            print(  # noqa: T201
+            logging.getLogger('textureminer').exception(
                 texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode, error_msg=err.stderr),
             )
 
@@ -264,10 +314,9 @@ class Bedrock(Edition):
             )
             raise OSError(repo_dir_not_found_msg)
         if fetch_tags:
-            subprocess.run(  # noqa: S603
+            self._run_git_command(
                 [self._git_executable, 'fetch', '--tags'],
                 check=False,
-                cwd=self.repo_dir,
             )
 
         try:
@@ -277,15 +326,13 @@ class Bedrock(Edition):
                     f'Invalid version. The version should follow the regex {version_regex.pattern}.'
                 )
                 raise ValueError(invalid_version_msg)
-            subprocess.run(  # noqa: S603
+
+            self._run_git_command(
                 [self._git_executable, 'checkout', f'tags/v{version}'],
                 check=False,
-                cwd=self.repo_dir,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT,
             )
         except subprocess.CalledProcessError as err:
-            print(  # noqa: T201
+            logging.getLogger('textureminer').exception(
                 texts.ERROR_COMMAND_FAILED.format(error_code=err.returncode, error_msg=err.stderr),
             )
             raise
@@ -308,7 +355,7 @@ class Bedrock(Edition):
         """
         unused_textures: list[str] = ['carpet']
 
-        tabbed_print(texts.CREATING_PARTIALS)
+        logging.getLogger('textureminer').info(texts.CREATING_PARTIALS)
         texture_dict = self._get_blocks_json(version_type=version_type)
 
         for texture_name in texture_dict:
@@ -316,9 +363,9 @@ class Bedrock(Edition):
                 continue
 
             if (
-                texture_name in self.OVERWRITE_TEXTURES
+                prevent_overwrite
+                and texture_name in self.OVERWRITE_TEXTURES
                 and texture_name == texture_dict[texture_name]['textures']
-                and prevent_overwrite
             ):
                 copyfile(
                     f'{texture_dir}/blocks/{texture_name}.png',
@@ -399,12 +446,13 @@ class Bedrock(Edition):
         if self.blocks_cache is not None:
             return self.blocks_cache
 
-        branch = 'main' if version_type == VersionType.STABLE else 'preview'
+        branch = 'textureminer' if version_type == VersionType.STABLE else 'preview'
 
-        file = requests.get(
-            f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/blocks.json',
-            timeout=10,
+        url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/blocks.json'
+        logging.getLogger('textureminer').debug(
+            'Fetching blocks.json from {url}'.format(url=url)  # noqa: G001, UP032
         )
+        file = requests.get(url, timeout=10)
 
         data = file.json()
 
@@ -450,12 +498,13 @@ class Bedrock(Edition):
         if self.terrain_texture_cache is not None:
             return self.terrain_texture_cache
 
-        branch = 'main' if version_type == VersionType.STABLE else 'preview'
+        branch = 'textureminer' if version_type == VersionType.STABLE else 'preview'
 
-        file = requests.get(
-            f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/textures/terrain_texture.json',
-            timeout=10,
+        url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/textures/terrain_texture.json'
+        logging.getLogger('textureminer').debug(
+            'Fetching terrain_texture.json from {url}'.format(url=url)  # noqa: G001, UP032
         )
+        file = requests.get(url, timeout=10)
         text = file.text
 
         json_text = ''

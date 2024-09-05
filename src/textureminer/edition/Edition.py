@@ -1,5 +1,6 @@
 """Types and a base class for Minecraft editions."""  # noqa: N999
 
+import logging
 import os
 import re
 from abc import ABC, abstractmethod
@@ -17,7 +18,6 @@ from PIL import Image as Pil_Image
 from textureminer import texts
 from textureminer.file import mk_dir, rm_if_exists
 from textureminer.options import DEFAULTS, EditionType, TextureOptions, VersionType
-from textureminer.texts import tabbed_print
 
 REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
 REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
@@ -58,6 +58,8 @@ class Edition(ABC):
         """Initialize the Edition."""
         self.id = uuid4()
         self.temp_dir = DEFAULTS['TEMP_PATH'] + '/' + self.id.__str__()
+        logging.getLogger('textureminer').debug('Created Edition: {id}'.format(id=self.id))  # noqa: G001, UP032
+        logging.getLogger('textureminer').debug('Temp directory: {temp}'.format(temp=self.temp_dir))  # noqa: G001, UP032
 
         if Path(self.temp_dir).is_dir():
             rmtree(self.temp_dir)
@@ -78,7 +80,7 @@ class Edition(ABC):
 
     def cleanup(self) -> None:
         """Clean up temporary files."""
-        tabbed_print(texts.CLEARING_TEMP)
+        logging.getLogger('textureminer').debug(texts.CLEARING_TEMP)
         rm_if_exists(self.temp_dir)
 
     @abstractmethod
@@ -234,9 +236,23 @@ class Edition(ABC):
         blocks_output = f'{output_dir}/blocks'
         items_output = f'{output_dir}/items'
 
+        logging.getLogger('textureminer').debug(
+            'Copying textures from {input} to {output}'.format(  # noqa: G001, UP032
+                input=blocks_input,
+                output=blocks_output,
+            )
+        )
         copytree(blocks_input, blocks_output)
+
+        logging.getLogger('textureminer').debug(
+            'Copying textures from {input} to {output}'.format(  # noqa: G001, UP032
+                input=items_input,
+                output=items_output,
+            )
+        )
         copytree(items_input, items_output)
 
+        logging.getLogger('textureminer').debug('Filtering textures out non .png files')
         f.filter_type(blocks_output, ['.png'])
         f.filter_type(items_output, ['.png'])
 
@@ -310,7 +326,7 @@ class Edition(ABC):
             int: number of textures replicated
 
         """
-        tabbed_print(texts.TEXTURES_REPLICATING)
+        logging.getLogger('textureminer').info(texts.TEXTURES_REPLICATING)
 
         count = 0
         originals = list(replication_rules.keys())
@@ -355,8 +371,8 @@ class Edition(ABC):
         """
         if do_merge:
             Edition.merge_dirs(path, path)
-        tabbed_print(texts.TEXTURES_FILTERING)
 
+        logging.getLogger('textureminer').info(texts.TEXTURES_FILTERING)
         for subdir, _, files in os.walk(path):
             f.filter_type(f'{Path(subdir).resolve().as_posix()}', ['.png'])
 
@@ -364,9 +380,11 @@ class Edition(ABC):
                 continue
 
             if do_merge:
-                tabbed_print(texts.TEXTURES_RESIZING_AMOUNT.format(texture_amount=len(files)))
+                logging.getLogger('textureminer').info(
+                    texts.TEXTURES_RESIZING_AMOUNT.format(texture_amount=len(files))
+                )
             else:
-                tabbed_print(
+                logging.getLogger('textureminer').info(
                     texts.TEXTURES_RESISING_AMOUNT_IN_DIR.format(
                         texture_amount=len(files),
                         dir_name=Path(subdir).name,
@@ -396,7 +414,7 @@ class Edition(ABC):
         block_folder = f'{input_dir}/blocks'
         item_folder = f'{input_dir}/items'
 
-        tabbed_print(texts.TEXTURES_MERGING)
+        logging.getLogger('textureminer').info(texts.TEXTURES_MERGING)
         copytree(block_folder, output_dir, dirs_exist_ok=True)
         rmtree(block_folder)
         copytree(item_folder, output_dir, dirs_exist_ok=True)
