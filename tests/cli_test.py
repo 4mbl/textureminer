@@ -8,9 +8,13 @@ from textureminer import cli
 
 @pytest.fixture
 def disable_color():
+    prev = os.getenv('NO_COLOR')
     os.environ['NO_COLOR'] = '1'
     yield
-    del os.environ['NO_COLOR']
+    if prev is not None:
+        os.environ['NO_COLOR'] = prev
+    else:
+        del os.environ['NO_COLOR']
 
 
 def test_version(capsys: pytest.CaptureFixture, disable_color) -> None:
