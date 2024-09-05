@@ -9,6 +9,7 @@
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
 * [Usage](#usage)
+* [Supported Versions](#supported-versions)
 
 ## Getting Started
 
@@ -84,3 +85,19 @@ There is also some options to customize how textureminer works, use the help fla
 ```sh
 textureminer --help
 ```
+
+## Supported Versions
+
+Currently `textureminer` is tested against the following versions of Minecraft:
+
+* Java
+  * 1.16
+  * 1.17
+  * 1.18
+  * 1.19
+  * 1.20
+  * 1.21
+* Bedrock
+  * v1.21.0.3 (first version of the 1.21 release)
+
+Other versions are likely to work, but are not tested against every release of `textureminer`. If you find a version that doesn't work, please open an issue on the [GitHub repository](https://github.com/4mbl/textureminer/issues).
