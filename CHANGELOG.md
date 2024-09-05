@@ -4,28 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## Unreleased
+<!-- ## Unreleased
 
 ### Added
 
-* (Major) Change default output directory to `~/textureminer/`.
-* (Major) Disable scaling by default.
-* Support for Linux.
-* Tests that run on GitHub Actions.
-* Package typings when installing with `pip`.
-* Centralized logging, `--verbose` and `--silent` flags.
-* Ability to turn off color output with `--no-color` flag or `NO_COLOR=1` environment variable.
-* (Major) Simplify file structure of textures by default. For example on Bedrock candles are directly in block and items directories instead of a nested `candles/` directory. Can be disabled with `--no-simple-structure` flag.
-
 ### Changed
-
-* Removed space from title text.
 
 ### Fixed
 
 ### Removed
 
-### Known Issues
+### Known Issues -->
+
+---
+
+## 4.0.0 | 2024-09-05
+
+### Added
+
+* Support for Linux.
+* Change default output directory to `~/textureminer/`.
+* Disable scaling by default.
+* Simplify file structure of textures by default. For example on Bedrock candles are directly in block and items directories instead of a nested `candles/` directory. Can be disabled with `--no-simple-structure` flag.
+* Tests that run on GitHub Actions.
+* Package typings when installing with `pip`.
+* Centralized logging, `--verbose` and `--silent` flags.
+* Ability to turn off color output with `--no-color` flag or `NO_COLOR=1` environment variable.
+
+### Changed
+
+* Removed space from title text.
 
 ## 3.1.1 | 2024-08-16
 
