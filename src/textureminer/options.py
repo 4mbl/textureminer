@@ -52,6 +52,11 @@ class TextureOptions(TypedDict):
     For example "glass_pane_top" to "glass_pane".
     """
 
+    SIMPLIFY_STRUCTURE: bool
+    """Whether to simplify file structure
+    for example on Bedrock flattens candles to be directly in block and items directories.
+    """
+
     SCALE_FACTOR: int
     """Factor that will be used to scale the textures
     """
@@ -89,6 +94,7 @@ DEFAULTS: Options = {
         'DO_MERGE': False,
         'DO_PARTIALS': True,
         'DO_REPLICATE': True,
+        'SIMPLIFY_STRUCTURE': True,
         'SCALE_FACTOR': 1,
     },
 }
