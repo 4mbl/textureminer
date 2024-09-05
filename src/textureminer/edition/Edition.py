@@ -58,6 +58,7 @@ class Edition(ABC):
         """Initialize the Edition."""
         self.id = uuid4()
         self.temp_dir = DEFAULTS['TEMP_PATH'] + '/' + self.id.__str__()
+        self.type = None
         logging.getLogger('textureminer').debug('Created Edition: {id}'.format(id=self.id))  # noqa: G001, UP032
         logging.getLogger('textureminer').debug('Temp directory: {temp}'.format(temp=self.temp_dir))  # noqa: G001, UP032
 
@@ -402,6 +403,29 @@ class Edition(ABC):
         return path
 
     @staticmethod
+    def simplify_structure(edition_type: EditionType, input_root: str) -> None:
+        """Simplify file structure of textures.
+
+        For example on Bedrock flattens candles to be directly in block and items directories.
+
+        Args:
+        ----
+            edition_type (EditionType): type of edition
+            input_root (str): directory in which there are subdirectories 'block' and 'item'
+
+        """
+        texture_folders = (
+            ['blocks', 'items'] if edition_type == EditionType.BEDROCK else ['block', 'item']
+        )
+        logging.getLogger('textureminer').info(texts.TEXTURES_SIMPLIFYING)
+        for texture_subdir in texture_folders:
+            for root, dirs, _ in os.walk(f'{input_root}/{texture_subdir}'):
+                for d in dirs:
+                    for file in os.listdir(f'{root}/{d}'):
+                        Path(f'{root}/{d}/{file}').rename(f'{root}/{file}')
+                    rmtree(f'{root}/{d}')
+
+    @staticmethod
     def merge_dirs(input_dir: str, output_dir: str) -> None:
         """Merge block and item textures to a single directory. Item textures are given priority.
 
@@ -411,10 +435,11 @@ class Edition(ABC):
             output_dir (str): directory in which the files will be merged into
 
         """
+        logging.getLogger('textureminer').info(texts.TEXTURES_MERGING)
+
         block_folder = f'{input_dir}/blocks'
         item_folder = f'{input_dir}/items'
 
-        logging.getLogger('textureminer').info(texts.TEXTURES_MERGING)
         copytree(block_folder, output_dir, dirs_exist_ok=True)
         rmtree(block_folder)
         copytree(item_folder, output_dir, dirs_exist_ok=True)

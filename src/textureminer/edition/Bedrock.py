@@ -122,6 +122,9 @@ class Bedrock(Edition):
         if options['DO_REPLICATE']:
             Edition.replicate_textures(filtered, self.REPLICATE_MAP)
 
+        if options['SIMPLIFY_STRUCTURE']:
+            Edition.simplify_structure(EditionType.BEDROCK, filtered)
+
         Edition.scale_textures(
             filtered,
             options['SCALE_FACTOR'],

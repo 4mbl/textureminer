@@ -142,6 +142,9 @@ class Java(Edition):
         if options['DO_REPLICATE']:
             Edition.replicate_textures(filtered, self.REPLICATE_MAP)
 
+        if options['SIMPLIFY_STRUCTURE']:
+            Edition.simplify_structure(EditionType.JAVA, filtered)
+
         Edition.scale_textures(
             filtered,
             options['SCALE_FACTOR'],

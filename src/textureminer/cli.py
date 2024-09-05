@@ -128,6 +128,12 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
             help='scale factor for textures',
             metavar='N',
         )
+        parser.add_argument(
+            '--no-simple-structure',
+            action='store_true',
+            default=not DEFAULTS['TEXTURE_OPTIONS']['SIMPLIFY_STRUCTURE'],
+            help='do not simplify file structure of textures',
+        )
         parser.add_argument('--no-color', action='store_true', help='disable color output')
         parser.add_argument('--silent', action='store_true', help='silence output')
         parser.add_argument('--verbose', action='store_true', help='enable verbose output')
@@ -189,6 +195,7 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
             'DO_PARTIALS': args.partials,
             'DO_REPLICATE': args.replicate,
             'SCALE_FACTOR': args.scale,
+            'SIMPLIFY_STRUCTURE': not args.no_simple_structure,
         }
 
         with Bedrock() if edition_type == EditionType.BEDROCK else Java() as edition:
