@@ -256,7 +256,6 @@ class Bedrock(Edition):
                     repo_url,
                     clone_dir,
                 ],
-                # cwd=os.getcwd(),  # noqa: PTH109
                 check=True,
             )
             self.repo_dir = clone_dir

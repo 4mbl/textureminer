@@ -105,8 +105,8 @@ class Java(Edition):
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
         logging.getLogger('textureminer').debug(
-            'Texture options: {options}'.format(options=options)
-        )  # noqa: G001, UP032
+            'Texture options: {options}'.format(options=options)  # noqa: G001, UP032
+        )
 
         version: str | None = None
 
