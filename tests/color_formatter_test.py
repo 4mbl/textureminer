@@ -25,8 +25,8 @@ def test_no_color_env(caplog):
 @pytest.mark.parametrize(
     'log_level, expected_color',
     [
-        (logging.DEBUG, Fg.BLUE),
-        (logging.INFO, Fg.GREEN),
+        (logging.DEBUG, Fg.GRAY),
+        (logging.INFO, Fg.CYAN),
         (logging.WARNING, Fg.YELLOW),
         (logging.ERROR, Fg.RED),
         (logging.CRITICAL, Fg.MAGENTA),
