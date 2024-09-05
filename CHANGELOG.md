@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 * Package typings when installing with `pip`.
 * Centralized logging, `--verbose` and `--silent` flags.
 * Ability to turn off color output with `--no-color` flag or `NO_COLOR=1` environment variable.
+* (Major) Simplify file structure of textures by default. For example on Bedrock candles are directly in block and items directories instead of a nested `candles/` directory. Can be disabled with `--no-simple-structure` flag.
 
 ### Changed
 
