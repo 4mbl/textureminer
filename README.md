@@ -1,6 +1,6 @@
 # [textureminer](https://4mbl.link/gh/textureminer)
 
-A Python package that allows you to extract and scale Minecraft's item and block textures easily.
+> Library and CLI program to extract and scale Minecraft item and block textures.
 
 ## Table of Contents
 
