@@ -14,6 +14,8 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+* Fixed missing textures when using a preview release of Minecraft Bedrock.
+
 ### Removed
 
 ### Known Issues
