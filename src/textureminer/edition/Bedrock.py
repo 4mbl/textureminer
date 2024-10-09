@@ -324,6 +324,13 @@ class Bedrock(Edition):
                 check=False,
             )
 
+        version_type = self.get_version_type(version)
+        if version_type == VersionType.EXPERIMENTAL:
+            self._run_git_command(
+                [self._git_executable, 'switch', 'preview'],
+                check=True,
+            )
+
         try:
             version_regex = re.compile(r'^v\d+\.\d+\.\d+(\.\d+)?(-preview)?$')
             if not version_regex.match(version):
