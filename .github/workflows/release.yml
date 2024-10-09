@@ -5,7 +5,8 @@ on:
     types: [created]
 
 env:
-  LATEST_PYTHON_VERSION: 3.12
+  LATEST_PYTHON_VERSION: 3.13
+  LATEST_MINECRAFT_JAVA_VERSION: 1.21
 
 jobs:
   test-java:
@@ -13,8 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        python-version: ['3.12']
+        os: [ubuntu-latest, windows-latest]
         minecraft-version:
           # remember to update the list in the README.md as well
           - '1.16'
@@ -26,18 +26,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python ${{ env.LATEST_PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install .
+          python-version: ${{ env.LATEST_PYTHON_VERSION }}
 
       - name: Install package
         run: |
+          python -m pip install --upgrade pip
           pip install . --force-reinstall
 
       - name: Run package with Java version ${{ matrix.minecraft-version }}
@@ -49,11 +45,33 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        python-version: ['3.12']
+        os: [ubuntu-latest, windows-latest]
         bedrock-version:
           # remember to update the list in the README.md as well
           - 'v1.21.0.3'
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ env.LATEST_PYTHON_VERSION }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.LATEST_PYTHON_VERSION }}
+
+      - name: Install dependencies and package
+        run: |
+          python -m pip install --upgrade pip
+          pip install . --force-reinstall
+
+      - name: Run package with Bedrock version ${{ matrix.bedrock-version }}
+        run: |
+          textureminer --bedrock ${{ matrix.bedrock-version }}
+
+  test-python:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
       - uses: actions/checkout@v4
@@ -62,22 +80,18 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install dependencies
+      - name: Install dependencies and package
         run: |
           python -m pip install --upgrade pip
-          pip install .
-
-      - name: Install package
-        run: |
           pip install . --force-reinstall
 
-      - name: Run package with Bedrock version ${{ matrix.bedrock-version }}
+      - name: Run package with Python version ${{ matrix.python-version }}
         run: |
-          textureminer --bedrock ${{ matrix.bedrock-version }}
+          textureminer --java ${{ env.LATEST_MINECRAFT_JAVA_VERSION }}
 
   publish:
     timeout-minutes: 10
-    needs: [test-java, test-bedrock]
+    needs: [test-java, test-bedrock, test-python]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

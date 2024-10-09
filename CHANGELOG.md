@@ -4,9 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-<!-- ## Unreleased
+## Unreleased
 
 ### Added
+
+* Support Python 3.13, and older still active Python versions.
 
 ### Changed
 
@@ -14,7 +16,7 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 
-### Known Issues -->
+### Known Issues
 
 ---
 
