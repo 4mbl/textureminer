@@ -228,4 +228,3 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
             logger.info(output_path)
 
     raise SystemExit(0)
-    raise SystemExit(0)

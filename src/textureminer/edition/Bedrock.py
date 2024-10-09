@@ -530,4 +530,3 @@ class Bedrock(Edition):
 
         self.terrain_texture_cache = data
         return data
-        return data
