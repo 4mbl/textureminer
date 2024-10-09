@@ -326,6 +326,7 @@ class Bedrock(Edition):
 
         version_type = self.get_version_type(version)
         if version_type == VersionType.EXPERIMENTAL:
+            logging.getLogger('textureminer').debug('Switching git branch to preview')
             self._run_git_command(
                 [self._git_executable, 'switch', 'preview'],
                 check=True,
@@ -458,7 +459,7 @@ class Bedrock(Edition):
         if self.blocks_cache is not None:
             return self.blocks_cache
 
-        branch = 'textureminer' if version_type == VersionType.STABLE else 'preview'
+        branch = 'preview' if version_type == VersionType.EXPERIMENTAL else 'main'
 
         url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/blocks.json'
         logging.getLogger('textureminer').debug(
