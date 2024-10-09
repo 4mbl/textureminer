@@ -1,5 +1,7 @@
 """Command line interface functionality."""
 
+from __future__ import annotations
+
 import argparse
 import logging
 import os
@@ -225,4 +227,5 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
         if output_path is not None:
             logger.info(output_path)
 
+    raise SystemExit(0)
     raise SystemExit(0)
