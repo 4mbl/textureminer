@@ -5,6 +5,7 @@ on:
     types: [opened, synchronize]
 
 env:
+  LATEST_PYTHON_VERSION: 3.12 # TODO: upgrade to 3.13
   PACKAGE_VERSION: 0.0.0
 
 concurrency:
@@ -17,14 +18,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ['3.13']
 
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python ${{ env.LATEST_PYTHON_VERSION }}
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{ env.LATEST_PYTHON_VERSION }}
 
       - name: Install dependencies
         run: |
