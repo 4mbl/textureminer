@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-* Support Python 3.13, and older still active Python versions.
+* Support Python 3.13 in addition to Python 3.12.
 
 ### Changed
 
