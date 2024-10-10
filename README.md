@@ -102,4 +102,4 @@ Currently `textureminer` is tested against the following versions of Minecraft:
 
 Other versions are likely to work, but are not tested against every release of `textureminer`. If you find a version that doesn't work, please open an issue on the [GitHub repository](https://github.com/4mbl/textureminer/issues).
 
-Each Python version is supported until they [reach end-of-life](https://devguide.python.org/versions/).
+Currently Python 3.12 and 3.13 are supported.
