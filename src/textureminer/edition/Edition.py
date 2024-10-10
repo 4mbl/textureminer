@@ -1,7 +1,5 @@
 """Types and a base class for Minecraft editions."""  # noqa: N999
 
-from __future__ import annotations
-
 import logging
 import os
 import re
