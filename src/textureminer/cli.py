@@ -10,13 +10,12 @@ from importlib import metadata
 
 from fortext import Fg, style
 
+from textureminer import texts
+from textureminer.edition.Bedrock import Bedrock
+from textureminer.edition.Edition import Edition
+from textureminer.edition.Java import Java
 from textureminer.logger import CustomLogger, get_logger
-
-from . import texts
-from .edition.Bedrock import Bedrock
-from .edition.Edition import Edition
-from .edition.Java import Java
-from .options import DEFAULTS, EditionType, TextureOptions, VersionType
+from textureminer.options import DEFAULTS, EditionType, TextureOptions, VersionType
 
 
 class UpdateOption(Enum):
