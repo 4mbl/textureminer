@@ -33,7 +33,6 @@ jobs:
 
       - name: Run tox
         run: |
-          pip install -r requirements-dev.txt
           pip install tox-gh-actions
           tox -p auto
 
