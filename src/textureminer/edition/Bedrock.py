@@ -1,8 +1,6 @@
 # noqa: N999, RUF100
 """Provides a class representing the Bedrock edition of Minecraft."""
 
-from __future__ import annotations
-
 import json
 import logging
 import platform

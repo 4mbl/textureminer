@@ -1,8 +1,6 @@
 # noqa: N999
 """Provides a class representing the Java edition of Minecraft."""
 
-from __future__ import annotations
-
 import json
 import logging
 import os
