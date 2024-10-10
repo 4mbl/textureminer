@@ -7,7 +7,8 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from pathlib import Path
 from shutil import copyfile, copytree, rmtree
-from typing import TYPE_CHECKING, Self
+from types import TracebackType
+from typing import Self
 from uuid import uuid4
 
 from forfiles import file as f
@@ -17,9 +18,6 @@ from PIL import Image as Pil_Image
 from textureminer import texts
 from textureminer.file import mk_dir, rm_if_exists
 from textureminer.options import DEFAULTS, EditionType, TextureOptions, VersionType
-
-if TYPE_CHECKING:
-    from types import TracebackType
 
 REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
 REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
