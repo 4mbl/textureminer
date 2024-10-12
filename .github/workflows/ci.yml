@@ -38,8 +38,8 @@ jobs:
 
       - name: Build package
         run: |
-          pip install build tomlkit
-          python -c "import tomlkit; reader=open('pyproject.toml', 'rb'); data=tomlkit.load(reader); data['project']['version']='${{env.PACKAGE_VERSION}}'; writer=open('pyproject.toml', 'w'); tomlkit.dump(data, writer)"
+          pip install build tomli-w
+          python -c "import tomllib; import tomli_w; reader=open('pyproject.toml', 'rb'); data=tomllib.load(reader); data['project']['version']='0.0.0'; writer=open('pyproject.toml', 'wb'); tomli_w.dump(data, writer)"
           python -m build
 
       - name: Install package
