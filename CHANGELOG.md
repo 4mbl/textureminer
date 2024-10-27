@@ -3,8 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ---
-
-<!-- ## Unreleased
+<!--
+## Unreleased
 
 ### Added
 
@@ -14,7 +14,14 @@ All notable changes to this project will be documented in this file.
 
 ### Removed
 
-### Known Issues -->
+### Known Issues
+-->
+
+## 4.0.1 | 2024-10-27
+
+### Fixed
+
+* Fix crash due to incorrect git branch of `bedrock-samples` repository.
 
 ---
 
