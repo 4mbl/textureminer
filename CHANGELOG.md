@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 
 ---
+<!--
+## Unreleased
+
+### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+### Known Issues
+-->
 
 ## 4.0.1 | 2024-10-27
 
