@@ -42,10 +42,12 @@ file = "LICENSE"
 textureminer = "textureminer.cli:cli"
 
 [project.urls]
-Homepage = "https://github.com/4mbl/textureminer"
+Home = "https://github.com/4mbl/textureminer"
 "Bug Tracker" = "https://github.com/4mbl/textureminer/issues"
-"Source Code" = "https://github.com/4mbl/textureminer"
 Changelog = "https://github.com/4mbl/textureminer/blob/main/CHANGELOG.md"
+Documentation = "https://github.com/4mbl/textureminer/blob/main/README.md"
+Repository = "https://github.com/4mbl/textureminer"
+
 
 [tool.ruff]
 line-length = 100
