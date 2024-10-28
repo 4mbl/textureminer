@@ -4,21 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+<!--
 ## Unreleased
 
 ### Added
-
-* Support Python 3.13 in addition to Python 3.12.
 
 ### Changed
 
 ### Fixed
 
-* Fixed missing textures when using a preview release of Minecraft Bedrock.
-
 ### Removed
 
 ### Known Issues
+-->
+
+---
+
+## 4.1.0
+
+### Added
+
+* Support Python 3.13 in addition to Python 3.12.
+
+### Fixed
+
+* Fixed missing textures when using a preview release of Minecraft Bedrock.
 
 ## 4.0.1 | 2024-10-27
 
