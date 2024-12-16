@@ -88,18 +88,21 @@ textureminer --help
 
 ## Supported Versions
 
-Currently `textureminer` is tested against the following versions of Minecraft:
+Currently releases of `textureminer` are tested against the following versions of Minecraft:
 
-* Java
-  * 1.16
-  * 1.17
-  * 1.18
-  * 1.19
-  * 1.20
-  * 1.21
-* Bedrock
-  * v1.21.0.3 (first version of the 1.21 release)
+| Update Name              | Java        | Bedrock        |
+|--------------------------|-------------|----------------|
+| Nether Update            | 1.16        | -              |
+| Caves & Cliffs: Part I   | 1.17        | -              |
+| Caves & Cliffs: Part II  | 1.18        | -              |
+| The Wild Update          | 1.19        | -              |
+| Trails & Tales           | 1.20        | v1.20.0.1      |
+| Bats and Pots            | 1.20.3      | v1.20.50.3     |
+| Armored Paws             | 1.20.5      | v1.20.80.5     |
+| Tricky Trials            | 1.21        | v1.21.0.3      |
+| Bundles of Bravery       | 1.21.2      | v1.21.40.3     |
+| Garden Awakens           | 1.21.4      | v1.21.50.7     |
 
 Other versions are likely to work, but are not tested against every release of `textureminer`. If you find a version that doesn't work, please open an issue on the [GitHub repository](https://github.com/4mbl/textureminer/issues).
 
-Currently Python 3.12 and 3.13 are supported.
+Currently Python versions 3.12 and 3.13 are supported by `textureminer`.

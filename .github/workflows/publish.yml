@@ -15,14 +15,18 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        minecraft-version:
+        minecraft-java:
           # remember to update the list in the README.md as well
-          - '1.16'
-          - '1.17'
-          - '1.18'
-          - '1.19'
-          - '1.20'
-          - '1.21'
+          - '1.16' # nether update
+          - '1.17' # caves and cliffs part 1
+          - '1.18' # caves and cliffs part 2
+          - '1.19' # wild update
+          - '1.20' # trails and tales
+          - '1.20.3' # bats and pots
+          - '1.20.5' # armored paws
+          - '1.21' # tricky trials
+          - '1.21.2' # bundles of bravery
+          - '1.21.4' # garden awakens
 
     steps:
       - uses: actions/checkout@v4
@@ -36,9 +40,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install . --force-reinstall
 
-      - name: Run package with Java version ${{ matrix.minecraft-version }}
+      - name: Run package with Java version ${{ matrix.minecraft-java }}
         run: |
-          textureminer --java ${{ matrix.minecraft-version }}
+          textureminer --java ${{ matrix.minecraft-java }}
 
   test-bedrock:
     timeout-minutes: 10
@@ -46,9 +50,14 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        bedrock-version:
+        minecraft-bedrock:
           # remember to update the list in the README.md as well
-          - 'v1.21.0.3'
+          - 'v1.20.0.1' # trails and tales
+          - 'v1.20.50.3' # bats and pots
+          - 'v1.20.80.5' # armored paws
+          - 'v1.21.0.3' # tricky trials
+          - 'v1.21.40.3' # bundles of bravery
+          - 'v1.21.50.7' # garden awakens
 
     steps:
       - uses: actions/checkout@v4
@@ -62,9 +71,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install . --force-reinstall
 
-      - name: Run package with Bedrock version ${{ matrix.bedrock-version }}
+      - name: Run package with Bedrock version ${{ matrix.minecraft-bedrock }}
         run: |
-          textureminer --bedrock ${{ matrix.bedrock-version }}
+          textureminer --bedrock ${{ matrix.minecraft-bedrock }}
 
   test-python:
     timeout-minutes: 10
