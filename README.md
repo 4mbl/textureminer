@@ -65,18 +65,18 @@ textureminer --bedrock
 You can also pick a specific update or update channel of Minecraft to download textures for.
 
 ```sh
-textureminer 1.17.1 # a java stable release
-textureminer 22w14a # a java snapshot
-textureminer v1.20.0.1 # a bedrock release
-textureminer v1.20.50.22-preview # a bedrock preview
+textureminer 1.17.1                 # a java stable release
+textureminer 22w14a                 # a java snapshot
+textureminer v1.20.0.1              # a bedrock release
+textureminer v1.20.50.22-preview    # a bedrock preview
 
 # update channels, gets latest version from channel
 # by default using java edition if no edition is specified
 
-textureminer stable # stable version
-textureminer experimental # snapshot/preview version depending on edition
-textureminer snapshot # java snapshot
-textureminer preview # bedrock preview, no need to specify edition
+textureminer stable                 # stable version
+textureminer experimental           # snapshot/preview version depending on edition
+textureminer snapshot               # java snapshot
+textureminer preview                # bedrock preview, no need to specify edition
 
 ```
 
