@@ -574,7 +574,7 @@ class Java(Edition):
                         texture_dir,
                     )
                 except FileFormatError:
-                    unknown_recipe_msg = f'Unknown recipe file format: {f'{root}/{file}'}'
+                    unknown_recipe_msg = f'Unknown recipe file format: {f"{root}/{file}"}'
                     raise FileFormatError(unknown_recipe_msg) from None
 
                 if base_material is None:
