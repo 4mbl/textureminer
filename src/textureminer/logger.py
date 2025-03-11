@@ -25,7 +25,7 @@ class CustomLogger(logging.Logger):
 
     def _make_tab(self, color: Fg) -> str:
         asterisk = '*' if self.color_disabled else style('*', fg=color)
-        return f"{' '*4}{asterisk} "
+        return f'{" " * 4}{asterisk} '
 
     @override
     def log(
