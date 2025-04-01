@@ -422,7 +422,7 @@ class Edition(ABC):
             for root, dirs, _ in os.walk(f'{input_root}/{texture_subdir}'):
                 for d in dirs:
                     for file in Path(f'{root}/{d}').iterdir():
-                        Path(f'{root}/{d}/{file}').rename(f'{root}/{file}')
+                        file.rename(f'{root}/{file.name}')
                     rmtree(f'{root}/{d}')
 
     @staticmethod
