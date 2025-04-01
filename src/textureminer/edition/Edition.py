@@ -421,8 +421,8 @@ class Edition(ABC):
         for texture_subdir in texture_folders:
             for root, dirs, _ in os.walk(f'{input_root}/{texture_subdir}'):
                 for d in dirs:
-                    for file in os.listdir(f'{root}/{d}'):
-                        Path(f'{root}/{d}/{file}').rename(f'{root}/{file}')
+                    for file in Path(f'{root}/{d}').iterdir():
+                        file.rename(f'{root}/{file.name}')
                     rmtree(f'{root}/{d}')
 
     @staticmethod

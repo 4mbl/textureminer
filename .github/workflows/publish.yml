@@ -6,7 +6,7 @@ on:
 
 env:
   LATEST_PYTHON_VERSION: 3.13
-  LATEST_MINECRAFT_JAVA_VERSION: 1.21.4
+  LATEST_MINECRAFT_JAVA_VERSION: 1.21.5
 
 jobs:
   test-java:
@@ -27,6 +27,7 @@ jobs:
           - '1.21' # tricky trials
           - '1.21.2' # bundles of bravery
           - '1.21.4' # garden awakens
+          - '1.21.5' # spring to life
 
     steps:
       - uses: actions/checkout@v4
@@ -58,6 +59,7 @@ jobs:
           - 'v1.21.0.3' # tricky trials
           - 'v1.21.40.3' # bundles of bravery
           - 'v1.21.50.7' # garden awakens
+          - 'v1.21.70.3' # spring to life
 
     steps:
       - uses: actions/checkout@v4
