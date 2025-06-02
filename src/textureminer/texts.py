@@ -20,6 +20,7 @@ ERROR_COMMAND_FAILED = 'The command failed with return code {error_code}: {error
 ERROR_EDITION_INVALID = 'Invalid edition!'
 ERROR_INVALID_COMBINATION = 'Invalid combination of version and edition!'
 ERROR_VERSION_INVALID = 'Invalid version ({version})!'
+ERROR_NO_LATEST_VERSION = 'Could not find latest version for {version_type} releases channel!'
 FILES_DOWNLOADING = 'Downloading assets...'
 FILES_EXTRACTING_N = 'Extracting {file_amount} files...'
 TEXTURES_FILTERING = 'Filtering textures...'

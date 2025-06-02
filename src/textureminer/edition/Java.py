@@ -108,10 +108,12 @@ class Java(Edition):
             'Texture options: {options}'.format(options=options)  # noqa: G001, UP032
         )
 
-        version: str | None = None
+        version = None
 
         if isinstance(version_or_type, VersionType):
             version = self.get_latest_version(version_or_type)
+            if version is None:
+                raise ValueError(texts.ERROR_NO_LATEST_VERSION.format(version=version_or_type))
         elif isinstance(version_or_type, str) and Edition.validate_version(
             version_or_type,
             edition=EditionType.JAVA,
@@ -171,7 +173,7 @@ class Java(Edition):
         return None
 
     @override
-    def get_latest_version(self, version_type: VersionType) -> str:
+    def get_latest_version(self, version_type: VersionType) -> str | None:
         logging.getLogger('textureminer').info(
             texts.VERSION_LATEST_FINDING.format(version_type=version_type.value)
         )

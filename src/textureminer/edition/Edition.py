@@ -120,7 +120,7 @@ class Edition(ABC):
         """
 
     @abstractmethod
-    def get_latest_version(self, version_type: VersionType) -> str:
+    def get_latest_version(self, version_type: VersionType) -> str | None:
         """Get the latest version of a certain type.
 
         Args:
