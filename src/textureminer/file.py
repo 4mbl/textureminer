@@ -16,28 +16,29 @@ def rm_read_only(_func: Callable, path: str, _exc_info: object) -> None:
         _exc_info (object): not used, but required for callback function to work
 
     """
-    Path(path).chmod(stat.S_IWRITE)
-    Path(path).unlink()
+    p = Path(path)
+    p.chmod(stat.S_IWRITE)
+    p.unlink()
 
 
-def rm_if_exists(path: str) -> None:
+def rm_if_exists(path: Path) -> None:
     """Remove a file or directory if it exists.
 
     Args:
     ----
-        path (str): path of the file or directory that will be removed
+        path (Path): file or directory that will be removed
 
     """
-    if Path(path).exists():
+    if path.exists():
         rmtree(path, onexc=rm_read_only)
 
 
-def mk_dir(path: str, *, del_prev: bool = False) -> bool:
+def mk_dir(path: Path, *, del_prev: bool = False) -> bool:
     """Make a directory if one does not already exist.
 
     Args:
     ----
-        path (str): path of the directory that will be created
+        path (Path): directory that will be created
         del_prev (bool, optional): whether to delete existing directory at the path
 
     Returns:
@@ -45,9 +46,9 @@ def mk_dir(path: str, *, del_prev: bool = False) -> bool:
         bool: True if the directory was created, False if it could not be created
 
     """
-    if del_prev and Path(path).is_dir():
+    if del_prev and path.is_dir():
         rmtree(path)
-    if not Path(path).is_dir():
-        Path(path).mkdir(parents=True)
+    if not path.is_dir():
+        path.mkdir(parents=True)
         return True
     return False

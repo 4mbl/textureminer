@@ -4,19 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-<!--
 ## Unreleased
 
 ### Added
 
 ### Changed
 
+* MAJOR: Switched from `str` to `Path` type arguments for paths.
+
 ### Fixed
 
 ### Removed
 
 ### Known Issues
--->
 
 ---
 

@@ -3,7 +3,6 @@
 
 import json
 import logging
-import os
 import re
 import string
 from enum import Enum
@@ -99,9 +98,9 @@ class Java(Edition):
     def get_textures(
         self,
         version_or_type: VersionType | str,
-        output_dir: str = DEFAULTS['OUTPUT_DIR'],
+        output_dir: Path = DEFAULTS['OUTPUT_DIR'],
         options: TextureOptions | None = None,
-    ) -> str | None:
+    ) -> Path | None:
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
         logging.getLogger('textureminer').debug(
@@ -124,20 +123,20 @@ class Java(Edition):
 
         self.version = version
 
-        assets = self._download_client_jar(version, self.temp_dir + '/version-jars')
+        assets = self._download_client_jar(version, self.temp_dir / 'version-jars')
         logging.getLogger('textureminer').info(texts.VERSION_USING_X.format(version=version))
 
-        extracted = self._extract_jar(assets, self.temp_dir + '/extracted-files')
+        extracted = self._extract_jar(assets, self.temp_dir / 'extracted-files')
 
-        textures_path = self.temp_dir + '/extracted-textures/textures'
-        copytree(extracted + '/assets/minecraft/textures', textures_path)
+        textures_path = self.temp_dir / 'extracted-textures' / 'textures'
+        copytree(extracted / 'assets' / 'minecraft' / 'textures', textures_path)
 
         if options['DO_PARTIALS']:
             self._create_partial_textures(extracted, textures_path)
 
         filtered = Edition.filter_unwanted(
             textures_path,
-            output_dir + '/java/' + version,
+            output_dir / 'java' / version,
             edition=EditionType.JAVA,
         )
 
@@ -154,7 +153,7 @@ class Java(Edition):
             do_crop=options['DO_CROP'],
         )
 
-        return Path(filtered).resolve().as_posix()
+        return filtered
 
     @override
     def get_version_type(self, version: str) -> VersionType | None:
@@ -414,17 +413,17 @@ class Java(Edition):
 
         return Java.version_manifest_cache
 
-    def _download_client_jar(self, version: str, download_dir: str) -> str:
+    def _download_client_jar(self, version: str, download_dir: Path) -> Path:
         """Download the client .jar file for a specific version from Mojang's servers.
 
         Args:
         ----
-            version (str): The version to download.
-            download_dir (str): The directory to download the file to
+            version (str): version to download.
+            download_dir (Path): directory to download the file to
 
         Returns:
         -------
-            str: The path of the downloaded file.
+            Path: path of the downloaded file.
 
         """
         url = None
@@ -449,20 +448,21 @@ class Java(Edition):
         if not client_jar_url.startswith(('http:', 'https:')):
             invalid_url_format_msg = 'URL must start with "http:" or "https:".'
             raise ValueError(invalid_url_format_msg)
-        urlretrieve(client_jar_url, f'{download_dir}/{version}.jar')  # noqa: S310
-        return f'{download_dir}/{version}.jar'
+        jar_file = download_dir / f'{version}.jar'
+        urlretrieve(client_jar_url, jar_file)  # noqa: S310
+        return jar_file
 
-    def _extract_jar(self, jar_path: str, output_dir: str) -> str:
+    def _extract_jar(self, jar_path: Path, output_dir: Path) -> Path:
         """Extract files from a .jar file.
 
         Args:
         ----
-            jar_path (str): The path of the .jar file.
-            output_dir (str): The path of the output directory.
+            jar_path (Path): The path of the .jar file.
+            output_dir (Path): The path of the output directory.
 
         Returns:
         -------
-            str: The path of the output directory.
+            Path: The path of the output directory.
 
         """
         with ZipFile(jar_path, 'r') as zip_object:
@@ -476,8 +476,8 @@ class Java(Edition):
 
     def _create_partial_textures(
         self,
-        extracted_dir: str,
-        texture_dir: str,
+        extracted_dir: Path,
+        texture_dir: Path,
         *,
         prevent_overwrite: bool = True,
     ) -> None:
@@ -485,8 +485,8 @@ class Java(Edition):
 
         Args:
         ----
-            extracted_dir (str): directory where the extracted files are
-            texture_dir (str): directory where the textures are
+            extracted_dir (Path): directory where the extracted files are
+            texture_dir (Path): directory where the textures are
             prevent_overwrite (bool, optional): whether to copy textures to prevent overwrite
 
         """
@@ -500,11 +500,11 @@ class Java(Edition):
             pre='1.21-pre1',
             rc='1.21-rc1',
         ):
-            recipe_data_dir = f'{extracted_dir}/data/minecraft/recipe'
+            recipe_data_dir = extracted_dir / 'data' / 'minecraft' / 'recipe'
         else:
-            recipe_data_dir = f'{extracted_dir}/data/minecraft/recipes'
+            recipe_data_dir = extracted_dir / 'data' / 'minecraft' / 'recipes'
 
-        recipe_dir = self.temp_dir + '/extracted-textures/recipes'
+        recipe_dir = self.temp_dir / 'extracted-textures' / 'recipes'
         copytree(recipe_data_dir, recipe_dir)
 
         texture_dict = self._get_texture_dict(recipe_dir, texture_dir)
@@ -516,8 +516,8 @@ class Java(Edition):
                 and texture_name in self.OVERWRITE_TEXTURES
             ):
                 copyfile(
-                    f'{texture_dir}/block/{texture_name}.png',
-                    f'{texture_dir}/block/{self.OVERWRITE_TEXTURES[texture_name]}.png',
+                    texture_dir / 'block' / f'{texture_name}.png',
+                    texture_dir / 'block' / f'{self.OVERWRITE_TEXTURES[texture_name]}.png',
                 )
 
             if 'slab' in texture_name:
@@ -531,17 +531,17 @@ class Java(Edition):
             else:
                 continue
 
-            in_path = f'{texture_dir}/block/{base_texture}.png'
-            out_path = f'{texture_dir}/block/{texture_name}.png'
+            in_path = texture_dir / 'block' / f'{base_texture}.png'
+            out_path = texture_dir / 'block' / f'{texture_name}.png'
             Edition.crop_texture(in_path, shape, out_path)
 
-    def _get_texture_dict(self, recipe_dir: str, texture_dir: str) -> dict[str, str]:
+    def _get_texture_dict(self, recipe_dir: Path, texture_dir: Path) -> dict[str, str]:
         """Get texture-material mapping from recipe files.
 
         Args:
         ----
-            recipe_dir (str): directory where the recipe files are
-            texture_dir (str): directory where the texture files are
+            recipe_dir (Path): directory where the recipe files are
+            texture_dir (Path): directory where the texture files are
 
         Raises:
         ------
@@ -553,47 +553,45 @@ class Java(Edition):
 
         """
         texture_dict = {}
-        for root, _dirs, files in os.walk(recipe_dir):
-            for file in files:
-                product = file.replace('.json', '')
+        for recipe_file in Path(recipe_dir).rglob('*.json'):
+            product = recipe_file.stem
 
-                # skip duplicate recipes
-                if 'from_' in product:
-                    continue
+            # skip duplicate recipes
+            if 'from_' in product:
+                continue
 
                 # skip re-dyed carpets
-                if 'dye_' in product and '_carpet' in product:
-                    continue
+            if 'dye_' in product and '_carpet' in product:
+                continue
 
-                if not any(
-                    partial in product for partial in self.ALLOWED_PARTIAL_SUFFIXES
-                ) and not any(literal == product for literal in self.ALLOWED_PARTIAL_LITERALS):
-                    continue
+            if not any(partial in product for partial in self.ALLOWED_PARTIAL_SUFFIXES) and not any(
+                literal == product for literal in self.ALLOWED_PARTIAL_LITERALS
+            ):
+                continue
 
-                try:
-                    base_material = self._get_base_material_from_recipe(
-                        f'{root}/{file}',
-                        texture_dir,
-                    )
-                except FileFormatError:
-                    unknown_recipe_msg = f'Unknown recipe file format: {f"{root}/{file}"}'
-                    raise FileFormatError(unknown_recipe_msg) from None
+            try:
+                base_material = self._get_base_material_from_recipe(recipe_file, texture_dir)
+            except FileFormatError:
+                unknown_recipe_msg = f'Unknown recipe file format: {recipe_file}'
+                raise FileFormatError(unknown_recipe_msg) from None
 
-                if base_material is None:
-                    not_found_msg = f'Could not find base material for {product}'
-                    raise FileFormatError(not_found_msg)
+            if base_material is None:
+                not_found_msg = f'Could not find base material for {product}'
+                raise FileFormatError(not_found_msg)
 
-                texture_dict[product] = base_material
+            texture_dict[product] = base_material
 
         return texture_dict
 
-    def _get_base_material_from_recipe(self, recipe_file_path: str, texture_dir: str) -> str | None:
+    def _get_base_material_from_recipe(
+        self, recipe_file_path: Path, texture_dir: Path
+    ) -> str | None:
         """Get the base material from a recipe file.
 
         Args:
         ----
-            recipe_file_path (str): path of the recipe file
-            texture_dir (str): directory where the texture files are
+            recipe_file_path (Path): path of the recipe file
+            texture_dir (Path): directory where the texture files are
 
         Raises:
         ------
@@ -604,12 +602,11 @@ class Java(Edition):
             str | None: base material name or None if not found
 
         """
-        with Path(recipe_file_path).open(encoding='utf-8') as f:
+        with recipe_file_path.open(encoding='utf-8') as f:
             recipe_data = json.load(f)
 
             i = 0
-            continue_loop = True
-            while continue_loop:
+            while True:
                 if 'key' in recipe_data:
                     materials = recipe_data['key']['#']
                     if isinstance(materials, list):
@@ -619,6 +616,7 @@ class Java(Edition):
                         base_material = self._handle_recipe_incredient_format(materials[i])
                     else:
                         base_material = self._handle_recipe_incredient_format(materials)
+                        break
                 elif 'ingredients' in recipe_data:
                     if i >= len(materials):
                         unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
@@ -630,17 +628,18 @@ class Java(Edition):
                     unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
                     raise FileFormatError(unknown_recipe_msg)
 
-                base_material = base_material.replace('minecraft:', '')
-                base_material = self._handle_texture_exceptions(
-                    base_material,
-                    self.TEXTURE_EXCEPTIONS,
-                    texture_dir,
-                )
-
-                if self._texture_exists(base_material, texture_dir):
-                    return base_material
-
+                if base_material is not None:
+                    break
                 i += 1
+            base_material = base_material.replace('minecraft:', '')
+            base_material = self._handle_texture_exceptions(
+                base_material,
+                self.TEXTURE_EXCEPTIONS,
+                texture_dir,
+            )
+
+            if self._texture_exists(base_material, texture_dir):
+                return base_material
 
         return None
 
@@ -674,7 +673,7 @@ class Java(Edition):
         self,
         texture_name: str,
         texture_exceptions: list[dict[str, str]],
-        texture_dir: str,
+        texture_dir: Path,
     ) -> str:
         """Handle texture exceptions.
 
@@ -682,7 +681,7 @@ class Java(Edition):
         ----
             texture_name (str): name of the texture to handle
             texture_exceptions (list[dict[str, str]]): list of texture exception rules
-            texture_dir (str): directory where the texture files are
+            texture_dir (Path): directory where the texture files are
 
         Returns:
         -------
@@ -706,9 +705,9 @@ class Java(Edition):
 
         return texture_name
 
-    def _texture_exists(self, texture_name: str, texture_dir: str) -> bool:
+    def _texture_exists(self, texture_name: str, texture_dir: Path) -> bool:
         return (
-            Path(f'{texture_dir}/block/{texture_name}.png').is_file()
+            (texture_dir / 'block' / f'{texture_name}.png').is_file()
             if texture_name is not None
             else False
         )

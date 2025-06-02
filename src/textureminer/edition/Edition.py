@@ -1,7 +1,6 @@
 """Types and a base class for Minecraft editions."""  # noqa: N999
 
 import logging
-import os
 import re
 from abc import ABC, abstractmethod
 from enum import Enum
@@ -57,12 +56,12 @@ class Edition(ABC):
     def __init__(self) -> None:
         """Initialize the Edition."""
         self.id = uuid4()
-        self.temp_dir = DEFAULTS['TEMP_PATH'] + '/' + self.id.__str__()
+        self.temp_dir = DEFAULTS['TEMP_PATH'] / self.id.__str__()
         self.type = None
         logging.getLogger('textureminer').debug('Created Edition: {id}'.format(id=self.id))  # noqa: G001, UP032
         logging.getLogger('textureminer').debug('Temp directory: {temp}'.format(temp=self.temp_dir))  # noqa: G001, UP032
 
-        if Path(self.temp_dir).is_dir():
+        if self.temp_dir.is_dir():
             rmtree(self.temp_dir)
         mk_dir(self.temp_dir)
 
@@ -88,20 +87,20 @@ class Edition(ABC):
     def get_textures(
         self,
         version_or_type: VersionType | str,
-        output_dir: str = DEFAULTS['OUTPUT_DIR'],
+        output_dir: Path = DEFAULTS['OUTPUT_DIR'],
         options: TextureOptions | None = None,
-    ) -> str | None:
+    ) -> Path | None:
         """Extract, filter, and scale item and block textures.
 
         Args:
         ----
             version_or_type (str): a Minecraft version type, or a version string.
-            output_dir (str, optional): directory that the final textures will go
+            output_dir (Path, optional): directory that the final textures will go
             options (TextureOptions | None, optional): options for the textures
 
         Returns:
         -------
-            string | None: path of the final textures or None if invalid input
+            Path | None: directory of the final textures or None if invalid input
 
         """
 
@@ -208,34 +207,34 @@ class Edition(ABC):
 
     @staticmethod
     def filter_unwanted(
-        input_dir: str,
-        output_dir: str,
+        input_dir: Path,
+        output_dir: Path,
         edition: EditionType = EditionType.JAVA,
-    ) -> str:
+    ) -> Path:
         """Remove files that are not item or block textures.
 
         Args:
         ----
-            input_dir (str): directory where the input files are
-            output_dir (str): directory where accepted files will end up
+            input_dir (Path): directory where the input files are
+            output_dir (Path): directory where accepted files will end up
             edition (EditionType, optional): type of edition
 
         """
         mk_dir(output_dir, del_prev=True)
 
         blocks_input = (
-            f'{input_dir}/block'
+            input_dir / 'block'
             if edition.value == EditionType.JAVA.value
-            else f'{input_dir}/resource_pack/textures/blocks'
+            else input_dir / 'resource_pack' / 'textures' / 'blocks'
         )
         items_input = (
-            f'{input_dir}/item'
+            input_dir / 'item'
             if edition.value == EditionType.JAVA.value
-            else f'{input_dir}/resource_pack/textures/items'
+            else input_dir / 'resource_pack' / 'textures' / 'items'
         )
 
-        blocks_output = f'{output_dir}/blocks'
-        items_output = f'{output_dir}/items'
+        blocks_output = output_dir / 'blocks'
+        items_output = output_dir / 'items'
 
         logging.getLogger('textureminer').debug(
             'Copying textures from {input} to {output}'.format(  # noqa: G001, UP032
@@ -254,24 +253,24 @@ class Edition(ABC):
         copytree(items_input, items_output)
 
         logging.getLogger('textureminer').debug('Filtering textures out non .png files')
-        f.filter_type(blocks_output, ['.png'])
-        f.filter_type(items_output, ['.png'])
+        f.filter_type(blocks_output.as_posix(), ['.png'])
+        f.filter_type(items_output.as_posix(), ['.png'])
 
         return output_dir
 
     @staticmethod
     def crop_texture(
-        image_path: str,
+        image_path: Path,
         crop_shape: BlockShape,
-        output_path: str | None = None,
+        output_path: Path | None = None,
     ) -> None:
         """Crop a texture to a specific shape.
 
         Args:
         ----
-            image_path (str): path of the texture to crop
+            image_path (Path): path of the texture to crop
             crop_shape (BlockShape): shape to crop the texture to
-            output_path (str, optional): path to save the cropped texture to
+            output_path (Path, optional): path to save the cropped texture to
 
         """
         if output_path is None:
@@ -314,12 +313,12 @@ class Edition(ABC):
                 raise ValueError(unknown_block_shape_msg)
 
     @staticmethod
-    def replicate_textures(asset_dir: str, replication_rules: dict[str, str]) -> int:
+    def replicate_textures(asset_dir: Path, replication_rules: dict[str, str]) -> int:
         """Replicate textures in a directory.
 
         Args:
         ----
-            asset_dir (str): path to the directory containing the textures
+            asset_dir (Path): path to the directory containing the textures
             replication_rules (dict): dictionary containing the replication rules
 
         Returns:
@@ -331,36 +330,31 @@ class Edition(ABC):
 
         count = 0
         originals = list(replication_rules.keys())
-        for subdir, _, files in os.walk(asset_dir):
-            for fil in files:
-                file_name = fil.replace('.png', '')
-                if file_name in originals:
-                    original_path = Path(subdir + '/' + fil).resolve().as_posix()
-                    replicated_path = (
-                        Path(subdir + '/' + replication_rules[file_name] + '.png')
-                        .resolve()
-                        .as_posix()
-                    )
-
-                    copyfile(original_path, replicated_path)
-                    Edition.crop_texture(replicated_path, BlockShape.GLASS_PANE, replicated_path)
-                    count += 1
+        for subpath in asset_dir.rglob('*'):
+            if not subpath.is_file() or subpath.suffix != '.png':
+                continue
+            file_name = subpath.stem
+            if file_name in originals:
+                replicated_path = subpath.parent / f'{replication_rules[file_name]}.png'
+                copyfile(subpath, replicated_path)
+                Edition.crop_texture(replicated_path, BlockShape.GLASS_PANE, replicated_path)
+                count += 1
 
         return count
 
     @staticmethod
     def scale_textures(
-        path: str,
+        path: Path,
         scale_factor: int = DEFAULTS['TEXTURE_OPTIONS']['SCALE_FACTOR'],
         *,
         do_merge: bool = DEFAULTS['TEXTURE_OPTIONS']['DO_MERGE'],
         do_crop: bool = DEFAULTS['TEXTURE_OPTIONS']['DO_CROP'],
-    ) -> str:
+    ) -> Path:
         """Scales textures within a directory by a factor.
 
         Args:
         ----
-            path (str): path of the textures that will be scaled
+            path (Path): path of the textures that will be scaled
             scale_factor (int, optional): factor that the textures will be scaled by
             do_merge (bool, optional): merge block and item texture files into a single directory
             do_crop (bool, optional): crop non-square textures to be square
@@ -374,36 +368,22 @@ class Edition(ABC):
             Edition.merge_dirs(path, path)
 
         logging.getLogger('textureminer').info(texts.TEXTURES_FILTERING)
-        for subdir, _, files in os.walk(path):
-            f.filter_type(f'{Path(subdir).resolve().as_posix()}', ['.png'])
-
-            if len(files) == 0:
+        for file in path.rglob('*'):
+            if not file.is_file():
                 continue
+            if file.suffix != '.png':
+                file.unlink()
 
-            if do_merge:
-                logging.getLogger('textureminer').info(
-                    texts.TEXTURES_RESIZING_AMOUNT.format(texture_amount=len(files))
-                )
-            else:
-                logging.getLogger('textureminer').info(
-                    texts.TEXTURES_RESISING_AMOUNT_IN_DIR.format(
-                        texture_amount=len(files),
-                        dir_name=Path(subdir).name,
-                    ),
-                )
+            if do_crop:
+                Edition.crop_texture(file, BlockShape.SQUARE, file)
 
-            for fil in files:
-                image_path = Path(subdir + '/' + fil).resolve().as_posix()
-                if do_crop:
-                    Edition.crop_texture(image_path, BlockShape.SQUARE, image_path)
-
-                if scale_factor != 1:
-                    image.scale(image_path, scale_factor, scale_factor)
+            if scale_factor != 1:
+                image.scale(file.as_posix(), scale_factor, scale_factor)
 
         return path
 
     @staticmethod
-    def simplify_structure(edition_type: EditionType, input_root: str) -> None:
+    def simplify_structure(_edition_type: EditionType, input_root: Path) -> None:
         """Simplify file structure of textures.
 
         For example on Bedrock flattens candles to be directly in block and items directories.
@@ -411,34 +391,33 @@ class Edition(ABC):
         Args:
         ----
             edition_type (EditionType): type of edition
-            input_root (str): directory in which there are subdirectories 'block' and 'item'
+            input_root (Path): directory in which there are subdirectories 'block' and 'item'
 
         """
-        texture_folders = (
-            ['blocks', 'items'] if edition_type == EditionType.BEDROCK else ['block', 'item']
-        )
         logging.getLogger('textureminer').info(texts.TEXTURES_SIMPLIFYING)
-        for texture_subdir in texture_folders:
-            for root, dirs, _ in os.walk(f'{input_root}/{texture_subdir}'):
-                for d in dirs:
-                    for file in Path(f'{root}/{d}').iterdir():
-                        file.rename(f'{root}/{file.name}')
-                    rmtree(f'{root}/{d}')
+        for texture_subdir in ('blocks', 'items'):
+            texture_dir = input_root / texture_subdir
+            for subdir in texture_dir.iterdir():
+                if not subdir.is_dir():
+                    continue
+                for file in subdir.iterdir():
+                    file.rename(subdir.parent / file.name)
+                rmtree(subdir)
 
     @staticmethod
-    def merge_dirs(input_dir: str, output_dir: str) -> None:
+    def merge_dirs(input_dir: Path, output_dir: Path) -> None:
         """Merge block and item textures to a single directory. Item textures are given priority.
 
         Args:
         ----
-            input_dir (str): directory in which there are subdirectories 'block' and 'item'
-            output_dir (str): directory in which the files will be merged into
+            input_dir (Path): directory in which there are subdirectories for blocks and items
+            output_dir (Path): directory in which the files will be merged into
 
         """
         logging.getLogger('textureminer').info(texts.TEXTURES_MERGING)
 
-        block_folder = f'{input_dir}/blocks'
-        item_folder = f'{input_dir}/items'
+        block_folder = input_dir / 'blocks'
+        item_folder = input_dir / 'items'
 
         copytree(block_folder, output_dir, dirs_exist_ok=True)
         rmtree(block_folder)
