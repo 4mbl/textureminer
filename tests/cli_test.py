@@ -79,3 +79,35 @@ def test_bedrock_valid_version(capsys: pytest.CaptureFixture, disable_color) -> 
     assert excinfo.value.code == 0
     out, err = capsys.readouterr()
     assert 'Invalid version' not in err
+
+
+def test_java_stable_channel(capsys: pytest.CaptureFixture, disable_color) -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        cli(['--java', 'stable', '--scale', '1'])
+    assert excinfo.value.code == 0
+    out, err = capsys.readouterr()
+    assert 'Invalid version' not in err
+
+
+def test_bedrock_stable_channel(capsys: pytest.CaptureFixture, disable_color) -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        cli(['--bedrock', 'stable', '--scale', '1'])
+    assert excinfo.value.code == 0
+    out, err = capsys.readouterr()
+    assert 'Invalid version' not in err
+
+
+def test_java_experimental_channel(capsys: pytest.CaptureFixture, disable_color) -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        cli(['--java', 'experimental', '--scale', '1'])
+    assert excinfo.value.code == 0
+    out, err = capsys.readouterr()
+    assert 'Invalid version' not in err
+
+
+def test_bedrock_experimental_channel(capsys: pytest.CaptureFixture, disable_color) -> None:
+    with pytest.raises(SystemExit) as excinfo:
+        cli(['--bedrock', 'experimental', '--scale', '1'])
+    assert excinfo.value.code == 0
+    out, err = capsys.readouterr()
+    assert 'Invalid version' not in err
