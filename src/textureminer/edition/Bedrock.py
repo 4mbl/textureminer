@@ -104,6 +104,8 @@ class Bedrock(Edition):
             version = version_or_type
         else:
             version = self.get_latest_version(version_type)
+            if version is None:
+                raise ValueError(texts.ERROR_NO_LATEST_VERSION.format(version=version_or_type))
 
         self.version = version
         logging.getLogger('textureminer').info(texts.VERSION_USING_X.format(version=version))
@@ -153,7 +155,7 @@ class Bedrock(Edition):
         return None
 
     @override
-    def get_latest_version(self, version_type: VersionType) -> str:
+    def get_latest_version(self, version_type: VersionType) -> str | None:
         if self.repo_dir is None:
             repo_not_found_msg = 'Repository not found. Please clone the repository first.'
             raise OSError(repo_not_found_msg)
