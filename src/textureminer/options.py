@@ -1,6 +1,5 @@
 """Options for the program."""
 
-import os
 import tempfile
 from enum import Enum
 from pathlib import Path
@@ -68,26 +67,26 @@ class Options(TypedDict):
     Attributes
     ----------
         EDITION (EditionType): The type of edition to use.
-        OUTPUT_DIR (str): The output directory for the textures.
-        TEMP_PATH (str): The temporary path for processing.
+        OUTPUT_DIR (Path): The output directory for the textures.
+        TEMP_PATH (Path): The temporary path for processing.
         TEXTURE_OPTIONS (TextureOptions): Texture manipulation options.
         VERSION (VersionType): The version to use.
 
     """
 
     EDITION: EditionType
-    OUTPUT_DIR: str
-    TEMP_PATH: str
+    OUTPUT_DIR: Path
+    TEMP_PATH: Path
     TEXTURE_OPTIONS: TextureOptions
     VERSION: VersionType
 
 
-HOME_DIR = Path('~').expanduser().as_posix()
+HOME_DIR = Path('~').expanduser()
 
 DEFAULTS: Options = {
     'EDITION': EditionType.JAVA,
-    'OUTPUT_DIR': os.path.normpath(f'{HOME_DIR}/textureminer'),
-    'TEMP_PATH': Path(tempfile.gettempdir()).joinpath('textureminer').as_posix(),
+    'OUTPUT_DIR': (HOME_DIR / 'textureminer'),
+    'TEMP_PATH': Path(tempfile.gettempdir()) / 'textureminer',
     'VERSION': VersionType.ALL,
     'TEXTURE_OPTIONS': {
         'DO_CROP': True,

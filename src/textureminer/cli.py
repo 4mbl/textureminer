@@ -218,7 +218,7 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
     if not color_disabled:
         logger.info(style(texts.COMPLETED, fg=Fg.GREEN))
         if output_path is not None:
-            logger.info(style(output_path, fg=Fg.GREEN))
+            logger.info(style(output_path.as_posix(), fg=Fg.GREEN))
     else:
         logger.info(texts.COMPLETED.format(output_dir=output_path))
         if output_path is not None:

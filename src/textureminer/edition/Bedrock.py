@@ -59,7 +59,7 @@ class Bedrock(Edition):
 
     _git_executable: Literal['git', '/usr/bin/git']
 
-    repo_dir: str | None = None
+    repo_dir: Path | None = None
 
     def __init__(self) -> None:
         """Initialize the Bedrock Edition."""
@@ -77,9 +77,9 @@ class Bedrock(Edition):
     def get_textures(
         self,
         version_or_type: VersionType | str,
-        output_dir: str = DEFAULTS['OUTPUT_DIR'],
+        output_dir: Path = DEFAULTS['OUTPUT_DIR'],
         options: TextureOptions | None = None,
-    ) -> str | None:
+    ) -> Path | None:
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
         logging.getLogger('textureminer').debug(
@@ -97,7 +97,7 @@ class Bedrock(Edition):
         )
         version = None
 
-        repo_dir = self.temp_dir + '/bedrock-samples/'
+        repo_dir = self.temp_dir / 'bedrock-samples'
         self._clone_repo(repo_dir)
 
         if isinstance(version_or_type, str):
@@ -114,7 +114,7 @@ class Bedrock(Edition):
 
         filtered = Edition.filter_unwanted(
             repo_dir,
-            output_dir + '/bedrock/' + version,
+            output_dir / 'bedrock' / version,
             edition=EditionType.BEDROCK,
         )
 
@@ -134,7 +134,7 @@ class Bedrock(Edition):
             do_crop=options['DO_CROP'],
         )
 
-        return str(Path((filtered).replace('\\', '/')).resolve())
+        return filtered
 
     @override
     def get_version_type(self, version: str) -> VersionType | None:
@@ -193,7 +193,7 @@ class Bedrock(Edition):
         self,
         command: list[str],
         *,
-        cwd: str | None = None,
+        cwd: Path | None = None,
         check: bool = False,
         capture_output: bool = False,
     ) -> subprocess.CompletedProcess[bytes] | None:
@@ -234,12 +234,12 @@ class Bedrock(Edition):
 
         return None
 
-    def _clone_repo(self, clone_dir: str, repo_url: str = REPO_URL) -> None:
+    def _clone_repo(self, clone_dir: Path, repo_url: str = REPO_URL) -> None:
         """Clone a git repository.
 
         Args:
         ----
-            clone_dir (str): directory to clone the repository to
+            clone_dir (Path): directory to clone the repository to
             repo_url (str): URL of the repo to clone
 
         """
@@ -259,7 +259,7 @@ class Bedrock(Edition):
                     '--filter=blob:none',
                     '--sparse',
                     repo_url,
-                    clone_dir,
+                    clone_dir.as_posix(),
                 ],
                 check=True,
             )
@@ -309,11 +309,7 @@ class Bedrock(Edition):
             fetch_tags (bool, optional): whether to fetch tags from the repository
 
         """
-        if (
-            not self.repo_dir
-            or not Path(self.repo_dir).exists()
-            or not Path(self.repo_dir).is_dir()
-        ):
+        if not self.repo_dir or not self.repo_dir.exists() or not self.repo_dir.is_dir():
             repo_dir_not_found_msg = (
                 'Repository directory not found. Please clone the repository first.'
             )
@@ -352,7 +348,7 @@ class Bedrock(Edition):
 
     def _create_partial_textures(  # noqa: C901, PLR0915
         self,
-        texture_dir: str,
+        texture_dir: Path,
         version_type: VersionType,
         *,
         prevent_overwrite: bool = True,
@@ -361,7 +357,7 @@ class Bedrock(Edition):
 
         Args:
         ----
-            texture_dir (str): directory where the textures are
+            texture_dir (Path): directory where the textures are
             version_type (VersionType): type of version to create partials for
             prevent_overwrite (bool, optional): whether to copy textures to prevent overwrite
 
@@ -375,29 +371,31 @@ class Bedrock(Edition):
             if texture_name in unused_textures:
                 continue
 
+            blocks_dir = texture_dir / 'blocks'
+
             if (
                 prevent_overwrite
                 and texture_name in self.OVERWRITE_TEXTURES
                 and texture_name == texture_dict[texture_name]['textures']
             ):
                 copyfile(
-                    f'{texture_dir}/blocks/{texture_name}.png',
-                    f'{texture_dir}/blocks/{self.OVERWRITE_TEXTURES[texture_name]}.png',
+                    blocks_dir / f'{texture_name}.png',
+                    blocks_dir / f'{self.OVERWRITE_TEXTURES[texture_name]}.png',
                 )
 
             if 'slab' in texture_name and 'double_slab' not in texture_name:
                 identifier = texture_dict[texture_name]['textures']
                 base_texture = self._identifier_to_filename(identifier, version_type)
                 sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
-                in_path = f'{texture_dir}/blocks/{base_texture}.png'
-                out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
+                in_path = blocks_dir / f'{base_texture}.png'
+                out_path = blocks_dir / sub_dir / f'{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.SLAB, out_path)
             elif 'stairs' in texture_name:
                 identifier = texture_dict[texture_name]['textures']
                 base_texture = self._identifier_to_filename(identifier, version_type)
                 sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
-                in_path = f'{texture_dir}/blocks/{base_texture}.png'
-                out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
+                in_path = blocks_dir / f'{base_texture}.png'
+                out_path = blocks_dir / sub_dir / f'{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.STAIR, out_path)
             elif 'carpet' in texture_name:
                 if 'moss' in texture_name:
@@ -408,15 +406,15 @@ class Bedrock(Edition):
                         'silver',
                     )
                 sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
-                in_path = f'{texture_dir}/blocks/{base_texture}.png'
-                out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
+                in_path = blocks_dir / f'{base_texture}.png'
+                out_path = blocks_dir / sub_dir / f'{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.CARPET, out_path)
 
             elif texture_name == 'snow':
                 base_texture = 'snow'
                 sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
-                in_path = f'{texture_dir}/blocks/{base_texture}.png'
-                out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
+                in_path = blocks_dir / f'{base_texture}.png'
+                out_path = blocks_dir / sub_dir / f'{texture_name}.png'
                 Edition.crop_texture(in_path, BlockShape.SNOW, out_path)
 
             # waxed copper blocks use same texture as the base variant
@@ -427,10 +425,10 @@ class Bedrock(Edition):
                 if '_door' in texture_name:
                     base_texture_top = base_texture + '_top'
                     base_texture_bottom = base_texture + '_bottom'
-                    in_path_top = f'{texture_dir}/blocks/{base_texture_top}.png'
-                    in_path_bottom = f'{texture_dir}/blocks/{base_texture_bottom}.png'
-                    out_path_top = f'{texture_dir}/blocks/{sub_dir}/{texture_name}_top.png'
-                    out_path_bottom = f'{texture_dir}/blocks/{sub_dir}/{texture_name}_bottom.png'
+                    in_path_top = blocks_dir / f'{base_texture_top}.png'
+                    in_path_bottom = blocks_dir / f'{base_texture_bottom}.png'
+                    out_path_top = texture_dir / sub_dir / f'{texture_name}_top.png'
+                    out_path_bottom = texture_dir / sub_dir / f'{texture_name}_bottom.png'
                     copyfile(in_path_top, out_path_top)
                     copyfile(in_path_bottom, out_path_bottom)
                     continue
@@ -440,8 +438,8 @@ class Bedrock(Edition):
                     if base_texture == 'copper'
                     else base_texture
                 )
-                in_path = f'{texture_dir}/blocks/{base_texture}.png'
-                out_path = f'{texture_dir}/blocks/{sub_dir}/{texture_name}.png'
+                in_path = blocks_dir / f'{base_texture}.png'
+                out_path = blocks_dir / sub_dir / f'{texture_name}.png'
                 copyfile(in_path, out_path)
 
     def _get_blocks_json(self, version_type: VersionType) -> dict[str, Any]:
@@ -511,7 +509,7 @@ class Bedrock(Edition):
         if self.terrain_texture_cache is not None:
             return self.terrain_texture_cache
 
-        branch = 'textureminer' if version_type == VersionType.STABLE else 'preview'
+        branch = 'main' if version_type == VersionType.STABLE else 'preview'
 
         url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/textures/terrain_texture.json'
         logging.getLogger('textureminer').debug(
