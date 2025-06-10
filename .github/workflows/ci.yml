@@ -1,11 +1,10 @@
 name: CI
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-
-env:
-  PACKAGE_VERSION: 0.0.0
+  push:
+    branches:
+      - '*'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,6 +20,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -36,15 +36,18 @@ jobs:
           pip install tox tox-gh
           tox -p auto
 
-      - name: Build package
+      - name: Set version to 0.0.0
         run: |
           pip install build tomli-w
           python -c "import tomllib; import tomli_w; reader=open('pyproject.toml', 'rb'); data=tomllib.load(reader); data['project']['version']='0.0.0'; writer=open('pyproject.toml', 'wb'); tomli_w.dump(data, writer)"
+
+      - name: Build package
+        run: |
           python -m build
 
       - name: Install package
         run: |
-          pip install ./dist/textureminer-${{ env.PACKAGE_VERSION }}-py3-none-any.whl --force-reinstall
+          pip install ./dist/textureminer-0.0.0-py3-none-any.whl --force-reinstall
 
       - name: Run package
         run: |
