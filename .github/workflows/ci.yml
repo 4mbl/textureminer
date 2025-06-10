@@ -1,11 +1,10 @@
 name: CI
 
 on:
-  pull_request:
-    types: [opened, synchronize]
-
-env:
-  PACKAGE_VERSION: 0.0.0
+  push:
+    branches:
+      - '*'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,6 +20,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -44,7 +44,7 @@ jobs:
 
       - name: Install package
         run: |
-          pip install ./dist/textureminer-${{ env.PACKAGE_VERSION }}-py3-none-any.whl --force-reinstall
+          pip install ./dist/textureminer-0.0.0-py3-none-any.whl --force-reinstall
 
       - name: Run package
         run: |
