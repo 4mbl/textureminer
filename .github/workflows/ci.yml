@@ -36,10 +36,13 @@ jobs:
           pip install tox tox-gh
           tox -p auto
 
-      - name: Build package
+      - name: Set version to 0.0.0
         run: |
           pip install build tomli-w
           python -c "import tomllib; import tomli_w; reader=open('pyproject.toml', 'rb'); data=tomllib.load(reader); data['project']['version']='0.0.0'; writer=open('pyproject.toml', 'wb'); tomli_w.dump(data, writer)"
+
+      - name: Build package
+        run: |
           python -m build
 
       - name: Install package
