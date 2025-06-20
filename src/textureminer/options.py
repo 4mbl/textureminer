@@ -81,7 +81,7 @@ class Options(TypedDict):
     VERSION: VersionType
 
 
-HOME_DIR = Path('~').expanduser()
+HOME_DIR = Path().home()
 
 DEFAULTS: Options = {
     'EDITION': EditionType.JAVA,
