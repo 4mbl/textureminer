@@ -103,6 +103,7 @@ Currently releases of `textureminer` are tested against the following versions o
 | Bundles of Bravery       | 1.21.2      | v1.21.40.3     |
 | Garden Awakens           | 1.21.4      | v1.21.50.7     |
 | Spring to Life           | 1.21.5      | v1.21.70.3     |
+| Chase the Skies          | 1.21.6      | v1.21.90.3     |
 
 Other versions are likely to work, but are not tested against every release of `textureminer`. If you find a version that doesn't work, please open an issue on the [GitHub repository](https://github.com/4mbl/textureminer/issues).
 
