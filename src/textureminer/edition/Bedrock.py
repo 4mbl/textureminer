@@ -420,15 +420,14 @@ class Bedrock(Edition):
             # waxed copper blocks use same texture as the base variant
             elif 'copper' in texture_name and 'waxed' in texture_name:
                 base_texture = texture_name.replace('waxed_', '')
-                sub_dir = texture_name.split('/').pop(0) if '/' in texture_name else ''
 
                 if '_door' in texture_name:
                     base_texture_top = base_texture + '_top'
                     base_texture_bottom = base_texture + '_bottom'
                     in_path_top = blocks_dir / f'{base_texture_top}.png'
                     in_path_bottom = blocks_dir / f'{base_texture_bottom}.png'
-                    out_path_top = texture_dir / sub_dir / f'{texture_name}_top.png'
-                    out_path_bottom = texture_dir / sub_dir / f'{texture_name}_bottom.png'
+                    out_path_top = blocks_dir / f'{texture_name}_top.png'
+                    out_path_bottom = blocks_dir / f'{texture_name}_bottom.png'
                     copyfile(in_path_top, out_path_top)
                     copyfile(in_path_bottom, out_path_bottom)
                     continue
