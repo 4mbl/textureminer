@@ -5,6 +5,7 @@ import json
 import logging
 import re
 import string
+from collections.abc import Sequence
 from enum import Enum
 from pathlib import Path
 from shutil import copyfile, copytree
@@ -54,15 +55,19 @@ class Java(Edition):
     VERSION_MANIFEST_URL: ClassVar[str] = (
         'https://piston-meta.mojang.com/mc/game/version_manifest_v2.json'
     )
-    ALLOWED_PARTIAL_SUFFIXES: ClassVar[list[str]] = ['_slab', '_stairs', '_carpet']
-    ALLOWED_PARTIAL_LITERALS: ClassVar[list[str]] = ['snow']
+    ALLOWED_PARTIAL_SUFFIXES: ClassVar[Sequence[str]] = (
+        '_slab',
+        '_stairs',
+        '_carpet',
+    )
+    ALLOWED_PARTIAL_LITERALS: ClassVar[Sequence[str]] = ('snow',)
 
-    TEXTURE_EXCEPTIONS: ClassVar[list[dict[str, str]]] = [
+    TEXTURE_EXCEPTIONS: ClassVar[Sequence[dict[str, str]]] = (
         {'from': 'smooth_quartz', 'to': 'quartz_block_bottom'},
         {'from': 'smooth_sandstone', 'to': 'sandstone_top'},
         {'from': 'smooth_red_sandstone', 'to': 'red_sandstone_top'},
         {'from': 'smooth_stone', 'to': 'smooth_stone_slab_side'},
-    ]
+    )
 
     REPLICATE_MAP: ClassVar[dict[str, str]] = {
         'glass_pane_top': 'glass_pane',
@@ -672,7 +677,7 @@ class Java(Edition):
     def _handle_texture_exceptions(
         self,
         texture_name: str,
-        texture_exceptions: list[dict[str, str]],
+        texture_exceptions: Sequence[dict[str, str]],
         texture_dir: Path,
     ) -> str:
         """Handle texture exceptions.
@@ -680,7 +685,7 @@ class Java(Edition):
         Args:
         ----
             texture_name (str): name of the texture to handle
-            texture_exceptions (list[dict[str, str]]): list of texture exception rules
+            texture_exceptions (Sequence[dict[str, str]]): list of texture exception rules
             texture_dir (Path): directory where the texture files are
 
         Returns:

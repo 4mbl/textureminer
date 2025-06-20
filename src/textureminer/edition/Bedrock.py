@@ -6,6 +6,7 @@ import logging
 import platform
 import re
 import subprocess
+from collections.abc import Sequence
 from pathlib import Path
 from shutil import copyfile
 from typing import Any, ClassVar, Literal, override
@@ -161,12 +162,12 @@ class Bedrock(Edition):
             raise OSError(repo_not_found_msg)
 
         self._run_git_command(
-            [self._git_executable, 'fetch', '--tags'],
+            (self._git_executable, 'fetch', '--tags'),
             check=False,
         )
 
         out = self._run_git_command(
-            [self._git_executable, 'tag', '--list'],
+            (self._git_executable, 'tag', '--list'),
             check=False,
             capture_output=True,
         )
@@ -191,7 +192,7 @@ class Bedrock(Edition):
 
     def _run_git_command(
         self,
-        command: list[str],
+        command: Sequence[str],
         *,
         cwd: Path | None = None,
         check: bool = False,
@@ -201,7 +202,7 @@ class Bedrock(Edition):
 
         Args:
         ----
-            command (list[str]): command to run
+            command (Sequence[str]): command to run
             cwd (str, optional): directory to run the command in
             check (bool, optional): whether to check the return code
             capture_output (bool, optional): whether to capture the output
@@ -253,43 +254,45 @@ class Bedrock(Edition):
                 raise OSError(invalid_repo_msg)
 
             self._run_git_command(
-                [
+                (
                     self._git_executable,
                     'clone',
                     '--filter=blob:none',
                     '--sparse',
                     repo_url,
                     clone_dir.as_posix(),
-                ],
+                ),
                 check=True,
             )
             self.repo_dir = clone_dir
 
-            command_2 = [
-                self._git_executable,
-                'config',
-                'core.sparsecheckout',
-                'true',
-            ]
-            command_3 = [
-                'echo',
-                'resource_pack',
-                '>>',
-                '.git/info/sparse-checkout',
-            ]
-            command_4 = [
-                self._git_executable,
-                'sparse-checkout',
-                'init',
-                '--cone',
-            ]
-            command_5 = [
-                self._git_executable,
-                'sparse-checkout',
-                'set',
-                'resource_pack',
-            ]
-            for cmd in [command_2, command_3, command_4, command_5]:
+            commands = (
+                (
+                    self._git_executable,
+                    'config',
+                    'core.sparsecheckout',
+                    'true',
+                ),
+                (
+                    'echo',
+                    'resource_pack',
+                    '>>',
+                    '.git/info/sparse-checkout',
+                ),
+                (
+                    self._git_executable,
+                    'sparse-checkout',
+                    'init',
+                    '--cone',
+                ),
+                (
+                    self._git_executable,
+                    'sparse-checkout',
+                    'set',
+                    'resource_pack',
+                ),
+            )
+            for cmd in commands:
                 self._run_git_command(
                     cmd,
                     check=True,
@@ -316,7 +319,7 @@ class Bedrock(Edition):
             raise OSError(repo_dir_not_found_msg)
         if fetch_tags:
             self._run_git_command(
-                [self._git_executable, 'fetch', '--tags'],
+                (self._git_executable, 'fetch', '--tags'),
                 check=False,
             )
 
@@ -324,7 +327,7 @@ class Bedrock(Edition):
         if version_type == VersionType.EXPERIMENTAL:
             logging.getLogger('textureminer').debug('Switching git branch to preview')
             self._run_git_command(
-                [self._git_executable, 'switch', 'preview'],
+                (self._git_executable, 'switch', 'preview'),
                 check=True,
             )
 
@@ -337,7 +340,7 @@ class Bedrock(Edition):
                 raise ValueError(invalid_version_msg)
 
             self._run_git_command(
-                [self._git_executable, 'checkout', f'tags/v{version}'],
+                (self._git_executable, 'checkout', f'tags/v{version}'),
                 check=False,
             )
         except subprocess.CalledProcessError as err:
@@ -362,7 +365,7 @@ class Bedrock(Edition):
             prevent_overwrite (bool, optional): whether to copy textures to prevent overwrite
 
         """
-        unused_textures: list[str] = ['carpet']
+        unused_textures: Sequence[str] = ('carpet',)
 
         logging.getLogger('textureminer').info(texts.CREATING_PARTIALS)
         texture_dict = self._get_blocks_json(version_type=version_type)

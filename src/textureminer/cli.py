@@ -3,6 +3,7 @@
 import argparse
 import logging
 import os
+from collections.abc import Sequence
 from enum import Enum
 from importlib import metadata
 from pathlib import Path
@@ -56,12 +57,12 @@ def get_edition_from_version(version: str) -> EditionType | None:
     return None
 
 
-def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
+def cli(argv: Sequence[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
     """CLI entrypoint for textureminer.
 
     Args:
     ----
-        argv (list[str] | None, optional): command line arguments, uses sys.argv if None
+        argv (Sequence[str] | None, optional): command line arguments, uses sys.argv if None
 
     """
     try:
