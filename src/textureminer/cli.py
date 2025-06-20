@@ -5,6 +5,7 @@ import logging
 import os
 from enum import Enum
 from importlib import metadata
+from pathlib import Path
 
 from fortext import Fg, style
 
@@ -94,6 +95,7 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
             '--output',
             metavar='DIR',
             default=DEFAULTS['OUTPUT_DIR'],
+            type=Path,
             help='path of output directory',
         )
         parser.add_argument(
@@ -205,7 +207,7 @@ def cli(argv: list[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0915
             )
             output_path = edition.get_textures(
                 version_or_type=update if update else DEFAULTS['VERSION'],
-                output_dir=args.output,
+                output_dir=args.output.resolve(),
                 options=texture_options,
             )
 
