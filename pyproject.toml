@@ -28,7 +28,7 @@ classifiers = [
 dependencies = [
     "forfiles>=5.0.0, <5.1.0",
     "fortext>=1.0.0, <1.2.0",
-    "pillow>=11.0.0, <11.3.0",
+    "pillow>=11.0.0, <11.4.0",
     "requests>=2.32.0, <2.33.0",
 ]
 keywords = ["minecraft", "cli"]
