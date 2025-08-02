@@ -150,7 +150,7 @@ def cli(argv: Sequence[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0
         args = parser.parse_args(argv)
 
         if args.no_color:
-            logging.getLogger('textureminer').debug('Disabling color output')
+            logging.getLogger('textureminer').debug(texts.DISABLING_COLOR)
             os.environ['NO_COLOR'] = '1'
 
         color_disabled = args.no_color or os.getenv('NO_COLOR') == '1'
@@ -201,11 +201,6 @@ def cli(argv: Sequence[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0
         }
 
         with Bedrock() if edition_type == EditionType.BEDROCK else Java() as edition:
-            logger.debug(
-                'Getting textures for {edition} with options: {options}'.format(  # noqa: G001, UP032
-                    edition=edition_type.value.capitalize(), options=texture_options
-                )
-            )
             output_path = edition.get_textures(
                 version_or_type=update if update else DEFAULTS['VERSION'],
                 output_dir=args.output.resolve(),
