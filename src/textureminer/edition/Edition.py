@@ -58,8 +58,8 @@ class Edition(ABC):
         self.id = uuid4()
         self.temp_dir = DEFAULTS['TEMP_PATH'] / self.id.__str__()
         self.type = None
-        logging.getLogger('textureminer').debug('Created Edition: {id}'.format(id=self.id))  # noqa: G001, UP032
-        logging.getLogger('textureminer').debug('Temp directory: {temp}'.format(temp=self.temp_dir))  # noqa: G001, UP032
+        logging.getLogger('textureminer').debug(texts.EDITION_ID.format(id=self.id))
+        logging.getLogger('textureminer').debug(texts.TEMP_DIR.format(temp=self.temp_dir))
 
         if self.temp_dir.is_dir():
             rmtree(self.temp_dir)
@@ -237,7 +237,7 @@ class Edition(ABC):
         items_output = output_dir / 'items'
 
         logging.getLogger('textureminer').debug(
-            'Copying textures from {input} to {output}'.format(  # noqa: G001, UP032
+            texts.COPYING_TEXTURES.format(
                 input=blocks_input,
                 output=blocks_output,
             )
@@ -245,14 +245,14 @@ class Edition(ABC):
         copytree(blocks_input, blocks_output)
 
         logging.getLogger('textureminer').debug(
-            'Copying textures from {input} to {output}'.format(  # noqa: G001, UP032
+            texts.COPYING_TEXTURES.format(
                 input=items_input,
                 output=items_output,
             )
         )
         copytree(items_input, items_output)
 
-        logging.getLogger('textureminer').debug('Filtering textures out non .png files')
+        logging.getLogger('textureminer').debug(texts.FILTERING_TEXTURES)
         f.filter_type(blocks_output.as_posix(), ['.png'])
         f.filter_type(items_output.as_posix(), ['.png'])
 
@@ -337,7 +337,6 @@ class Edition(ABC):
             if file_name in originals:
                 replicated_path = subpath.parent / f'{replication_rules[file_name]}.png'
                 copyfile(subpath, replicated_path)
-                Edition.crop_texture(replicated_path, BlockShape.GLASS_PANE, replicated_path)
                 count += 1
 
         return count

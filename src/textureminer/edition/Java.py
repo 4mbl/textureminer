@@ -108,9 +108,7 @@ class Java(Edition):
     ) -> Path | None:
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
-        logging.getLogger('textureminer').debug(
-            'Texture options: {options}'.format(options=options)  # noqa: G001, UP032
-        )
+        logging.getLogger('textureminer').debug(texts.TEXTURE_OPTIONS.format(options=options))
 
         version = None
 
@@ -136,9 +134,6 @@ class Java(Edition):
         textures_path = self.temp_dir / 'extracted-textures' / 'textures'
         copytree(extracted / 'assets' / 'minecraft' / 'textures', textures_path)
 
-        if options['DO_PARTIALS']:
-            self._create_partial_textures(extracted, textures_path)
-
         filtered = Edition.filter_unwanted(
             textures_path,
             output_dir / 'java' / version,
@@ -147,6 +142,9 @@ class Java(Edition):
 
         if options['DO_REPLICATE']:
             Edition.replicate_textures(filtered, self.REPLICATE_MAP)
+
+        if options['DO_PARTIALS']:
+            self._create_partial_textures(extracted, textures_path)
 
         if options['SIMPLIFY_STRUCTURE']:
             Edition.simplify_structure(EditionType.JAVA, filtered)
@@ -412,7 +410,7 @@ class Java(Edition):
         """
         if Java.version_manifest_cache is None:
             logging.getLogger('textureminer').debug(
-                'Fetching version manifest from {url}'.format(url=Java.VERSION_MANIFEST_URL)  # noqa: G001, UP032
+                texts.FETCHING_VERSION_MANIFEST.format(url=Java.VERSION_MANIFEST_URL)
             )
             Java.version_manifest_cache = requests.get(Java.VERSION_MANIFEST_URL, timeout=10).json()
 

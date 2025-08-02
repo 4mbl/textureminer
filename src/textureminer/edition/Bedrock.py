@@ -49,6 +49,10 @@ class Bedrock(Edition):
         'glass_pane_top_gray': 'gray_stained_glass_pane',
         'glass_pane_top_black': 'black_stained_glass_pane',
         'glass_pane_top_brown': 'brown_stained_glass_pane',
+        'copper_chest_inventory_front': 'copper_chest',
+        'weathered_copper_chest_inventory_front': 'weathered_copper_chest',
+        'exposed_copper_chest_inventory_front': 'exposed_copper_chest',
+        'oxidized_copper_chest_inventory_front': 'oxidized_copper_chest',
     }
 
     OVERWRITE_TEXTURES: ClassVar[dict[str, str]] = {
@@ -71,7 +75,7 @@ class Bedrock(Edition):
         else:
             self._git_executable = 'git'
         logging.getLogger('textureminer').debug(
-            'Git executable: {git}'.format(git=self._git_executable)  # noqa: G001, UP032
+            texts.USING_GIT_EXECUTABLE.format(git=self._git_executable)
         )
 
     @override
@@ -83,9 +87,7 @@ class Bedrock(Edition):
     ) -> Path | None:
         if options is None:
             options = DEFAULTS['TEXTURE_OPTIONS']
-        logging.getLogger('textureminer').debug(
-            'Texture options: {options}'.format(options=options)  # noqa: G001, UP032
-        )
+        logging.getLogger('textureminer').debug(texts.TEXTURE_OPTIONS.format(options=options))
 
         if isinstance(version_or_type, str) and not Edition.validate_version(
             version_or_type,
@@ -119,11 +121,11 @@ class Bedrock(Edition):
             edition=EditionType.BEDROCK,
         )
 
-        if options['DO_PARTIALS']:
-            self._create_partial_textures(filtered, version_type)
-
         if options['DO_REPLICATE']:
             Edition.replicate_textures(filtered, self.REPLICATE_MAP)
+
+        if options['DO_PARTIALS']:
+            self._create_partial_textures(filtered, version_type)
 
         if options['SIMPLIFY_STRUCTURE']:
             Edition.simplify_structure(EditionType.BEDROCK, filtered)
@@ -211,9 +213,9 @@ class Bedrock(Edition):
         cwd = cwd if cwd is not None else self.repo_dir
 
         logging.getLogger('textureminer').debug(
-            'Running `{command}` on {cwd}'.format(  # noqa: G001
+            texts.RUNNING_COMMAND_ON_DIR.format(
                 command=' '.join(command),
-                cwd=cwd,
+                dir=cwd,
             )
         )
 
@@ -325,7 +327,9 @@ class Bedrock(Edition):
 
         version_type = self.get_version_type(version)
         if version_type == VersionType.EXPERIMENTAL:
-            logging.getLogger('textureminer').debug('Switching git branch to preview')
+            logging.getLogger('textureminer').debug(
+                texts.GIT_SWITCHING_BRANCH.format(branch='preview')
+            )
             self._run_git_command(
                 (self._git_executable, 'switch', 'preview'),
                 check=True,
@@ -421,7 +425,11 @@ class Bedrock(Edition):
                 Edition.crop_texture(in_path, BlockShape.SNOW, out_path)
 
             # waxed copper blocks use same texture as the base variant
-            elif 'copper' in texture_name and 'waxed' in texture_name:
+            elif (
+                'copper' in texture_name
+                and 'waxed' in texture_name
+                and 'golem_statue' not in texture_name
+            ):
                 base_texture = texture_name.replace('waxed_', '')
 
                 if '_door' in texture_name:
@@ -462,9 +470,7 @@ class Bedrock(Edition):
         branch = 'preview' if version_type == VersionType.EXPERIMENTAL else 'main'
 
         url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/blocks.json'
-        logging.getLogger('textureminer').debug(
-            'Fetching blocks.json from {url}'.format(url=url)  # noqa: G001, UP032
-        )
+        logging.getLogger('textureminer').debug(texts.FETCHING_BLOCKS_JSON.format(url=url))
         file = requests.get(url, timeout=10)
 
         data = file.json()
@@ -514,9 +520,7 @@ class Bedrock(Edition):
         branch = 'main' if version_type == VersionType.STABLE else 'preview'
 
         url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/textures/terrain_texture.json'
-        logging.getLogger('textureminer').debug(
-            'Fetching terrain_texture.json from {url}'.format(url=url)  # noqa: G001, UP032
-        )
+        logging.getLogger('textureminer').debug(texts.FETCHING_TERRAIN_TEXTURE_JSON.format(url=url))
         file = requests.get(url, timeout=10)
         text = file.text
 
