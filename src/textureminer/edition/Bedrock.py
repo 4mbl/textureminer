@@ -53,6 +53,10 @@ class Bedrock(Edition):
         'weathered_copper_chest_inventory_front': 'weathered_copper_chest',
         'exposed_copper_chest_inventory_front': 'exposed_copper_chest',
         'oxidized_copper_chest_inventory_front': 'oxidized_copper_chest',
+        'copper_chain1': 'copper_chain',
+        'weathered_copper_chain1': 'weathered_copper_chain',
+        'exposed_copper_chain1': 'exposed_copper_chain',
+        'oxidized_copper_chain1': 'oxidized_copper_chain',
     }
 
     OVERWRITE_TEXTURES: ClassVar[dict[str, str]] = {
