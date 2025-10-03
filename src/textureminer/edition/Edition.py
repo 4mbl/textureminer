@@ -18,8 +18,8 @@ from textureminer import texts
 from textureminer.file import mk_dir, rm_if_exists
 from textureminer.options import DEFAULTS, EditionType, TextureOptions, VersionType
 
-REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}$'
-REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}-preview$'
+REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,3}\.[0-9]{1,2}$'
+REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,3}\.[0-9]{1,2}-preview$'
 
 REGEX_JAVA_SNAPSHOT = r'^[0-9]{2}w[0-9]{2}[a-z]$'
 REGEX_JAVA_PRE = r'^[0-9]\.[0-9]+\.?[0-9]+-pre[0-9]?$'
