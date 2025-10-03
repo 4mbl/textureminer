@@ -88,22 +88,23 @@ textureminer --help
 
 ## Supported Versions
 
-Currently releases of `textureminer` are tested against the following versions of Minecraft:
+Currently releases of `textureminer` are tested against the following versions of Minecraft.
 
-| Update Name              | Java        | Bedrock        |
-|--------------------------|-------------|----------------|
-| Nether Update            | 1.16        | -              |
-| Caves & Cliffs: Part I   | 1.17        | -              |
-| Caves & Cliffs: Part II  | 1.18        | -              |
-| The Wild Update          | 1.19        | -              |
-| Trails & Tales           | 1.20        | v1.20.0.1      |
-| Bats and Pots            | 1.20.3      | v1.20.50.3     |
-| Armored Paws             | 1.20.5      | v1.20.80.5     |
-| Tricky Trials            | 1.21        | v1.21.0.3      |
-| Bundles of Bravery       | 1.21.2      | v1.21.40.3     |
-| Garden Awakens           | 1.21.4      | v1.21.50.7     |
-| Spring to Life           | 1.21.5      | v1.21.70.3     |
-| Chase the Skies          | 1.21.6      | v1.21.90.3     |
+| Update Name             | Java   | Bedrock     |
+| ----------------------- | ------ | ----------- |
+| Nether Update           | 1.16   | N/A         |
+| Caves & Cliffs: Part I  | 1.17   | N/A         |
+| Caves & Cliffs: Part II | 1.18   | N/A         |
+| The Wild Update         | 1.19   | N/A         |
+| Trails & Tales          | 1.20   | v1.20.0.1   |
+| Bats and Pots           | 1.20.3 | v1.20.50.3  |
+| Armored Paws            | 1.20.5 | v1.20.80.5  |
+| Tricky Trials           | 1.21   | v1.21.0.3   |
+| Bundles of Bravery      | 1.21.2 | v1.21.40.3  |
+| Garden Awakens          | 1.21.4 | v1.21.50.7  |
+| Spring to Life          | 1.21.5 | v1.21.70.3  |
+| Chase the Skies         | 1.21.6 | v1.21.90.3  |
+| Copper Age              | 1.21.9 | v1.21.110.2 |
 
 Other versions are likely to work, but are not tested against every release of `textureminer`. If you find a version that doesn't work, please open an issue on the [GitHub repository](https://github.com/4mbl/textureminer/issues).
 

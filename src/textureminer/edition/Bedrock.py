@@ -184,17 +184,15 @@ class Bedrock(Edition):
 
         tags = out.stdout.decode('utf-8').splitlines()
 
-        tag = None
-
         for tag in reversed(tags):
             if Edition.validate_version(
                 version=tag,
                 version_type=version_type if version_type != VersionType.ALL else None,
                 edition=EditionType.BEDROCK,
             ):
-                break
+                return tag
 
-        return tag
+        return None
 
     def _run_git_command(
         self,

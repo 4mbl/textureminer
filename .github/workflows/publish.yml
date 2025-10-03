@@ -6,7 +6,7 @@ on:
 
 env:
   LATEST_PYTHON_VERSION: 3.13
-  LATEST_MINECRAFT_JAVA_VERSION: 1.21.6
+  LATEST_MINECRAFT_JAVA_VERSION: 1.21.9
 
 jobs:
   test-java:
@@ -29,6 +29,7 @@ jobs:
           - '1.21.4' # garden awakens
           - '1.21.5' # spring to life
           - '1.21.6' # chase the skies
+          - '1.21.9' # copper age
 
     steps:
       - uses: actions/checkout@v5
@@ -62,6 +63,7 @@ jobs:
           - 'v1.21.50.7' # garden awakens
           - 'v1.21.70.3' # spring to life
           - 'v1.21.90.3' # chase the skies
+          - 'v1.21.110.2' # copper age
 
     steps:
       - uses: actions/checkout@v5
