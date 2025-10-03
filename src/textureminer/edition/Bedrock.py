@@ -173,7 +173,7 @@ class Bedrock(Edition):
         )
 
         out = self._run_git_command(
-            (self._git_executable, 'describe', '--tags', '--abbrev=0'),
+            (self._git_executable, 'tag', '--list'),
             check=False,
             capture_output=True,
         )
@@ -182,16 +182,17 @@ class Bedrock(Edition):
             err = 'Failed to get tags.'
             raise ChildProcessError(err)
 
-        tag = out.stdout.decode('utf-8').strip()
+        tags = out.stdout.decode('utf-8').splitlines()
 
-        if not Edition.validate_version(
-            version=tag,
-            version_type=version_type if version_type != VersionType.ALL else None,
-            edition=EditionType.BEDROCK,
-        ):
-            raise ValueError(texts.ERROR_VERSION_INVALID.format(version=tag))
+        for tag in reversed(tags):
+            if Edition.validate_version(
+                version=tag,
+                version_type=version_type if version_type != VersionType.ALL else None,
+                edition=EditionType.BEDROCK,
+            ):
+                return tag
 
-        return tag
+        return None
 
     def _run_git_command(
         self,
