@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
-* Fix incorrect latest Bedrock stable when third segment of the version is greater than 100, for example v1.21.130.3.
+* Fix incorrect latest Bedrock stable when third segment of the version is equal or greater than 100, for example v1.21.130.3.
 
 ### Removed
 
