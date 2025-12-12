@@ -173,7 +173,7 @@ class Bedrock(Edition):
         )
 
         out = self._run_git_command(
-            (self._git_executable, 'tag', '--list'),
+            (self._git_executable, 'tag', '--list', '--sort=-creatordate'),
             check=False,
             capture_output=True,
         )
@@ -182,9 +182,14 @@ class Bedrock(Edition):
             err = 'Failed to get tags.'
             raise ChildProcessError(err)
 
-        tags = out.stdout.decode('utf-8').splitlines()
+        tags = out.stdout.splitlines()
+        logging.getLogger('textureminer').debug(
+            texts.GIT_TAGS_FOUND.format(
+                tags=', '.join(tags),
+            )
+        )
 
-        for tag in reversed(tags):
+        for tag in tags:
             if Edition.validate_version(
                 version=tag,
                 version_type=version_type if version_type != VersionType.ALL else None,
@@ -201,7 +206,7 @@ class Bedrock(Edition):
         cwd: Path | None = None,
         check: bool = False,
         capture_output: bool = False,
-    ) -> subprocess.CompletedProcess[bytes] | None:
+    ) -> subprocess.CompletedProcess[str] | None:
         """Run a git command.
 
         Args:
@@ -227,6 +232,7 @@ class Bedrock(Edition):
                 check=check,
                 cwd=cwd,
                 capture_output=True,
+                text=True,
             )
 
         subprocess.run(  # noqa: S603
@@ -235,6 +241,7 @@ class Bedrock(Edition):
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT,
             cwd=cwd,
+            text=True,
         )
 
         return None
