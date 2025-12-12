@@ -6,7 +6,7 @@ on:
 
 env:
   LATEST_PYTHON_VERSION: 3.13
-  LATEST_MINECRAFT_JAVA_VERSION: 1.21.9
+  LATEST_MINECRAFT_JAVA_VERSION: 1.21.11
 
 jobs:
   test-java:
@@ -30,6 +30,7 @@ jobs:
           - '1.21.5' # spring to life
           - '1.21.6' # chase the skies
           - '1.21.9' # copper age
+          - '1.21.11' # mounts of mayhem
 
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
@@ -64,6 +65,7 @@ jobs:
           - 'v1.21.70.3' # spring to life
           - 'v1.21.90.3' # chase the skies
           - 'v1.21.110.2' # copper age
+          - 'v1.21.130.3' # mounts of mayhem
 
     steps:
       - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6.0.0
