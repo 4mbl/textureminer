@@ -10,8 +10,7 @@ from types import TracebackType
 from typing import Self
 from uuid import uuid4
 
-from forfiles import file as f
-from forfiles import image
+from forfiles import filter_type, image
 from PIL import Image as Pil_Image
 
 from textureminer import texts
@@ -25,7 +24,7 @@ REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,3}\.[0-9]{1,2}-preview$'
 REGEX_JAVA_SNAPSHOT = r'^(([0-9]{2}w[0-9]{2}[a-z])|([0-9]+\.?[0-9]+-snapshot-[0-9]?))$'
 REGEX_JAVA_PRE = r'^(([0-9]\.[0-9]+\.?[0-9]+-pre[0-9]?)|([0-9]+\.?[0-9]+-pre-[0-9]?))$'
 REGEX_JAVA_RC = r'^(([0-9]\.[0-9]+\.?[0-9]+-rc[0-9]?)|([0-9]+\.?[0-9]+-rc-[0-9]?))$'
-REGEX_JAVA_RELEASE = r'^([0-9]\.[0-9]+(\.[0-9]+)|([0-9]+(\.[0-9]+))?$'
+REGEX_JAVA_RELEASE = r'^(([0-9]\.[0-9]+(\.[0-9]+)?)|([0-9]+(\.[0-9]+)))$'
 
 
 class BlockShape(Enum):
@@ -254,8 +253,8 @@ class Edition(ABC):
         copytree(items_input, items_output)
 
         logging.getLogger('textureminer').debug(texts.FILTERING_TEXTURES)
-        f.filter_type(blocks_output.as_posix(), ['.png'])
-        f.filter_type(items_output.as_posix(), ['.png'])
+        filter_type(blocks_output.as_posix(), ['.png'])
+        filter_type(items_output.as_posix(), ['.png'])
 
         return output_dir
 
