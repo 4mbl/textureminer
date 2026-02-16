@@ -34,7 +34,7 @@ jobs:
       - name: Run tests
         run: |
           pip install -r requirements-dev.txt
-          tox -p auto
+          tox -p auto --parallel-no-spinner
 
       - name: Set version to 0.0.0
         run: |

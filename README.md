@@ -4,12 +4,12 @@
 
 ## Table of Contents
 
-* [Table of Contents](#table-of-contents)
-* [Getting Started](#getting-started)
-  * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
-* [Usage](#usage)
-* [Supported Versions](#supported-versions)
+- [Table of Contents](#table-of-contents)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Usage](#usage)
+- [Supported Versions](#supported-versions)
 
 ## Getting Started
 
