@@ -211,14 +211,19 @@ class Java(Edition):
 
         Returns:
         -------
-            tuple[int, int, int]: year, week, build number, e.g. (24, 12, 0) for 24w12a
+            tuple[int, int, int]: year, week/drop, build number,
+                e.g. (24, 12, 0) for 24w12a or (26, 1, 1) for 26.1-snapshot-1
 
         """
-        year = int(version.split('w')[0])
-        week = int(version.split('w')[1][:-1])
-        build_letter = version.split('w')[1][-1]
+        if 'w' in version:
+            year = int(version.split('w')[0])
+            week = int(version.split('w')[1][:-1])
+            build_letter = version.split('w')[1][-1]
 
-        return year, week, Java._LETTER_TO_NUMBER[build_letter]
+            return year, week, Java._LETTER_TO_NUMBER[build_letter]
+
+        year, drop, build = version.replace('snapshot-', '').replace('-', '.').split('.')
+        return int(year), int(drop), int(build)
 
     @staticmethod
     def is_pre(version: str) -> bool:
@@ -245,16 +250,21 @@ class Java(Edition):
 
         Returns:
         -------
-            tuple[int, int, int]: major, minor, build number, e.g. (21, 0, 1) for 1.21-pre1
+            tuple[int, int, int]: major, minor, build number,
+                e.g. (21, 0, 1) for 1.21-pre1 or (26, 1, 1) for 26.1-pre-1
 
         """
-        update, build = version.split('-pre')
+        if 'pre-' not in version:
+            update, build = version.split('-pre')
 
-        parts = update.split('.')
-        if len(parts) == 3:  # noqa: PLR2004
-            return int(parts[1]), int(parts[2]), int(build)
+            parts = update.split('.')
+            if len(parts) == 3:  # noqa: PLR2004
+                return int(parts[1]), int(parts[2]), int(build)
 
-        return int(parts[1]), 0, int(build)
+            return int(parts[1]), 0, int(build)
+
+        year, drop, build = version.replace('pre-', '').replace('-', '.').split('.')
+        return int(year), int(drop), int(build)
 
     @staticmethod
     def is_rc(version: str) -> bool:
@@ -281,16 +291,21 @@ class Java(Edition):
 
         Returns:
         -------
-            tuple[int, int, int]: major, minor, build number, e.g. (21, 0, 1) for 1.21-rc1
+            tuple[int, int, int]: major, minor, build number,
+                e.g. (21, 0, 1) for 1.21-rc1 or (26, 1, 1) for 26.1-rc-1
 
         """
-        update, build = version.split('-rc')
+        if 'rc-' not in version:
+            update, build = version.split('-rc')
 
-        parts = update.split('.')
-        if len(parts) == 3:  # noqa: PLR2004
-            return int(parts[1]), int(parts[2]), int(build)
+            parts = update.split('.')
+            if len(parts) == 3:  # noqa: PLR2004
+                return int(parts[1]), int(parts[2]), int(build)
 
-        return int(parts[1]), 0, int(build)
+            return int(parts[1]), 0, int(build)
+
+        year, drop, build = version.replace('rc-', '').replace('-', '.').split('.')
+        return int(year), int(drop), int(build)
 
     @staticmethod
     def is_stable(version: str) -> bool:
@@ -317,15 +332,22 @@ class Java(Edition):
 
         Returns:
         -------
-            tuple[int, int]: major, minor, e.g. (21, 0) for 1.21
+            tuple[int, int]: major, minor,
+                e.g. (21, 0) for 1.21 or (26, 1) for 26.1
 
         """
         parts = version.split('.')
 
+        # eg "1.21.1"
         if len(parts) == 3:  # noqa: PLR2004
             return int(parts[1]), int(parts[2])
 
-        return int(parts[1]), 0
+        # eg "1.21"
+        if parts[0] == '1':
+            return int(parts[1]), 0
+
+        # eg "26.1"
+        return int(parts[0]), int(parts[1])
 
     @staticmethod
     def is_version_after(  # noqa: C901, PLR0911, PLR0912
@@ -335,7 +357,7 @@ class Java(Edition):
         pre: str | None = None,
         rc: str | None = None,
     ) -> bool:
-        """Check if the version of the edition is after another version (inclusive).
+        """Compare version against different types of versions.
 
         Args:
         ----
@@ -348,7 +370,7 @@ class Java(Edition):
 
         Returns:
         -------
-            bool: True if version is after or equal to a version of the same type, False otherwise
+            bool: True if `version` is after or equal to a version of the same type, False otherwise
 
         """
         if stable and not Java.is_stable(stable):
