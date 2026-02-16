@@ -216,11 +216,11 @@ class Java(Edition):
 
         """
         if 'w' in version:
-            year = int(version.split('w')[0])
-            week = int(version.split('w')[1][:-1])
+            year = version.split('w')[0]
+            week = version.split('w')[1][:-1]
             build_letter = version.split('w')[1][-1]
 
-            return year, week, Java._LETTER_TO_NUMBER[build_letter]
+            return int(year), int(week), Java._LETTER_TO_NUMBER[build_letter]
 
         year, drop, build = version.replace('snapshot-', '').replace('-', '.').split('.')
         return int(year), int(drop), int(build)
