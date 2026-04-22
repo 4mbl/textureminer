@@ -339,14 +339,14 @@ class Java(Edition):
         parts = version.split('.')
 
         # eg "1.21.1"
-        if len(parts) == 3:  # noqa: PLR2004
+        if parts[0] == '1' and len(parts) == 3:  # noqa: PLR2004
             return int(parts[1]), int(parts[2])
 
         # eg "1.21"
-        if parts[0] == '1':
+        if parts[0] == '1' and len(parts) == 2:  # noqa: PLR2004
             return int(parts[1]), 0
 
-        # eg "26.1"
+        # eg "26.1" or "26.1.1"
         return int(parts[0]), int(parts[1])
 
     @staticmethod

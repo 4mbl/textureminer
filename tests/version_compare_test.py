@@ -12,6 +12,8 @@ from textureminer import Java
         ('1.21.1', '1.21', True),
         ('1.20', '1.21', False),
         ('1.21', '1.21.1', False),
+        ('26.1', '1.21', True),
+        ('26.1.1', '26.1', True),
     ],
 )
 def test_version_comparison(version1: str, version2: str, expected: bool) -> None:

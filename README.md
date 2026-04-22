@@ -106,4 +106,4 @@ Currently releases of `textureminer` are tested against the following versions o
 
 Other versions are likely to work, but are not tested against every release of `textureminer`. If you find a version that doesn't work, please open an issue on the [GitHub repository](https://github.com/4mbl/textureminer/issues).
 
-Currently Python versions 3.12 and 3.13 are supported by `textureminer`.
+Currently Python versions 3.12, 3.13, and 3.14 are supported by `textureminer`.
