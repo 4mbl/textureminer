@@ -31,7 +31,7 @@ Optionally, if are looking to get Bedrock edition textures, you need to install 
 Use pip to install the [`textureminer`](https://pypi.org/project/textureminer) package.
 
 ```sh
-pip install --upgrade textureminer
+python3 -m pip install --upgrade textureminer
 ```
 
 After installing the package, `textureminer` will be available as a command line tool.
