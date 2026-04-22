@@ -59,6 +59,7 @@ def test_parse_rc(rc: str, expected: tuple) -> None:
         ('1.21', (21, 0)),
         ('1.21.1', (21, 1)),
         ('26.1', (26, 1)),
+        ('26.1.1', (26, 1)),  # hotfixes are considered same as their base release
     ],
 )
 def test_parse_stable(stable: str, expected: tuple) -> None:

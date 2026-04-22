@@ -37,6 +37,7 @@ def test_validate_bedrock_valid(
         ('26.1-pre-1', EditionType.JAVA, None, True),
         ('26.1-rc-1', EditionType.JAVA, None, True),
         ('26.1', EditionType.JAVA, None, True),
+        ('26.1.1', EditionType.JAVA, None, True),
         #
         ('24w21a', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
         ('24w21b', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
@@ -49,6 +50,7 @@ def test_validate_bedrock_valid(
         ('26.1-pre-1', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
         ('26.1-rc-1', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
         ('26.1', EditionType.JAVA, VersionType.STABLE, True),
+        ('26.1.1', EditionType.JAVA, VersionType.STABLE, True),
     ],
 )
 def test_validate_java_valid(
