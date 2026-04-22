@@ -103,6 +103,7 @@ Currently releases of `textureminer` are tested against the following versions o
 | Chase the Skies         | 1.21.6  | v1.21.90.3  |
 | Copper Age              | 1.21.9  | v1.21.110.2 |
 | Mounts of Mayhem        | 1.21.11 | v1.21.130.3 |
+| Tiny Takeover           | 26.1    | v1.26.10.4  |
 
 Other versions are likely to work, but are not tested against every release of `textureminer`. If you find a version that doesn't work, please open an issue on the [GitHub repository](https://github.com/4mbl/textureminer/issues).
 
