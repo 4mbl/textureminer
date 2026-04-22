@@ -8,8 +8,13 @@ from textureminer import Edition, EditionType, VersionType
     [
         ('v1.21.0.20-preview', EditionType.BEDROCK, None, True),
         ('v1.21.0.3', EditionType.BEDROCK, None, True),
+        ('v1.26.0.23-preview', EditionType.BEDROCK, None, True),
+        ('v1.26.0.2', EditionType.BEDROCK, None, True),
+        #
         ('v1.21.0.20-preview', EditionType.BEDROCK, VersionType.EXPERIMENTAL, True),
         ('v1.21.0.3', EditionType.BEDROCK, VersionType.STABLE, True),
+        ('v1.26.0.23-preview', EditionType.BEDROCK, VersionType.EXPERIMENTAL, True),
+        ('v1.26.0.2', EditionType.BEDROCK, VersionType.STABLE, True),
     ],
 )
 def test_validate_bedrock_valid(
@@ -28,6 +33,11 @@ def test_validate_bedrock_valid(
         ('1.21.0-rc1', EditionType.JAVA, None, True),
         ('1.21.0-rc2', EditionType.JAVA, None, True),
         ('1.21.0', EditionType.JAVA, None, True),
+        ('26.1-snapshot-1', EditionType.JAVA, None, True),
+        ('26.1-pre-1', EditionType.JAVA, None, True),
+        ('26.1-rc-1', EditionType.JAVA, None, True),
+        ('26.1', EditionType.JAVA, None, True),
+        #
         ('24w21a', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
         ('24w21b', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
         ('1.21.0-pre1', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
@@ -35,6 +45,10 @@ def test_validate_bedrock_valid(
         ('1.21.0-rc1', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
         ('1.21.0-rc2', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
         ('1.21.0', EditionType.JAVA, VersionType.STABLE, True),
+        ('26.1-snapshot-1', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
+        ('26.1-pre-1', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
+        ('26.1-rc-1', EditionType.JAVA, VersionType.EXPERIMENTAL, True),
+        ('26.1', EditionType.JAVA, VersionType.STABLE, True),
     ],
 )
 def test_validate_java_valid(
