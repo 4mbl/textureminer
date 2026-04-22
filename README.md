@@ -15,30 +15,20 @@
 
 ### Prerequisites
 
-You need to have Git installed if you plan on using the Bedrock edition.
+To use `textureminer`, you need to have Python installed on your system.
 
-Git can be installed using your system's package manager, or by downloading the [installer](https://git-scm.com/download/) from the official website.
+1. Install [Python](https://www.python.org/downloads/), the latest version is generally recommended. See [supported versions](#supported-versions) for more information.
+2. Install/update Python's `pip` package manager.
 
-Install if you plan on using the Bedrock edition.
-Either download the [installer](https://git-scm.com/download/) from the official website or use a package manager like [winget](https://learn.microsoft.com/en-us/windows/package-manager/winget/#install-winget).
+   ```sh
+   python3 -m pip install --upgrade pip
+   ```
 
-```sh
-winget install Git.Git
-```
-
-Install Python, the latest version is recommended.
-
-<https://www.python.org/downloads/>
-
-Install/update the [pip](https://pip.pypa.io/en/stable/) package manager.
-
-```sh
-python3 -m pip install --upgrade pip
-```
+Optionally, if are looking to get Bedrock edition textures, you need to install Git: <https://git-scm.com/install/>
 
 ### Installation
 
-Use pip to install [`textureminer`](https://pypi.org/project/textureminer) package.
+Use pip to install the [`textureminer`](https://pypi.org/project/textureminer) package.
 
 ```sh
 pip install --upgrade textureminer
@@ -48,12 +38,18 @@ After installing the package, `textureminer` will be available as a command line
 
 ## Usage
 
-The base syntax for `textureminer` is `textureminer [version] [flags]`. If version is omitted, the latest version of Minecraft will be used. If no edition flags are specified, the Java edition will be used.
+The base syntax for the `textureminer` command is `textureminer [version] [flags]`. If version is omitted, the latest version of Minecraft will be used. If no edition flags are specified, the Java edition will be used.
 
 To download and scale textures for the most recent Java version, run the following command.
 
 ```sh
 textureminer
+```
+
+You can alternatively run `textureminer` through the Python CLI. The following command is equivalent to the above and you can use the the `python3 -m` prefix to run any commands listed below.
+
+```sh
+python3 -m textureminer
 ```
 
 Add `--bedrock` or `-b` to use the Bedrock edition.
@@ -62,22 +58,23 @@ Add `--bedrock` or `-b` to use the Bedrock edition.
 textureminer --bedrock
 ```
 
-You can also pick a specific update or update channel of Minecraft to download textures for.
+You can also pick a specific update of Minecraft to download textures for.
 
 ```sh
 textureminer 1.17.1                 # a java stable release
 textureminer 22w14a                 # a java snapshot
 textureminer v1.20.0.1              # a bedrock release
 textureminer v1.20.50.22-preview    # a bedrock preview
+```
 
-# update channels, gets latest version from channel
-# by default using java edition if no edition is specified
+The `textureminer` command also supports update channels, which are moving targets that always point to the latest version in that channel. This can be useful for automation.
 
-textureminer stable                 # stable version
-textureminer experimental           # snapshot/preview version depending on edition
+```sh
+textureminer stable                 # stable version (defaults to java)
+textureminer experimental           # snapshot/preview version (defaults to java)
+
 textureminer snapshot               # java snapshot
-textureminer preview                # bedrock preview, no need to specify edition
-
+textureminer preview                # bedrock preview
 ```
 
 There is also some options to customize how textureminer works, use the help flag to get more information.
