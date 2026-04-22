@@ -10,8 +10,7 @@ from types import TracebackType
 from typing import Self
 from uuid import uuid4
 
-from forfiles import file as f
-from forfiles import image
+from forfiles import fs, image
 from PIL import Image as Pil_Image
 
 from textureminer import texts
@@ -254,8 +253,8 @@ class Edition(ABC):
         copytree(items_input, items_output)
 
         logging.getLogger('textureminer').debug(texts.FILTERING_TEXTURES)
-        f.filter_type(blocks_output.as_posix(), ['.png'])
-        f.filter_type(items_output.as_posix(), ['.png'])
+        fs.filter_type(blocks_output.as_posix(), ('.png'))
+        fs.filter_type(items_output.as_posix(), ('.png'))
 
         return output_dir
 

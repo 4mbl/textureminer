@@ -27,10 +27,10 @@ classifiers = [
 
 ]
 dependencies = [
-    "forfiles>=5.0.0, <5.1.0",
+    "forfiles>=6.0.0, <7.1.0",
     "fortext>=1.0.0, <1.2.0",
-    "pillow>=11.0.0, <12.0.0",
-    "requests>=2.32.0, <2.33.0",
+    "pillow>=12.0.0,<12.2.0",
+    "requests>=2.33.0, <2.34.0",
 ]
 keywords = ["minecraft", "cli"]
 [[project.authors]]
