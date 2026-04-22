@@ -6,7 +6,7 @@ on:
 
 env:
   LATEST_PYTHON_VERSION: 3.14
-  LATEST_MINECRAFT_JAVA_VERSION: 1.21.11
+  LATEST_MINECRAFT_JAVA_VERSION: 26.1
 
 jobs:
   test-java:
@@ -31,6 +31,7 @@ jobs:
           - '1.21.6' # chase the skies
           - '1.21.9' # copper age
           - '1.21.11' # mounts of mayhem
+          - '26.1' # tiny takeover
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -66,6 +67,7 @@ jobs:
           - 'v1.21.90.3' # chase the skies
           - 'v1.21.110.2' # copper age
           - 'v1.21.130.3' # mounts of mayhem
+          - 'v1.26.10.4' # tiny takeover
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
