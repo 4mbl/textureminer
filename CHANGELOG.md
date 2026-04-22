@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 
 ## Unreleased
 
+- Support for Python 3.14.
+
 ### Added
 
 - Added support for the [annual release format](https://www.minecraft.net/en-us/article/minecraft-new-version-numbering-system).
