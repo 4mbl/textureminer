@@ -202,7 +202,7 @@ def cli(argv: Sequence[str] | None = None) -> None:  # noqa: C901, PLR0912, PLR0
 
         with Bedrock() if edition_type == EditionType.BEDROCK else Java() as edition:
             output_path = edition.get_textures(
-                version_or_type=update if update else DEFAULTS['VERSION'],
+                version_or_type=update or DEFAULTS['VERSION'],
                 output_dir=args.output.resolve(),
                 options=texture_options,
             )
