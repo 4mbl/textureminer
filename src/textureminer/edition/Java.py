@@ -216,9 +216,9 @@ class Java(Edition):
 
         """
         if 'w' in version:
-            year = version.split('w')[0]
-            week = version.split('w')[1][:-1]
-            build_letter = version.split('w')[1][-1]
+            year, week_part = version.split('w')
+            week = week_part[:-1]
+            build_letter = week_part[-1]
 
             return int(year), int(week), Java._LETTER_TO_NUMBER[build_letter]
 
