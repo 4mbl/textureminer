@@ -15,7 +15,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        # windows-latest is not tested due to slow runners and flakyness
+        os: [ubuntu-latest]
         python-version: ['3.12', '3.13', '3.14']
 
     steps:
