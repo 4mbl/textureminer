@@ -647,12 +647,17 @@ class Java(Edition):
                         base_material = self._handle_recipe_incredient_format(materials)
                         break
                 elif 'ingredients' in recipe_data:
-                    if i >= len(materials):
+                    ingredients = recipe_data['ingredients']
+                    if isinstance(ingredients, list):
+                        if i >= len(ingredients):
+                            unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
+                            raise FileFormatError(unknown_recipe_msg)
+                        base_material = self._handle_recipe_incredient_format(
+                            ingredients[i],
+                        )
+                    else:
                         unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
                         raise FileFormatError(unknown_recipe_msg)
-                    base_material = self._handle_recipe_incredient_format(
-                        recipe_data['ingredients'][i],
-                    )
                 else:
                     unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
                     raise FileFormatError(unknown_recipe_msg)
