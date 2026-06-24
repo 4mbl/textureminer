@@ -62,6 +62,13 @@ class Java(Edition):
     )
     ALLOWED_PARTIAL_LITERALS: ClassVar[Sequence[str]] = ('snow',)
 
+    SKIPPED_PARTIAL_RECIPES: ClassVar[Sequence[Sequence[str]]] = (
+        ('from_',),  # duplicate recipes
+        ('dye_', '_carpet'),  # re-dyed carpets
+        ('dye_', '_stairs'),  # re-dyed stairs
+        ('dye_', '_slab'),  # re-dyed slabs
+    )
+
     TEXTURE_EXCEPTIONS: ClassVar[Sequence[dict[str, str]]] = (
         {'from': 'smooth_quartz', 'to': 'quartz_block_bottom'},
         {'from': 'smooth_sandstone', 'to': 'sandstone_top'},
@@ -581,12 +588,9 @@ class Java(Edition):
         for recipe_file in Path(recipe_dir).rglob('*.json'):
             product = recipe_file.stem
 
-            # skip duplicate recipes
-            if 'from_' in product:
-                continue
-
-                # skip re-dyed carpets
-            if 'dye_' in product and '_carpet' in product:
+            if any(
+                all(skip in product for skip in skips) for skips in self.SKIPPED_PARTIAL_RECIPES
+            ):
                 continue
 
             if not any(partial in product for partial in self.ALLOWED_PARTIAL_SUFFIXES) and not any(
@@ -643,12 +647,17 @@ class Java(Edition):
                         base_material = self._handle_recipe_incredient_format(materials)
                         break
                 elif 'ingredients' in recipe_data:
-                    if i >= len(materials):
+                    ingredients = recipe_data['ingredients']
+                    if isinstance(ingredients, list):
+                        if i >= len(ingredients):
+                            unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
+                            raise FileFormatError(unknown_recipe_msg)
+                        base_material = self._handle_recipe_incredient_format(
+                            ingredients[i],
+                        )
+                    else:
                         unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
                         raise FileFormatError(unknown_recipe_msg)
-                    base_material = self._handle_recipe_incredient_format(
-                        recipe_data['ingredients'][i],
-                    )
                 else:
                     unknown_recipe_msg = f'Unknown recipe file format: {recipe_file_path}'
                     raise FileFormatError(unknown_recipe_msg)
