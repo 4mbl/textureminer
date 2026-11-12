@@ -63,6 +63,10 @@ class Bedrock(Edition):
         'snow': 'snow_block',
     }
 
+    PARTIAL_TEXTURE_SOURCE_OVERRIDES: ClassVar[dict[str, str]] = {
+        'acacia_planks': 'planks_acacia',
+    }
+
     blocks_cache: dict[str, Any] | None = None
     terrain_texture_cache: dict[str, Any] | None = None
 
@@ -488,7 +492,10 @@ class Bedrock(Edition):
         if self.blocks_cache is not None:
             return self.blocks_cache
 
-        branch = 'preview' if version_type == VersionType.EXPERIMENTAL else 'main'
+        selected_type = (
+            self.get_version_type(self.version) if version_type == VersionType.ALL else version_type
+        )
+        branch = 'preview' if selected_type == VersionType.EXPERIMENTAL else 'main'
 
         url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/blocks.json'
         logging.getLogger('textureminer').debug(texts.FETCHING_BLOCKS_JSON.format(url=url))
@@ -518,6 +525,8 @@ class Bedrock(Edition):
         data = self._get_terrain_texture_json(version_type=version_type)
         texture_data = data['texture_data']
         if identifier not in texture_data:
+            if identifier in self.PARTIAL_TEXTURE_SOURCE_OVERRIDES:
+                return self.PARTIAL_TEXTURE_SOURCE_OVERRIDES[identifier]
             logging.getLogger('textureminer').debug(
                 texts.MISSING_TERRAIN_MAPPING.format(identifier=identifier)
             )
@@ -541,10 +550,12 @@ class Bedrock(Edition):
             dict[str, Any]: terrain texture dictionary
 
         """
+        selected_type = (
+            self.get_version_type(self.version) if version_type == VersionType.ALL else version_type
+        )
+        branch = 'preview' if selected_type == VersionType.EXPERIMENTAL else 'main'
         if self.terrain_texture_cache is not None:
             return self.terrain_texture_cache
-
-        branch = 'main' if version_type == VersionType.STABLE else 'preview'
 
         url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/textures/terrain_texture.json'
         logging.getLogger('textureminer').debug(texts.FETCHING_TERRAIN_TEXTURE_JSON.format(url=url))
