@@ -366,7 +366,7 @@ class Bedrock(Edition):
             )
             raise
 
-    def _create_partial_textures(  # noqa: C901, PLR0915
+    def _create_partial_textures(  # noqa: C901, PLR0912, PLR0915
         self,
         texture_dir: Path,
         version_type: VersionType,
