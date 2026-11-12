@@ -63,6 +63,10 @@ class Bedrock(Edition):
         'snow': 'snow_block',
     }
 
+    PARTIAL_TEXTURE_SOURCE_OVERRIDES: ClassVar[dict[str, str]] = {
+        'acacia_planks': 'planks_acacia',
+    }
+
     blocks_cache: dict[str, Any] | None = None
     terrain_texture_cache: dict[str, Any] | None = None
 
@@ -362,7 +366,7 @@ class Bedrock(Edition):
             )
             raise
 
-    def _create_partial_textures(  # noqa: C901, PLR0915
+    def _create_partial_textures(  # noqa: C901, PLR0912, PLR0915
         self,
         texture_dir: Path,
         version_type: VersionType,
@@ -382,6 +386,7 @@ class Bedrock(Edition):
 
         logging.getLogger('textureminer').info(texts.CREATING_PARTIALS)
         texture_dict = self._get_blocks_json(version_type=version_type)
+        skipped_partials = 0
 
         for texture_name in texture_dict:
             if texture_name in unused_textures:
@@ -402,6 +407,9 @@ class Bedrock(Edition):
             if 'slab' in texture_name and 'double_slab' not in texture_name:
                 identifier = texture_dict[texture_name]['textures']
                 base_texture = self._identifier_to_filename(identifier, version_type)
+                if base_texture is None:
+                    skipped_partials += 1
+                    continue
                 sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
                 in_path = blocks_dir / f'{base_texture}.png'
                 out_path = blocks_dir / sub_dir / f'{texture_name}.png'
@@ -409,6 +417,9 @@ class Bedrock(Edition):
             elif 'stairs' in texture_name:
                 identifier = texture_dict[texture_name]['textures']
                 base_texture = self._identifier_to_filename(identifier, version_type)
+                if base_texture is None:
+                    skipped_partials += 1
+                    continue
                 sub_dir = base_texture.split('/').pop(0) if '/' in base_texture else ''
                 in_path = blocks_dir / f'{base_texture}.png'
                 out_path = blocks_dir / sub_dir / f'{texture_name}.png'
@@ -461,6 +472,11 @@ class Bedrock(Edition):
                 out_path = blocks_dir / sub_dir / f'{texture_name}.png'
                 copyfile(in_path, out_path)
 
+        if skipped_partials:
+            logging.getLogger('textureminer').warning(
+                texts.SKIPPED_PARTIALS.format(count=skipped_partials)
+            )
+
     def _get_blocks_json(self, version_type: VersionType) -> dict[str, Any]:
         """Fetch the blocks dictionary.
 
@@ -476,7 +492,10 @@ class Bedrock(Edition):
         if self.blocks_cache is not None:
             return self.blocks_cache
 
-        branch = 'preview' if version_type == VersionType.EXPERIMENTAL else 'main'
+        selected_type = (
+            self.get_version_type(self.version) if version_type == VersionType.ALL else version_type
+        )
+        branch = 'preview' if selected_type == VersionType.EXPERIMENTAL else 'main'
 
         url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/blocks.json'
         logging.getLogger('textureminer').debug(texts.FETCHING_BLOCKS_JSON.format(url=url))
@@ -487,7 +506,7 @@ class Bedrock(Edition):
         self.blocks_cache = data
         return data
 
-    def _identifier_to_filename(self, identifier: str, version_type: VersionType) -> str:
+    def _identifier_to_filename(self, identifier: str, version_type: VersionType) -> str | None:
         """Convert a block identifier to a texture filename.
 
         Args:
@@ -497,14 +516,22 @@ class Bedrock(Edition):
 
         Returns:
         -------
-            str: texture filename
+            str | None: texture filename, or None if the identifier is absent
 
         """
         if isinstance(identifier, dict) and 'side' in identifier:
             identifier = identifier['side']
 
         data = self._get_terrain_texture_json(version_type=version_type)
-        textures = data['texture_data'][identifier]['textures']
+        texture_data = data['texture_data']
+        if identifier not in texture_data:
+            if identifier in self.PARTIAL_TEXTURE_SOURCE_OVERRIDES:
+                return self.PARTIAL_TEXTURE_SOURCE_OVERRIDES[identifier]
+            logging.getLogger('textureminer').debug(
+                texts.MISSING_TERRAIN_MAPPING.format(identifier=identifier)
+            )
+            return None
+        textures = texture_data[identifier]['textures']
 
         if isinstance(textures, list):
             return textures[0].replace('textures/blocks/', '')
@@ -523,10 +550,12 @@ class Bedrock(Edition):
             dict[str, Any]: terrain texture dictionary
 
         """
+        selected_type = (
+            self.get_version_type(self.version) if version_type == VersionType.ALL else version_type
+        )
+        branch = 'preview' if selected_type == VersionType.EXPERIMENTAL else 'main'
         if self.terrain_texture_cache is not None:
             return self.terrain_texture_cache
-
-        branch = 'main' if version_type == VersionType.STABLE else 'preview'
 
         url = f'https://raw.githubusercontent.com/Mojang/bedrock-samples/{branch}/resource_pack/textures/terrain_texture.json'
         logging.getLogger('textureminer').debug(texts.FETCHING_TERRAIN_TEXTURE_JSON.format(url=url))
