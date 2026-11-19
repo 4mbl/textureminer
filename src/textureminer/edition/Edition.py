@@ -21,7 +21,7 @@ REGEX_BEDROCK_RELEASE = r'^v1\.[0-9]{2}\.[0-9]{1,3}\.[0-9]{1,2}$'
 REGEX_BEDROCK_PREVIEW = r'^v1\.[0-9]{2}\.[0-9]{1,3}\.[0-9]{1,2}-preview$'
 
 # regex format `(pre-26-format) | (post-26-format)`
-REGEX_JAVA_SNAPSHOT = r'^(([0-9]{2}w[0-9]{2}[a-z])|([0-9]+\.?[0-9]+-snapshot-[0-9]?))$'
+REGEX_JAVA_SNAPSHOT = r'^(([0-9]{2}w[0-9]{2}[a-z])|([0-9]+\.[0-9]+-snapshot-[0-9]+))$'
 REGEX_JAVA_PRE = r'^(([0-9]\.[0-9]+\.?[0-9]+-pre[0-9]?)|([0-9]+\.?[0-9]+-pre-[0-9]?))$'
 REGEX_JAVA_RC = r'^(([0-9]\.[0-9]+\.?[0-9]+-rc[0-9]?)|([0-9]+\.?[0-9]+-rc-[0-9]?))$'
 REGEX_JAVA_RELEASE = r'^(([0-9]\.[0-9]+(\.[0-9]+)?)|([0-9]+\.[0-9]+(\.[0-9]+)?))$'
